@@ -51,8 +51,8 @@
 (defn experiment-results
   "Results that have completed."
   [host creds exp & [opts]]
-  (for [res (:results exp)] 
-    (resource host creds res)))
+  (map (partial resource host creds) (:results exp)))
+
 
 (defn pluginresult
   "Pluginresult that have completed."
