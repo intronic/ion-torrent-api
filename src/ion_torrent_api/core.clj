@@ -51,3 +51,9 @@
   [host creds id]
   (resource (str "pluginresult/" id "/") host creds))
 
+(defn coverage
+  "coverageAnalysis for id."
+  [host creds id]
+  (let [{{name :name} :plugin :as res} (pluginresult-id host creds id)]
+    (and (= "coverageAnalysis" name) )))
+
