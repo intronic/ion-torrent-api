@@ -36,10 +36,23 @@
   [host creds & [opts]]
   (resource "experiment/" host creds (assoc opts :status__exact "run")))
 
+(defn experiment-name
+  "Experiment by name."
+  [host creds name & [opts]]
+  (let [{{tot :total_count} :meta
+         exp :objects} (resource host creds "experiment/" (merge opts {:expName__exact name :status__exact "run"}))]
+    (if (= 1 tot) (first exp))))
+
 (defn results
   "Results that have completed."
   [host creds & [opts]]
   (resource host creds "results/" (assoc opts :status__startswith "Completed")))
+
+(defn experiment-results
+  "Results that have completed."
+  [host creds exp & [opts]]
+  (for [res (:results exp)] 
+    (resource host creds res)))
 
 (defn pluginresult
   "Pluginresult that have completed."
