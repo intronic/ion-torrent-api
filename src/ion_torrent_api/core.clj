@@ -57,3 +57,10 @@
   (let [{{name :name} :plugin :as res} (pluginresult-id host creds id)]
     (and (= "coverageAnalysis" name) )))
 
+(defn amplicon-coverage-file-path
+  "Coverage by amplicon."
+  [res barcode]
+  (let [{{{{prefix :Alignments} (keyword barcode)} :barcodes} :store} res
+        path (str (pluginresult-api-path res) "/" barcode "/" prefix ".amplicon.cov.xls")]
+    path))
+
