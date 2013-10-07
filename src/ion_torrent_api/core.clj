@@ -68,7 +68,7 @@
   "coverageAnalysis for id."
   [host creds id]
   (let [{{name :name} :plugin :as res} (pluginresult-id host creds id)]
-    (and (= "coverageAnalysis" name) )))
+    (if (= "coverageAnalysis" name) res)))
 
 (defn amplicon-coverage-file-path
   "Coverage by amplicon."
