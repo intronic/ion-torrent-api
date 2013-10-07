@@ -29,3 +29,13 @@
   [host creds & [opts]]
   (resource "results/" host creds (assoc opts :status__startswith "Completed")))
 
+(defn pluginresult
+  "Pluginresult that have completed."
+  [host creds & [opts]]
+  (resource "pluginresult/" host creds (assoc opts :status__startswith "Completed")))
+
+(defn pluginresult-id
+  "Pluginresult that have completed."
+  [host creds id]
+  (resource (str "pluginresult/" id "/") host creds))
+
