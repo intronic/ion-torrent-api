@@ -21,13 +21,13 @@
 
 (defn resource-file
   "Return a file from host."
-  [file-path host creds]
+  [host creds file-path]
   (:body (client/get (str "http://" host file-path)
                      {:basic-auth creds})))
 
 (defn resource
   "Return a JSON resource from host."
-  [resource host creds & [opts]]
+  [host creds resource & [opts]]
   (:body (client/get (str "http://" host (ensure-starts-with "/rundb/api/v1/" resource))
                      {:as :json :basic-auth creds :query-params opts})))
 
@@ -39,17 +39,17 @@
 (defn results
   "Results that have completed."
   [host creds & [opts]]
-  (resource "results/" host creds (assoc opts :status__startswith "Completed")))
+  (resource host creds "results/" (assoc opts :status__startswith "Completed")))
 
 (defn pluginresult
   "Pluginresult that have completed."
   [host creds & [opts]]
-  (resource "pluginresult/" host creds (assoc opts :status__startswith "Completed")))
+  (resource host creds "pluginresult/"  (assoc opts :status__startswith "Completed")))
 
 (defn pluginresult-id
   "Pluginresult that have completed."
   [host creds id]
-  (resource (str "pluginresult/" id "/") host creds))
+  (resource host creds (str "pluginresult/" id "/")))
 
 (defn coverage
   "coverageAnalysis for id."
