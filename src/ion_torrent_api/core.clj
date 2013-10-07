@@ -83,3 +83,8 @@
         path (str (pluginresult-api-path res) "/" barcode "/" prefix ".amplicon.cov.xls")]
     path))
 
+(defn tsvc-variant-file-path
+  "TSVC variant vcf file path."
+  [res barcode]
+  (let [path (str (pluginresult-api-path res) "/" barcode "/TSVC_variants.vcf.gz" )]
+    path))
