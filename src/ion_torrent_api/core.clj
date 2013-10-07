@@ -70,6 +70,12 @@
   (let [{{name :name} :plugin :as res} (pluginresult-id host creds id)]
     (if (= "coverageAnalysis" name) res)))
 
+(defn variant-call
+  "variantCall for id."
+  [host creds id]
+  (let [{{name :name} :plugin :as res} (pluginresult-id host creds id)]
+    (if (= "variantCaller" name) res)))
+
 (defn amplicon-coverage-file-path
   "Coverage by amplicon."
   [res barcode]
