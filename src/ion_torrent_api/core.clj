@@ -65,6 +65,12 @@
   (filter #(-> % :plugin :name (= "coverageAnalysis"))
           (experiment-pluginresults host creds exp)))
 
+(defn experiment-variants
+  "variantCaller plugin results that have completed, for an experiment."
+  [host creds exp]
+  (filter #(-> % :plugin :name (= "variantCaller"))
+          (experiment-pluginresults host creds exp)))
+
 (defn pluginresult
   "Pluginresult that have completed."
   [host creds & [opts]]
