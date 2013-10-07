@@ -1,6 +1,18 @@
 (ns ion-torrent-api.core
   (:require [clj-http.client :as client]))
 
+(defn- pluginresult-api-path
+  "API path to pluginresult files."
+  [res]
+  (let [{path :path
+         report-link :reportLink} res]
+    ;; sample path:
+    ;;   "/results/analysis/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+    ;; sample reportLink:
+    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/"
+    ;; required API path to report files:
+    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+    (.substring path (.indexOf path report-link))))
 
 (defn- ensure-starts-with
   "Ensure s starts with prefix."
