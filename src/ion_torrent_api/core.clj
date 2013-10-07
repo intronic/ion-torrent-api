@@ -49,9 +49,15 @@
   (resource host creds "results/" (assoc opts :status__startswith "Completed")))
 
 (defn experiment-results
-  "Results that have completed."
-  [host creds exp & [opts]]
-  (map (partial resource host creds) (:results exp)))
+  "Results that have completed for an experiment."
+  [host creds exp]
+  (map #(resource host creds % {:status__startswith "Completed"}) (:results exp)))
+
+(defn experiment-pluginresults
+  "Plugin results that have completed for an experiment."
+  [host creds exp]
+  (map #(resource host creds % {:status__exact "Completed"})
+       (mapcat :pluginresults (experiment-results host creds exp))))
 
 (defn experiment-coverage
   "given an experiment, get all coverageAnalysis plugin results"
