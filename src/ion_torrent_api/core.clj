@@ -77,7 +77,7 @@
     (if (= "variantCaller" name) res)))
 
 (defn amplicon-coverage-file-path
-  "Coverage by amplicon."
+  "Coverage by amplicon file path."
   [res barcode]
   (let [{{{{prefix :Alignments} (keyword barcode)} :barcodes} :store} res
         path (str (pluginresult-api-path res) "/" barcode "/" prefix ".amplicon.cov.xls")]
