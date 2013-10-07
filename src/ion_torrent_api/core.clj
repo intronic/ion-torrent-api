@@ -53,6 +53,12 @@
   [host creds exp & [opts]]
   (map (partial resource host creds) (:results exp)))
 
+(defn experiment-coverage
+  "given an experiment, get all coverageAnalysis plugin results"
+  [host creds exp & [opts]]
+  (filter #(-> % :plugin :name (= "coverageAnalysis"))
+          (map (partial resource host creds)
+               (mapcat :pluginresults (experiment-results host creds exp)))))
 
 (defn pluginresult
   "Pluginresult that have completed."
