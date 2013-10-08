@@ -1,5 +1,6 @@
 (ns ion-torrent-api.core
-  (:require [clj-http.client :as client]))
+  (:require [clj-http.client :as client]
+            [clojure.java.io :as io]))
 
 (defn- pluginresult-api-path
   "API path to pluginresult files."
@@ -24,6 +25,16 @@
   [host creds file-path]
   (:body (client/get (str "http://" host file-path)
                      {:basic-auth creds})))
+
+(defn write-resource-file
+  "write a file from host."
+  [host creds file-path dest-file]
+  (with-open [o (io/output-stream dest-file)]
+    (io/copy (:body (client/get (str "http://" host file-path)
+                                {:as :stream :basic-auth creds}))
+             o
+             :buffer-size (* 16 1024))
+    dest-file))
 
 (defn resource
   "Return a JSON resource from host."
