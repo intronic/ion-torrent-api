@@ -94,11 +94,11 @@
   (let [{{name :name} :plugin :as res} (pluginresult-id host creds id)]
     (if (= "variantCaller" name) res)))
 
-(defn amplicon-coverage-file-path
+(defn coverage-amplicon-file-path
   "Coverage by amplicon file path."
-  [res barcode]
-  (let [{{{{prefix :Alignments} (keyword barcode)} :barcodes} :store} res
-        path (str (pluginresult-api-path res) "/" barcode "/" prefix ".amplicon.cov.xls")]
+  [cov barcode]
+  (let [{{{{prefix :Alignments} (keyword barcode)} :barcodes} :store} cov
+        path (str (pluginresult-api-path cov) "/" barcode "/" prefix ".amplicon.cov.xls")]
     path))
 
 (defn tsvc-variant-file-path
