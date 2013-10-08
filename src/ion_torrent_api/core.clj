@@ -106,3 +106,8 @@
   [res barcode]
   (let [path (str (pluginresult-api-path res) "/" barcode "/TSVC_variants.vcf.gz" )]
     path))
+
+(defn coverage-amplicon-files
+  [cov]
+  (map #(coverage-amplicon-file-path cov (name %)) (-> cov :store :barcodes keys)))
+
