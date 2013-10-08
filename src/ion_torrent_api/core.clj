@@ -109,13 +109,13 @@
   "Coverage by amplicon file path."
   [cov barcode]
   (let [{{{{prefix :Alignments} (keyword barcode)} :barcodes} :store} cov
-        path (str (pluginresult-api-path cov) "/" barcode "/" prefix ".amplicon.cov.xls")]
+        path (str (pluginresult-api-path cov) "/" (name barcode) "/" prefix ".amplicon.cov.xls")]
     path))
 
 (defn tsvc-variant-file-path
   "TSVC variant vcf file path."
   [res barcode]
-  (let [path (str (pluginresult-api-path res) "/" barcode "/TSVC_variants.vcf.gz" )]
+  (let [path (str (pluginresult-api-path res) "/" (name barcode) "/TSVC_variants.vcf.gz" )]
     path))
 
 (defn coverage-amplicon-files
