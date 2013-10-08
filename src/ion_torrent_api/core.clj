@@ -49,9 +49,10 @@
   (resource host creds "results/" (assoc opts :status__startswith "Completed")))
 
 (defn experiment-results
-  "Results that have completed for an experiment."
+  "Results that have completed for an experiment and are not thumbnails."
   [host creds exp]
-  (map #(resource host creds % {:status__startswith "Completed"}) (:results exp)))
+  (remove (comp :thumb :metaData)
+          (map #(resource host creds % {:status__startswith "Completed"}) (:results exp))))
 
 (defn experiment-pluginresults
   "Plugin results that have completed for an experiment."
