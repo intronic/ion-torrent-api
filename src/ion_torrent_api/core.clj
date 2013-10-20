@@ -118,11 +118,7 @@
   (let [path (str (pluginresult-api-path res) "/" (name barcode) "/TSVC_variants.vcf.gz" )]
     path))
 
-(defn save-experiment
-  "Save experiment to EDN file under path."
-  [host creds path name]
-  (spit (format "%s/%s.edn" path name)
-        (pr-str (experiment-name host creds name))))
+
 
 #_(defn coverage-amplicon-files
   [cov]
