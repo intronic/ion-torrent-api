@@ -1,7 +1,9 @@
 (ns ion-torrent-api.core-test
   (:require [clojure.test :refer :all]
-            [ion-torrent-api.core :refer :all]))
+            [ion-torrent-api.core :refer :all :as ion]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(deftest string-test
+  (testing "ensure-starts-with"
+    (is (= "abcdef" (#'ion/ensure-starts-with "abc" "def")))
+    (is (= "abcxabcdef" (#'ion/ensure-starts-with "abc" "xabcdef")))
+    (is (= "abcdef" (#'ion/ensure-starts-with "abc" "abcdef")))))
