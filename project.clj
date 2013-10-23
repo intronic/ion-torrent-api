@@ -1,4 +1,4 @@
-(defproject intronic/ion-torrent-api "0.1.1"
+(defproject intronic/ion-torrent-api "0.1.2"
   :description "Ion Torrent Server API"
   :url "https://github.com/intronic/ion-torrent-api"
   :license {:name "Eclipse Public License"
@@ -7,4 +7,4 @@
                  [clj-http "0.7.7"]]
   :scm {:name "git"
         :url "https://github.com/intronic/ion-torrent-api"
-        :tag "ea85ce16a489efcde1b4a1dd260ece241b7e132f"})
+        :tag "d94fb90c69214efe5a624d03f8ff49046fd63fe2"})
