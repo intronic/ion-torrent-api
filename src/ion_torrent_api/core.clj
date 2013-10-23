@@ -32,6 +32,37 @@
   [prefix s]
   (if (.startsWith s prefix) s (str prefix s)))
 
+;;; paths
+
+(defn coverage-amplicon-file-path
+  "Coverage by amplicon file path. Barcode is a keyword or string."
+  [cov barcode]
+  (let [prefix (get-in cov ["store" "barcodes" (name barcode) "Alignments"])]
+    (str (pluginresult-api-path cov) "/" (name barcode) "/" prefix ".amplicon.cov.xls")))
+
+(defn tsvc-variant-path-prefix
+  "TSVC variant path prefix."
+  [res]
+  (str (pluginresult-api-path res) "/"))
+
+(defn tsvc-variant-target-region-path
+  "Target region bed file path."
+  [res]
+  (if-let [reg (get-in res ["store" "Target Regions"])]
+    (str (tsvc-variant-path-prefix res) reg ".bed")))
+
+(defn tsvc-variant-file-path
+  "TSVC variant vcf.gz file path. Barcode is a keyword or string."
+  [res barcode]
+  (str (tsvc-variant-path-prefix res) (name barcode) "/TSVC_variants.vcf.gz" ))
+
+(defn tsvc-variant-tbi-file-path
+  "TSVC variant vcf.gz.tbi file path. Barcode is a keyword or string."
+  [res barcode]
+  (str (tsvc-variant-file-path res barcode) ".tbi"))
+
+;;; get data from API
+
 (defn resource-file
   "Return a file from host."
   [host creds file-path]
@@ -59,6 +90,8 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   (:body (client/get (str "http://" host (ensure-starts-with "/rundb/api/v1/" resource))
                      {:as :json-string-keys :basic-auth creds :query-params opts})))
 
+;;; get resources
+
 (defn experiment
   "Experiments that have run."
   [host creds & [opts]]
@@ -77,28 +110,30 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   (resource host creds "results/" (assoc opts "status__startswith" "Completed")))
 
 (defn experiment-results
-  "Results that have completed for an experiment and are not thumbnails."
+  "Results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
   [host creds exp]
-  (remove #(get-in % ["metaData" "thumb"])
-          (map #(resource host creds % {"status__startswith" "Completed"}) (get exp "results"))))
+  (sort-by-id-desc
+   (remove #(get-in % ["metaData" "thumb"])
+           (map #(resource host creds % {"status__startswith" "Completed"}) (get exp "results")))))
 
 (defn experiment-pluginresults
-  "Plugin results that have completed for an experiment."
+  "Plugin results that have completed for an experiment, returned in most-recent-first order."
   [host creds exp]
   (map #(resource host creds % {"status__exact" "Completed"})
        (mapcat #(get % "pluginresults") (experiment-results host creds exp))))
 
 (defn experiment-coverage
-  "coverageAnalysis plugin results that have completed, for an experiment."
+  "coverageAnalysis plugin results that have completed, for an experiment, returned in most-recent-first order."
   [host creds exp]
-  (filter #(-> % (get-in ["plugin" "name"]) (= "coverageAnalysis"))
+  (filter (plugin-name? "coverageAnalysis")
           (experiment-pluginresults host creds exp)))
 
 (defn experiment-variants
-  "variantCaller plugin results that have completed, for an experiment."
+  "variantCaller plugin results that have completed, for an experiment, returned in most-recent-first order."
   [host creds exp]
-  (filter #(-> % (get-in ["plugin" "name"]) (= "variantCaller"))
-          (experiment-pluginresults host creds exp)))
+  (sort-by-id-desc
+   (filter (plugin-name? "variantCaller")
+           (experiment-pluginresults host creds exp))))
 
 (defn pluginresult
   "Pluginresult that have completed."
@@ -122,23 +157,8 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
     (if (= "variantCaller" name) res)))
 
-(defn coverage-amplicon-file-path
-  "Coverage by amplicon file path. Barcode is a keyword or string."
-  [cov barcode]
-  (let [prefix (get-in cov ["store" "barcodes" (name barcode) "Alignments"])]
-    (str (pluginresult-api-path cov) "/" (name barcode) "/" prefix ".amplicon.cov.xls")))
 
-(defn tsvc-variant-file-path
-  "TSVC variant vcf.gz file path. Barcode is a keyword or string."
-  [res barcode]
-  (let [path (str (pluginresult-api-path res) "/" (name barcode) "/TSVC_variants.vcf.gz" )]
-    path))
 
-(defn tsvc-variant-tbi-file-path
-  "TSVC variant vcf.gz.tbi file path. Barcode is a keyword or string."
-  [res barcode]
-  (let [path (str (pluginresult-api-path res) "/" (name barcode) "/TSVC_variants.vcf.gz.tbi" )]
-    path))
 
 
 
