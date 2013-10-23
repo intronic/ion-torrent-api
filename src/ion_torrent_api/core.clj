@@ -119,6 +119,12 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   (let [path (str (pluginresult-api-path res) "/" (name barcode) "/TSVC_variants.vcf.gz" )]
     path))
 
+(defn tsvc-variant-tbi-file-path
+  "TSVC variant vcf.gz.tbi file path. Barcode is a keyword or string."
+  [res barcode]
+  (let [path (str (pluginresult-api-path res) "/" (name barcode) "/TSVC_variants.vcf.gz.tbi" )]
+    path))
+
 
 
 #_(defn coverage-amplicon-files
