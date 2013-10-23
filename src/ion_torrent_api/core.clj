@@ -22,6 +22,11 @@
   [name]
   #(= name (get-in % ["plugin" "name"])))
 
+(defn- sort-by-id-desc
+  "Sort list of items by elements with 'id' key in descending numeric order."
+  [items]
+  (sort-by #(get % "id") > items))
+
 (defn- ensure-starts-with
   "Ensure s starts with prefix."
   [prefix s]
