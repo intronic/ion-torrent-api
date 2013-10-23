@@ -15,6 +15,13 @@
     ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
     (.substring path (.indexOf path report-link))))
 
+;;; general
+
+(defn- plugin-name?
+  "returns a function that tests if plugin is named 'name'."
+  [name]
+  #(= name (get-in % ["plugin" "name"])))
+
 (defn- ensure-starts-with
   "Ensure s starts with prefix."
   [prefix s]
