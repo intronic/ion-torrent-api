@@ -109,9 +109,8 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 (defn coverage-amplicon-file-path
   "Coverage by amplicon file path. Barcode is a keyword or string."
   [cov barcode]
-  (let [{{{{prefix "Alignments"} (name barcode)} "barcodes"} "store"} cov
-        path (str (pluginresult-api-path cov) "/" (name barcode) "/" prefix ".amplicon.cov.xls")]
-    path))
+  (let [prefix (get-in cov ["store" "barcodes" (name barcode) "Alignments"])]
+    (str (pluginresult-api-path cov) "/" (name barcode) "/" prefix ".amplicon.cov.xls")))
 
 (defn tsvc-variant-file-path
   "TSVC variant vcf.gz file path. Barcode is a keyword or string."
