@@ -50,6 +50,16 @@
                               barcodes)))))
 
 ;;; paths
+(defn bam-path
+  "Return the bam path for a particular barcode based on the result 'bamLink'"
+  [{bam-link "bamLink"} barcode]
+  (let [bam (io/as-file bam-link)]
+    (str (io/file (.getParent bam) (str (name barcode) "_" (.getName bam))))))
+
+(defn bam-bai-path
+  "Return the bam bai path for a particular barcode"
+  [result barcode]
+  (str (bam-path result barcode) ".bai"))
 
 (defn coverage-amplicon-file-path
   "Coverage by amplicon file path. Barcode is a keyword or string."
