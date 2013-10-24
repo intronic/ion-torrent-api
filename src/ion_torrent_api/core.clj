@@ -32,6 +32,23 @@
   [prefix s]
   (if (.startsWith s prefix) s (str prefix s)))
 
+;;; access utilities
+
+(defn experiment-samples
+  "Return a sorted list of samples for the experiment."
+  [exp]
+  (sort (into #{}
+              (apply concat (for [eas (exp "eas_set")]
+                              (keys (get eas "barcodedSamples")))))))
+
+(defn experiment-barcodes
+  "Return a sorted list of barcodes for the experiment."
+  [exp]
+  (sort (into #{}
+              (apply concat (for [eas (exp "eas_set")
+                                  [_ {barcodes "barcodes"}] (get eas "barcodedSamples")]
+                              barcodes)))))
+
 ;;; paths
 
 (defn coverage-amplicon-file-path
