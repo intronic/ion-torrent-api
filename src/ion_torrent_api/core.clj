@@ -52,9 +52,15 @@
 ;;; paths
 (defn bam-path
   "Return the bam path for a particular barcode based on the result 'bamLink'"
-  [{bam-link "bamLink"} barcode]
-  (let [bam (io/as-file bam-link)]
-    (str (io/file (.getParent bam) (str (name barcode) "_" (.getName bam))))))
+  [result barcode]
+  (str (result "reportLink") (name barcode) "_rawlib.bam")
+  ;; eg: /output/Home/Auto_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
+  
+  ;; alternatively, more complicated but possibly less assumptions and
+  ;; safer?:-
+  ;; eg: /output/Home/Auto_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
+  #_(let [bam (io/as-file (result "bamLink"))]
+      (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam))))))
 
 (defn bam-bai-path
   "Return the bam bai path for a particular barcode"
