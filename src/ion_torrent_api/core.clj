@@ -49,6 +49,11 @@
                                   [_ {barcodes "barcodes"}] (get eas "barcodedSamples")]
                               barcodes)))))
 
+(defn plugin-barcodes
+  "Return a sorted list of barcodes for the plugin result."
+  [plugin-result]
+  (sort (keys (get-in plugin-result ["store" "barcodes"]))))
+
 ;;; paths
 (defn bam-path
   "Return the bam path for a particular barcode based on the result 'bamLink'"
