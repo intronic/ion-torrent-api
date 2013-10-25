@@ -2,19 +2,6 @@
   (:require [clj-http.client :as client]
             [clojure.java.io :as io]))
 
-(defn- pluginresult-api-path
-  "API path to pluginresult files."
-  [res]
-  (let [{^String path "path"
-         ^String report-link "reportLink"} res]
-    ;; sample path:
-    ;;   "/results/analysis/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
-    ;; sample reportLink:
-    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/"
-    ;; required API path to report files:
-    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
-    (.substring path (.indexOf path report-link))))
-
 ;;; general
 
 (defn- plugin-name?
@@ -55,6 +42,20 @@
   (sort (keys (get-in plugin-result ["store" "barcodes"]))))
 
 ;;; paths
+
+(defn- pluginresult-api-path
+  "API path to pluginresult files."
+  [res]
+  (let [{^String path "path"
+         ^String report-link "reportLink"} res]
+    ;; sample path:
+    ;;   "/results/analysis/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+    ;; sample reportLink:
+    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/"
+    ;; required API path to report files:
+    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+    (.substring path (.indexOf path report-link))))
+
 (defn bam-path
   "Return the bam path for a particular barcode based on the result 'bamLink'"
   [result barcode]
