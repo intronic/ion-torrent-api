@@ -7,4 +7,5 @@
                  [clj-http "0.7.7"]]
   :scm {:name "git"
         :url "https://github.com/intronic/ion-torrent-api"
-        :tag "3de0de17e84d10f4ada2fe6f00bd64b1abec87fd"})
+        :tag "3de0de17e84d10f4ada2fe6f00bd64b1abec87fd"}
+  :warn-on-reflection true)

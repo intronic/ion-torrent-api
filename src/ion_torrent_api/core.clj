@@ -5,8 +5,8 @@
 (defn- pluginresult-api-path
   "API path to pluginresult files."
   [res]
-  (let [{path "path"
-         report-link "reportLink"} res]
+  (let [{^String path "path"
+         ^String report-link "reportLink"} res]
     ;; sample path:
     ;;   "/results/analysis/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
     ;; sample reportLink:
@@ -29,7 +29,7 @@
 
 (defn- ensure-starts-with
   "Ensure s starts with prefix."
-  [prefix s]
+  [^String prefix ^String s]
   (if (.startsWith s prefix) s (str prefix s)))
 
 ;;; access utilities
