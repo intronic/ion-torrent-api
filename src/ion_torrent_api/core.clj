@@ -145,6 +145,12 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   [host creds & [opts]]
   (resource host creds "results/" (assoc opts "status__startswith" "Completed")))
 
+(defn pluginresult
+  "Pluginresult that have completed. Returns a map of metadata and objects:
+'meta' key lists total_count, limit, offset and next/previos URIs.
+'objects' key containl list of experiment resources."
+  [host creds & [opts]]
+  (resource host creds "pluginresult/"  (assoc opts "status__startswith" "Completed")))
 (defn experiment-name
   "Experiment by name."
   [host creds name & [opts]]
@@ -178,10 +184,6 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
    (filter (plugin-name? "variantCaller")
            (experiment-pluginresults host creds exp))))
 
-(defn pluginresult
-  "Pluginresult that have completed."
-  [host creds & [opts]]
-  (resource host creds "pluginresult/"  (assoc opts "status__startswith" "Completed")))
 
 (defn pluginresult-id
   "Pluginresult for id."
