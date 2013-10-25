@@ -198,9 +198,3 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 
 
 
-
-
-#_(defn coverage-amplicon-files
-  [cov]
-  (map #(coverage-amplicon-file-path cov (name %)) (-> cov (get-in ["store" "barcodes"]) keys)))
-
