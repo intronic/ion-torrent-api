@@ -133,7 +133,7 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 (defn experiment
   "Experiments that have run."
   [host creds & [opts]]
-  (resource "experiment/" host creds (assoc opts "status__exact" "run")))
+  (resource host creds "experiment/" (assoc opts "status__exact" "run")))
 
 (defn experiment-name
   "Experiment by name."
