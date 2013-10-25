@@ -129,7 +129,7 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   (:body (client/get (str "http://" host (ensure-starts-with "/rundb/api/v1/" resource))
                      {:as :json-string-keys :basic-auth creds :query-params opts})))
 
-;;; get resources
+;;; get resources through API returning map of metadata and data
 
 (defn experiment
   "Experiments that have run. Returns a map of metadata and objects:
@@ -151,6 +151,9 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 'objects' key containl list of experiment resources."
   [host creds & [opts]]
   (resource host creds "pluginresult/"  (assoc opts "status__startswith" "Completed")))
+
+;;; query objects by experiment 
+
 (defn experiment-name
   "Experiment by name."
   [host creds name & [opts]]
@@ -159,31 +162,34 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
     (if (= 1 tot) (first exp))))
 
 (defn experiment-results
-  "Results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
+  "List of results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
   [host creds exp]
   (sort-by-id-desc
    (remove #(get-in % ["metaData" "thumb"])
            (map #(resource host creds % {"status__startswith" "Completed"}) (get exp "results")))))
 
 (defn experiment-pluginresults
-  "Plugin results that have completed for an experiment, returned in most-recent-first order."
+  "List of plugin results that have completed for an experiment, returned in most-recent-first order."
   [host creds exp]
-  (map #(resource host creds % {"status__exact" "Completed"})
-       (mapcat #(get % "pluginresults") (experiment-results host creds exp))))
+  (sort-by-id-desc
+   (map #(resource host creds % {"status__exact" "Completed"})
+        (mapcat #(get % "pluginresults") (experiment-results host creds exp)))))
 
 (defn experiment-coverage
-  "coverageAnalysis plugin results that have completed, for an experiment, returned in most-recent-first order."
+  "List of coverageAnalysis plugin results that have completed, for an experiment, returned in most-recent-first order."
   [host creds exp]
-  (filter (plugin-name? "coverageAnalysis")
-          (experiment-pluginresults host creds exp)))
+  (sort-by-id-desc
+   (filter (plugin-name? "coverageAnalysis")
+           (experiment-pluginresults host creds exp))))
 
 (defn experiment-variants
-  "variantCaller plugin results that have completed, for an experiment, returned in most-recent-first order."
+  "List of variantCaller plugin results that have completed, for an experiment, returned in most-recent-first order."
   [host creds exp]
   (sort-by-id-desc
    (filter (plugin-name? "variantCaller")
            (experiment-pluginresults host creds exp))))
 
+;;; Query individual resources by ID
 
 (defn pluginresult-id
   "Pluginresult for id."
