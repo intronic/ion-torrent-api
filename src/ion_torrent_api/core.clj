@@ -180,17 +180,17 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   (resource host creds "pluginresult/"  (assoc opts "status__startswith" "Completed")))
 
 (defn pluginresult-id
-  "Pluginresult that have completed."
+  "Pluginresult for id."
   [host creds id]
   (resource host creds (str "pluginresult/" id "/")))
 
-(defn coverage
+(defn coverage-id
   "coverageAnalysis for id."
   [host creds id]
   (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
     (if (= "coverageAnalysis" name) res)))
 
-(defn variant-call
+(defn variant-call-id
   "variantCall for id."
   [host creds id]
   (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
