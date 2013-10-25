@@ -1,4 +1,4 @@
-(defproject intronic/ion-torrent-api "0.1.4"
+(defproject intronic/ion-torrent-api "0.1.5"
   :description "Ion Torrent Server API"
   :url "https://github.com/intronic/ion-torrent-api"
   :license {:name "Eclipse Public License"
