@@ -132,7 +132,9 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 ;;; get resources
 
 (defn experiment
-  "Experiments that have run."
+  "Experiments that have run. Returns a map of metadata and objects:
+'meta' key lists total_count, limit, offset and next/previos URIs.
+'objects' key containl list of experiment resources."
   [host creds & [opts]]
   (resource host creds "experiment/" (assoc opts "status__exact" "run")))
 
@@ -144,7 +146,9 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
     (if (= 1 tot) (first exp))))
 
 (defn results
-  "Results that have completed."
+  "Results that have completed. Returns a map of metadata and objects:
+'meta' key lists total_count, limit, offset and next/previos URIs.
+'objects' key containl list of experiment resources."
   [host creds & [opts]]
   (resource host creds "results/" (assoc opts "status__startswith" "Completed")))
 
