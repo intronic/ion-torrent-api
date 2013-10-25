@@ -194,7 +194,3 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   [host creds id]
   (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
     (if (= "variantCaller" name) res)))
-
-
-
-
