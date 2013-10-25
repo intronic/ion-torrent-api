@@ -152,6 +152,25 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   [host creds & [opts]]
   (resource host creds "pluginresult/"  (assoc opts "status__startswith" "Completed")))
 
+;;; Query individual resources by ID
+
+(defn pluginresult-id
+  "Pluginresult for id."
+  [host creds id]
+  (resource host creds (str "pluginresult/" id "/")))
+
+(defn coverage-id
+  "coverageAnalysis for id."
+  [host creds id]
+  (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
+    (if (= "coverageAnalysis" name) res)))
+
+(defn variant-call-id
+  "variantCall for id."
+  [host creds id]
+  (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
+    (if (= "variantCaller" name) res)))
+
 ;;; query objects by experiment 
 
 (defn experiment-name
@@ -189,21 +208,3 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
    (filter (plugin-name? "variantCaller")
            (experiment-pluginresults host creds exp))))
 
-;;; Query individual resources by ID
-
-(defn pluginresult-id
-  "Pluginresult for id."
-  [host creds id]
-  (resource host creds (str "pluginresult/" id "/")))
-
-(defn coverage-id
-  "coverageAnalysis for id."
-  [host creds id]
-  (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
-    (if (= "coverageAnalysis" name) res)))
-
-(defn variant-call-id
-  "variantCall for id."
-  [host creds id]
-  (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
-    (if (= "variantCaller" name) res)))
