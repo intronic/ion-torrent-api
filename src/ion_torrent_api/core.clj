@@ -138,19 +138,19 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
   [host creds & [opts]]
   (resource host creds "experiment/" (assoc opts "status__exact" "run")))
 
-(defn experiment-name
-  "Experiment by name."
-  [host creds name & [opts]]
-  (let [{{tot "total_count"} "meta"
-         exp "objects"} (resource host creds "experiment/" (merge opts {"expName__exact" name "status__exact" "run"}))]
-    (if (= 1 tot) (first exp))))
-
 (defn results
   "Results that have completed. Returns a map of metadata and objects:
 'meta' key lists total_count, limit, offset and next/previos URIs.
 'objects' key containl list of experiment resources."
   [host creds & [opts]]
   (resource host creds "results/" (assoc opts "status__startswith" "Completed")))
+
+(defn experiment-name
+  "Experiment by name."
+  [host creds name & [opts]]
+  (let [{{tot "total_count"} "meta"
+         exp "objects"} (resource host creds "experiment/" (merge opts {"expName__exact" name "status__exact" "run"}))]
+    (if (= 1 tot) (first exp))))
 
 (defn experiment-results
   "Results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
