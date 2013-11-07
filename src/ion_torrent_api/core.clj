@@ -51,6 +51,18 @@
     (assert (= samples (sort (into #{} (keys samp-bc-map)))))
     samp-bc-map))
 
+(defn experiment-barcode-sample-map
+  "Return a map of barcodes to samples for the experiment."
+  [exp]
+  ;; get map of sample -> [barcode list]
+  (let [samp-bc-map (experiment-sample-barcode-map exp)
+        bc-samp-map (into {} (for [[samp {bc-list "barcodes"}] samp-bc-map
+                                   bc bc-list]
+                               [bc samp]))
+        barcodes (experiment-barcodes exp)]
+    (assert (= barcodes (sort (into #{} (keys bc-samp-map)))))
+    bc-samp-map))
+
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
   [plugin-result]
