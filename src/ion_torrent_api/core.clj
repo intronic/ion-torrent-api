@@ -22,25 +22,23 @@
 
 ;;; access utilities
 
-
 (defn experiment-samples
-  "Return a sorted list of samples for the experiment."
+  "Return a list of samples for the experiment."
   [exp]
   ;; two ways to get samples, check that result is the same
-  (let [s1 (sort (into #{} (map #(% "name") (get exp "samples"))))
-        s2 (sort (into #{}               
-                       (apply concat (for [eas (exp "eas_set")]
-                                       (keys (get eas "barcodedSamples"))))))]
-    (assert (= s1 s2) (pr-str "Sample name mismatch (s1=" s1 ", s2=" s2 ")"))
-    s1))
-
-(defn experiment-barcodes
-  "Return a sorted list of barcodes for the experiment."
+  ;; example of eliment under exp->samples key:
+  ;;  {"externalId" "",
+  ;;   "name" "C66_2169-74",
+  ;;   "displayedName" "C66 2169-74",
+  ;;   "date" "2013-10-19T11:44:45.000360+00:00",
+  ;;   "status" "run",
+  ;;   "experiments" ["/rundb/api/v1/experiment/65/"],
+  ;;   "id" 189,
+  ;;   "sampleSets" [],
+  ;;   "resource_uri" "/rundb/api/v1/sample/189/",
+  ;;   "description" nil}
+  (get exp "samples"))
   [exp]
-  (sort (into #{}
-              (apply concat (for [eas (exp "eas_set")
-                                  [_ {barcodes "barcodes"}] (get eas "barcodedSamples")]
-                              barcodes)))))
 
 (defn experiment-sample-barcode-map
   "Return a map of samples to barcodes for the experiment."
