@@ -1,6 +1,7 @@
 (ns ion-torrent-api.core
   (:require [clj-http.client :as client]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.algo.generic.functor :refer (fmap)]))
 
 ;;; general
 
@@ -40,6 +41,15 @@
               (apply concat (for [eas (exp "eas_set")
                                   [_ {barcodes "barcodes"}] (get eas "barcodedSamples")]
                               barcodes)))))
+
+(defn experiment-sample-barcode-map
+  "Return a map of samples to barcodes for the experiment."
+  [exp]
+  ;; get map of sample -> [barcode list]
+  (let [samp-bc-map (into {} (mapcat #(% "barcodedSamples") (exp "eas_set")))
+        samples (experiment-samples exp)]
+    (assert (= samples (sort (into #{} (keys samp-bc-map)))))
+    samp-bc-map))
 
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
