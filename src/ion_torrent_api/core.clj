@@ -38,7 +38,11 @@
   ;;   "resource_uri" "/rundb/api/v1/sample/189/",
   ;;   "description" nil}
   (get exp "samples"))
+
+(defn experiment-sample-names
+  "Return a sorted list of sample names for the experiment."
   [exp]
+  (sort (map #(% "displayedName") (experiment-samples exp))))
 
 (defn experiment-sample-barcode-map
   "Return a map of samples to barcodes for the experiment."
