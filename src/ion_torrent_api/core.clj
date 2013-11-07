@@ -4,6 +4,7 @@
             [clojure.algo.generic.functor :refer (fmap)]))
 
 ;;; general
+(def ^:const ^:private BUFFER-SIZE (* 16 1024))
 
 (defn- plugin-name?
   "returns a function that tests if plugin is named 'name'."
@@ -153,16 +154,16 @@ Normally there should only be one sample per barcode."
 (defn write-resource-file
   "Write a file from host. Deletes the file if an exception occurs."
   [host creds file-path dest-file]
-  (try
-   (with-open [o (io/output-stream dest-file)]
-     (io/copy (:body (client/get (str "http://" host file-path)
-                                 {:as :stream :basic-auth creds}))
-              o
-              :buffer-size (* 16 1024))
-     dest-file)
-   (catch Exception e
-     (io/delete-file dest-file)
-     (throw e))))
+  (let [res (str "http://" host file-path)]
+    (try
+      (with-open [o (io/output-stream dest-file)]
+        (let [i (:body (client/get res {:as :stream :basic-auth creds}))]
+          (io/copy i o :buffer-size BUFFER-SIZE))
+        dest-file)
+      (catch Exception e
+        #_(println "error: " res " -> " dest-file)
+        (io/delete-file dest-file)
+        (throw e)))))
 
 (defn resource
   "Return a JSON resource from host.
