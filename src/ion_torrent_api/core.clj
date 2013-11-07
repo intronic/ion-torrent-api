@@ -45,25 +45,33 @@
   (sort (map #(% "displayedName") (experiment-samples exp))))
 
 (defn experiment-sample-barcode-map
-  "Return a map of samples to barcodes for the experiment."
+  "Return a map of samples and vector of barcodes for the experiment."
   [exp]
-  ;; get map of sample -> [barcode list]
-  (let [samp-bc-map (into {} (mapcat #(% "barcodedSamples") (exp "eas_set")))
-        samples (experiment-samples exp)]
-    (assert (= samples (sort (into #{} (keys samp-bc-map)))))
+  (let [samp-bc-map (into {}
+                          (for [[s {barcodes "barcodes"}] (mapcat #(% "barcodedSamples")
+                                                                  (exp "eas_set"))]
+                            [s barcodes]))
+        samps (sort (keys samp-bc-map))
+        names (experiment-sample-names exp)]
+    (assert (= samps names)
+            (pr-str "Sample name mismatch (samples=" samps ", names=" names ")"))
     samp-bc-map))
 
 (defn experiment-barcode-sample-map
-  "Return a map of barcodes to samples for the experiment."
+  "Return a map of barcodes and vector of samples for the experiment.
+Normally there should only be one sample per barcode."
   [exp]
-  ;; get map of sample -> [barcode list]
-  (let [samp-bc-map (experiment-sample-barcode-map exp)
-        bc-samp-map (into {} (for [[samp {bc-list "barcodes"}] samp-bc-map
-                                   bc bc-list]
-                               [bc samp]))
-        barcodes (experiment-barcodes exp)]
-    (assert (= barcodes (sort (into #{} (keys bc-samp-map)))))
-    bc-samp-map))
+  (reduce (fn [m [k v]]
+            (update-in m [k] (fnil conj []) v))
+          {}
+          (for [[s barcodes] (experiment-sample-barcode-map exp)
+                bc barcodes]
+            [bc s])))
+
+(defn experiment-barcodes
+  "Return a sorted list of barcodes for the experiment."
+  [exp]
+  (sort (vals (experiment-barcode-sample-map exp))))
 
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
