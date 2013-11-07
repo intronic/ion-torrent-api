@@ -10,7 +10,7 @@
 ;; You must not remove this notice, or any other, from this software.
 
 
-(defproject intronic/ion-torrent-api "0.1.5"
+(defproject intronic/ion-torrent-api "0.1.6"
   :description "Ion Torrent Server API"
   :url "https://github.com/intronic/ion-torrent-api"
   :license {:name "Eclipse Public License"
