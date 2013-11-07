@@ -9,7 +9,7 @@
   [name]
   #(= name (get-in % ["plugin" "name"])))
 
-(defn- sort-by-id-desc
+(defn sort-by-id-desc
   "Sort list of items by elements with 'id' key in descending numeric order."
   [items]
   (sort-by #(get % "id") > items))
