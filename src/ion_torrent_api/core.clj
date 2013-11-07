@@ -68,10 +68,15 @@ Normally there should only be one sample per barcode."
                 bc barcodes]
             [bc s])))
 
+(defn experiment-samples
+  "Return a sorted list of samples for the experiment."
+  [exp]
+  (sort (keys (experiment-sample-barcode-map exp))))
+
 (defn experiment-barcodes
   "Return a sorted list of barcodes for the experiment."
   [exp]
-  (sort (vals (experiment-barcode-sample-map exp))))
+  (sort (keys (experiment-barcode-sample-map exp))))
 
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
