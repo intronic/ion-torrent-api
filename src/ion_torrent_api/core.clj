@@ -22,7 +22,7 @@
 
 ;;; access utilities
 
-(defn experiment-samples
+(defn experiment-sample-maps
   "Return a list of samples for the experiment."
   [exp]
   ;; two ways to get samples, check that result is the same
@@ -42,7 +42,7 @@
 (defn experiment-sample-names
   "Return a sorted list of sample names for the experiment."
   [exp]
-  (sort (map #(% "displayedName") (experiment-samples exp))))
+  (sort (map #(% "displayedName") (experiment-sample-maps exp))))
 
 (defn experiment-sample-barcode-map
   "Return a map of samples and vector of barcodes for the experiment."
