@@ -21,12 +21,17 @@
 
 ;;; access utilities
 
+
 (defn experiment-samples
   "Return a sorted list of samples for the experiment."
   [exp]
-  (sort (into #{}
-              (apply concat (for [eas (exp "eas_set")]
-                              (keys (get eas "barcodedSamples")))))))
+  ;; two ways to get samples, check that result is the same
+  (let [s1 (sort (into #{} (map #(% "name") (get exp "samples"))))
+        s2 (sort (into #{}               
+                       (apply concat (for [eas (exp "eas_set")]
+                                       (keys (get eas "barcodedSamples"))))))]
+    (assert (= s1 s2) (pr-str "Sample name mismatch (s1=" s1 ", s2=" s2 ")"))
+    s1))
 
 (defn experiment-barcodes
   "Return a sorted list of barcodes for the experiment."
