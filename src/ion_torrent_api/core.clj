@@ -118,8 +118,8 @@ Normally there should only be one sample per barcode."
 
 (defn result-pdf-path
   "Return the path for a result summary PDF"
-  [result]
-  (format "/report/latex/%d.pdf" (:id result)))
+  [{id "id"}]
+  (format "/report/latex/%d.pdf" id))
 
 (defn coverage-amplicon-file-path
   "Coverage by amplicon file path. Barcode is a keyword or string."
