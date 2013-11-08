@@ -116,6 +116,11 @@ Normally there should only be one sample per barcode."
   [result barcode]
   (str (bam-path result barcode) ".bai"))
 
+(defn result-pdf-path
+  "Return the path for a result summary PDF"
+  [result]
+  (format "/report/latex/%d.pdf" (:id result)))
+
 (defn coverage-amplicon-file-path
   "Coverage by amplicon file path. Barcode is a keyword or string."
   [cov barcode]
