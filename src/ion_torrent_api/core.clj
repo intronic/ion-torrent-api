@@ -256,3 +256,21 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
    (filter (plugin-name? "variantCaller")
            (experiment-pluginresults host creds exp))))
 
+(defn- result-metrics
+  "Sorted list of metrics for a result."
+  [metric-name host creds res]
+  (sort-by-id-desc
+   (map #(resource host creds %) (get res metric-name))))
+
+(def result-libmetrics
+  (partial result-metrics "libmetrics"))
+
+(def result-qualitymetrics
+  (partial result-metrics "qualitymetrics"))
+
+(def result-analysismetrics
+  (partial result-metrics "analysismetrics"))
+
+(def result-tfmetrics
+  (partial result-metrics "tfmetrics"))
+
