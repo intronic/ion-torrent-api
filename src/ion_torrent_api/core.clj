@@ -158,11 +158,11 @@ Normally there should only be one sample per barcode."
 
 (defn write-resource-file
   "Write a file from host. Deletes the file if an exception occurs."
-  [host creds file-path dest-file]
+  [host creds file-path dest-file & [opts]]
   (let [res (str "http://" host file-path)]
     (try
       (with-open [o (io/output-stream dest-file)]
-        (let [i (:body (client/get res {:as :stream :basic-auth creds}))]
+        (let [i (:body (client/get res (merge {:as :stream :basic-auth creds} opts)))]
           (io/copy i o :buffer-size BUFFER-SIZE))
         dest-file)
       (catch Exception e
@@ -230,37 +230,37 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 
 (defn experiment-results
   "List of results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
-  [host creds exp]
+  [host creds exp & [opts]]
   (sort-by-id-desc
    (remove #(get-in % ["metaData" "thumb"])
-           (map #(resource host creds % {"status__startswith" "Completed"}) (get exp "results")))))
+           (map #(resource host creds % (merge {"status__startswith" "Completed"} opts)) (get exp "results")))))
 
 (defn experiment-pluginresults
   "List of plugin results that have completed for an experiment, returned in most-recent-first order."
-  [host creds exp]
+  [host creds exp & [opts]]
   (sort-by-id-desc
-   (map #(resource host creds % {"status__exact" "Completed"})
+   (map #(resource host creds % (merge {"status__exact" "Completed"} opts))
         (mapcat #(get % "pluginresults") (experiment-results host creds exp)))))
 
 (defn experiment-coverage
   "List of coverageAnalysis plugin results that have completed, for an experiment, returned in most-recent-first order."
-  [host creds exp]
+  [host creds exp & [opts]]
   (sort-by-id-desc
    (filter (plugin-name? "coverageAnalysis")
-           (experiment-pluginresults host creds exp))))
+           (experiment-pluginresults host creds exp opts))))
 
 (defn experiment-variants
   "List of variantCaller plugin results that have completed, for an experiment, returned in most-recent-first order."
-  [host creds exp]
+  [host creds exp & [opts]]
   (sort-by-id-desc
    (filter (plugin-name? "variantCaller")
-           (experiment-pluginresults host creds exp))))
+           (experiment-pluginresults host creds exp opts))))
 
 (defn- result-metrics
   "Sorted list of metrics for a result."
-  [metric-name host creds res]
+  [metric-name host creds res & [opts]]
   (sort-by-id-desc
-   (map #(resource host creds %) (get res metric-name))))
+   (map #(resource host creds % opts) (get res metric-name))))
 
 (def result-libmetrics
   (partial result-metrics "libmetrics"))
