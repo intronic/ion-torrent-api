@@ -11,8 +11,11 @@
 
 
 (defproject intronic/ion-torrent-api "0.1.6"
-  :description "Ion Torrent Server API"
+  :description "Ion Torrent Server API: Convenience functions for accessing data."
   :url "https://github.com/intronic/ion-torrent-api"
+  :autodoc {:name "ion-torrent-api", :page-title "Ion Torrent Server API Convenience Functions Documentation."
+            :author "Michael Pheasant <mpheasant@gmail.com> "
+            :copyright "2013 © Insilico Informatics Pty Ltd, AU."}
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
