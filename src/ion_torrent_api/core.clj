@@ -1,7 +1,8 @@
 (ns ion-torrent-api.core
   (:require [clj-http.client :as client]
             [clojure.java.io :as io]
-            [clojure.algo.generic.functor :refer (fmap)]))
+            [clojure.algo.generic.functor :refer (fmap)]
+            [clojure.instant :as inst]))
 
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
@@ -78,6 +79,18 @@ Normally there should only be one sample per barcode."
   "Return a sorted list of barcodes for the experiment."
   [exp]
   (sort (keys (experiment-barcode-sample-map exp))))
+
+(defn experiment-pgm-name
+  [exp]
+  (exp "pgmName"))
+
+(defn experiment-result-date
+  [exp]
+  (inst/read-instant-timestamp (exp "resultDate")))
+
+(defn experiment-chip-type
+  [exp]
+  (exp "chipType"))
 
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
