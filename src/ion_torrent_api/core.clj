@@ -97,6 +97,15 @@ Normally there should only be one sample per barcode."
   [plugin-result]
   (sort (keys (get-in plugin-result ["store" "barcodes"]))))
 
+(defn plugin-versioned-name
+  [plugin-result]
+  (get-in plugin-result ["plugin" "versionedName"]))
+
+(defn plugin-configuration
+  [plugin-result]
+  (get-in plugin-result ["store" "Configuration"]))
+
+
 ;;; paths
 
 (defn- pluginresult-api-path
