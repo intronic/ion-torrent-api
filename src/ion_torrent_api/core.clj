@@ -60,6 +60,14 @@
     samp-bc-map))
 
 (defn experiment-barcode-sample-map
+  "Return a map of barcodes to sample for the experiment.
+Fails if there is more than one barcode for a single sample."
+  [exp]
+  (into {} (for [[s barcodes] (experiment-sample-barcode-map exp)
+                 bc barcodes]
+             [bc s])))
+
+(defn experiment-barcode-sample-map-with-dups
   "Return a map of barcodes and vector of samples for the experiment.
 Handles the case where a sample has 2 barcodes."
   [exp]
