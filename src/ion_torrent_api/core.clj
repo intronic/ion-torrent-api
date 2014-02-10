@@ -61,7 +61,7 @@
 
 (defn experiment-barcode-sample-map
   "Return a map of barcodes and vector of samples for the experiment.
-Normally there should only be one sample per barcode."
+Handles the case where a sample has 2 barcodes."
   [exp]
   (reduce (fn [m [k v]]
             (update-in m [k] (fnil conj []) v))
