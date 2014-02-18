@@ -20,7 +20,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/algo.generic "0.1.1"]
-                 [clj-http "0.7.7"]]
+                 [clj-http "0.7.9"]]
   :scm {:name "git"
         :url "https://github.com/intronic/ion-torrent-api"
         :tag "3e7ef41804a7012d72462a3247b9ba97286dfc24"}
