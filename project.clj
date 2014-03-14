@@ -14,13 +14,20 @@
   :description "Ion Torrent Server API: Convenience functions for accessing data."
   :url "https://github.com/intronic/ion-torrent-api"
   :autodoc {:name "ion-torrent-api", :page-title "Ion Torrent Server API Convenience Functions Documentation."
-            :author "Michael Pheasant <mpheasant@gmail.com> "
+            :author "Michael Pheasant <mike@insilico.io>"
             :copyright "2013 © Insilico Informatics Pty Ltd, AU."}
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/algo.generic "0.1.1"]
                  [clj-http "0.7.9"]]
+
+  :source-paths ["src/clj"]
+  :test-paths ["test/clj"]
+
+  :profiles {:dev {:dependencies [[expectations "1.4.52"]]}}
+
   :scm {:name "git"
         :url "https://github.com/intronic/ion-torrent-api"
         :tag "3e7ef41804a7012d72462a3247b9ba97286dfc24"}
