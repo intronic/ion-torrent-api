@@ -23,8 +23,8 @@
                  [org.clojure/algo.generic "0.1.1"]
                  [clj-http "0.7.9"]]
 
-  :source-paths ["src/clj"]
-  :test-paths ["test/clj"]
+  :source-paths ["src"]
+  :test-paths ["test"]
 
   :profiles {:dev {:dependencies [[expectations "1.4.52"]]}}
 
