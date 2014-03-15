@@ -22,7 +22,8 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/algo.generic "0.1.2"]
                  ;;[clj-http "0.9.0"]
-                 [clj-http "0.7.9"]]
+                 [clj-http "0.7.9"]
+                 [clj-http-fake "0.7.8"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
