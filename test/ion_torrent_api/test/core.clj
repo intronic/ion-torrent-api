@@ -52,6 +52,8 @@
 ;;; Torrent Objects
 (expect "bob" (experiment-name {"expName" "bob"}))
 
-(given (read-string (slurp "test/data/rundb/api/v1/experiment/name-XXX-24.edn"))
-       (expect experiment-name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"
-               experiment-results ["/rundb/api/v1/results/77/" "/rundb/api/v1/results/61/" "/rundb/api/v1/results/62/"]))
+(expect (more-> "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24" experiment-name
+                ["/rundb/api/v1/results/77/"
+                 "/rundb/api/v1/results/61/"
+                 "/rundb/api/v1/results/62/"] experiment-results)
+        (read-string (slurp (uri-to-file "/rundb/api/v1/experiment/name-XXX-24" :edn))))

@@ -31,7 +31,7 @@
 ;;  :jvm-opts [~(str "-Xmx" (* (.getTotalPhysicalMemorySize (java.lang.management.ManagementFactory/getOperatingSystemMXBean)) 1/2))]
   :jvm-opts [ "-Xmx2g" ]
 
-  :profiles {:dev {:dependencies [[expectations "1.4.52"]]}}
+  :profiles {:dev {:dependencies [[expectations "2.0.6"]]}}
 
   :scm {:name "git"
         :url "https://github.com/intronic/ion-torrent-api"
