@@ -216,7 +216,7 @@ Handles the case where a sample has 2 barcodes."
 (defn- get-resource-file-to-stream
   "Get a file from host and copy to stream."
   [creds host file-path out-stream & [opts]]
-  (let [i (:body (io! (client/get (str host file-path) (merge {:as :stream :basic-auth creds} opts))))]
+  (let [i (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts})))]
     (io/copy i out-stream :buffer-size BUFFER-SIZE)))
 
 (defn- get-resource-file-to-file
