@@ -3,25 +3,68 @@
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]))
 
-;;; general
 
-;;; access utilities
+;;; ;;;;;;;;;;;;;;;;;
+;;; Experiment
+
+(defn experiment-name
+  "Experiment name."
+  [exp]
+  (get exp "expName"))
+
+(defn experiment-id
+  [exp]
+  (get exp "id"))
+
+(defn experiment-uri
+  [exp]
+  (get exp "resource_uri"))
+
+(defn experiment-keys
+  [exp]
+  (into #{} (keys exp)))
+
+(defn experiment-run-type
+  [exp]
+  (get exp "runtype"))
+
+(defn experiment-chip-type
+  [exp]
+  (get exp "chipType"))
+
+(defn experiment-pgm-name
+  [exp]
+  (exp "pgmName"))
+
+(defn experiment-result-uri
+  [exp]
+  (get exp "results"))
+
+(defn experiment-result-date
+  [exp]
+  (inst/read-instant-timestamp (get exp "resultDate")))
+
+(defn experiment-dir
+  [exp]
+  (get exp "expDir"))
+
+(defn experiment-status-run?
+  [exp]
+  (= "run" (get exp "status")))
 
 (defn experiment-sample-maps
-  "Return a list of samples for the experiment."
-  [exp]
-  ;; two ways to get samples, check that result is the same
-  ;; example of eliment under exp->samples key:
-  ;;  {"externalId" "",
-  ;;   "name" "C66_2169-74",
-  ;;   "displayedName" "C66 2169-74",
-  ;;   "date" "2013-10-19T11:44:45.000360+00:00",
-  ;;   "status" "run",
-  ;;   "experiments" ["/rundb/api/v1/experiment/65/"],
-  ;;   "id" 189,
-  ;;   "sampleSets" [],
-  ;;   "resource_uri" "/rundb/api/v1/sample/189/",
-  ;;   "description" nil}
+  "Return a list of samples for the experiment. Each sample is a map of the following:
+   {\"externalId\" \"\",
+    \"name\" \"C66_2169-74\",
+    \"displayedName\" \"C66 2169-74\",
+    \"date\" \"2013-10-19T11:44:45.000360+00:00\",
+    \"status\" \"run\",
+    \"experiments\" [\"/rundb/api/v1/experiment/65/\"],
+    \"id\" 189,
+    \"sampleSets\" [],
+    \"resource_uri\" \"/rundb/api/v1/sample/189/\",
+    \"description\" nil}"
+[exp]
   (get exp "samples"))
 
 (defn experiment-sample-names
@@ -71,17 +114,21 @@ Handles the case where a sample has 2 barcodes."
   [exp]
   (sort (keys (experiment-barcode-sample-map exp))))
 
-(defn experiment-pgm-name
-  [exp]
-  (exp "pgmName"))
+;;; ;;;;;;;;;;;;;;;;;
+;;; Result
 
-(defn experiment-result-date
-  [exp]
-  (inst/read-instant-timestamp (exp "resultDate")))
+(defn result-pluginresults
+  "Plugin results for an experiment result."
+  [res]
+  (get res "pluginresults"))
 
-(defn experiment-chip-type
-  [exp]
-  (exp "chipType"))
+(defn result-metadata-thumb
+  "Result metadata thumbnails."
+  [res]
+  (get-in res ["metaData" "thumb"]))
+
+;;; ;;;;;;;;;;;;;;;;;
+;;; Plugin
 
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
@@ -97,6 +144,7 @@ Handles the case where a sample has 2 barcodes."
   (get-in plugin-result ["store" "Configuration"]))
 
 
+;;; ;;;;;;;;;;;;;;;;;
 ;;; paths
 
 (defn- pluginresult-api-path
@@ -162,26 +210,3 @@ Handles the case where a sample has 2 barcodes."
   (str (tsvc-variant-file-path res barcode) ".tbi"))
 
 
-;;; ;;;;;;;;;;;;;;;;;;;;;;
-;;; Torrent Object Access
-
-(defn experiment-name
-  "Experiment name."
-  [exp]
-  (get exp "expName"))
-
-(defn experiment-results
-  "Experiment results."
-  [exp]
-  (get exp "results"))
-
-(defn result-pluginresults
-  "Plugin results for an experiment result."
-  [res]
-  (get res "pluginresults"))
-
-
-(defn result-metadata-thumb
-  "Result metadata thumbnails."
-  [res]
-  (get-in res ["metaData" "thumb"]))
