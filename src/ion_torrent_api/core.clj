@@ -122,22 +122,22 @@ Handles the case where a sample has 2 barcodes."
   (let [{^String path "path"
          ^String report-link "reportLink"} res]
     ;; sample path:
-    ;;   "/results/analysis/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+    ;;   "/results/analysis/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
     ;; sample reportLink:
-    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/"
+    ;;   "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/"
     ;; required API path to report files:
-    ;;   "/output/Home/Auto_user_AIB-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+    ;;   "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
     (.substring path (.indexOf path report-link))))
 
 (defn bam-path
   "Return the bam path for a particular barcode based on the result 'bamLink'"
   [result barcode]
   (str (result "reportLink") (name barcode) "_rawlib.bam")
-  ;; eg: /output/Home/Auto_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
+  ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
   
   ;; alternatively, more complicated but possibly less assumptions and
   ;; safer?:-
-  ;; eg: /output/Home/Auto_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_AIB-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
+  ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
   #_(let [bam (io/as-file (result "bamLink"))]
       (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam))))))
 
@@ -178,122 +178,158 @@ Handles the case where a sample has 2 barcodes."
   [res barcode]
   (str (tsvc-variant-file-path res barcode) ".tbi"))
 
-;;; get data from API
 
-(defn resource-file
+;;; ;;;;;;;;;;;;;;;;;;;;;;
+;;; Torrent Object Access
+
+(defn experiment-name
+  "Experiment name."
+  [exp]
+  (get exp "expName"))
+
+(defn experiment-results
+  "Experiment results."
+  [exp]
+  (get exp "results"))
+
+(defn result-pluginresults
+  "Plugin results for an experiment result."
+  [res]
+  (get res "pluginresults"))
+
+
+(defn result-metadata-thumb
+  "Result metadata thumbnails."
+  [res]
+  (get-in res ["metaData" "thumb"]))
+
+
+;;; ;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Query Torrent Server API
+
+;;; generic calls for resources and resource files
+(defn- get-resource-file
   "Return a file from host."
-  [host creds file-path]
-  (:body (client/get (str "http://" host file-path)
-                     {:basic-auth creds})))
+  [creds host file-path]
+  (:body (io! (client/get (str host file-path) {:basic-auth creds}))))
 
-(defn write-resource-file
-  "Write a file from host. Deletes the file if an exception occurs."
-  [host creds file-path dest-file & [opts]]
-  (let [res (str "http://" host file-path)]
-    (try
-      (with-open [o (io/output-stream dest-file)]
-        (let [i (:body (client/get res (merge {:as :stream :basic-auth creds} opts)))]
-          (io/copy i o :buffer-size BUFFER-SIZE))
-        dest-file)
-      (catch Exception e
-        #_(println "error: " res " -> " dest-file)
-        (io/delete-file dest-file)
-        (throw e)))))
+(defn- get-resource-file-to-stream
+  "Get a file from host and copy to stream."
+  [creds host file-path out-stream & [opts]]
+  (let [i (:body (io! (client/get (str host file-path) (merge {:as :stream :basic-auth creds} opts))))]
+    (io/copy i out-stream :buffer-size BUFFER-SIZE)))
 
-(defn resource
+(defn- get-resource-file-to-file
+  "Get a file from host to local file. Deletes the local file if an exception occurs."
+  [creds host file-path dest-file & [opts]]
+  (try
+    (with-open [out (io/output-stream dest-file)]
+      (get-resource-file-to-stream creds host file-path out opts)
+      dest-file)
+    (catch Exception e
+      #_(println "error: " res " -> " dest-file)
+      (io/delete-file dest-file)
+      (throw e))))
+
+(defn- get-resource
   "Return a JSON resource from host.
-Keys are not coerced to keywords as the JSON keys can have spaces in them which are invalid as keywords and not printable+readable."
-  [host creds resource & [opts]]
-  (:body (client/get (str "http://" host (ensure-starts-with "/rundb/api/v1/" resource))
-                     {:as :json-string-keys :basic-auth creds :query-params opts})))
+Keys are not coerced to keywords as the JSON keys can have spaces in them which are invalid as keywords and not printable+readable.
+host should "
+  [creds host resource & [opts]]
+  (:body (io! (client/get (str host (ensure-starts-with "/rundb/api/v1/" resource))
+                          {:as :json-string-keys :basic-auth creds :query-params opts}))))
 
-;;; get resources through API returning map of metadata and data
+;;; ;;;;;;;;;;;;;;;;;;;;;;;
+;;; Get Torrent API objects
 
-(defn experiment
+(defn get-experiment
   "Experiments that have run. Returns a map of metadata and objects:
 'meta' key lists total_count, limit, offset and next/previos URIs.
 'objects' key containl list of experiment resources."
-  [host creds & [opts]]
-  (resource host creds "experiment/" (assoc opts "status__exact" "run")))
+  [creds host & [opts]]
+  (get-resource creds host "experiment/" (assoc opts "status__exact" "run")))
 
-(defn results
+(defn get-experiment-name
+  "Get experiment by name."
+  [creds host name & [opts]]
+  (let [res (get-experiment creds host (assoc opts "expName__exact" name))]
+    (first (get res "objects"))))
+
+(defn get-result-uri
+  "Get result"
+  [creds host res & [opts]]
+  (get-resource creds host res (assoc opts "status__startswith" "Completed")))
+
+(defn get-result
   "Results that have completed. Returns a map of metadata and objects:
 'meta' key lists total_count, limit, offset and next/previos URIs.
 'objects' key containl list of experiment resources."
-  [host creds & [opts]]
-  (resource host creds "results/" (assoc opts "status__startswith" "Completed")))
+  [creds host & [opts]]
+  (get-resource creds host "results/" (assoc opts "status__startswith" "Completed")))
 
-(defn pluginresult
+(defn get-experiment-result
+  "List of results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
+  [creds host exp & [opts]]
+  (->> exp
+       experiment-results
+       (map #(get-result-uri creds host % opts))
+       (remove result-metadata-thumb)   ; HACK how to detect thumbs in the query API?
+       sort-by-id-desc))
+
+(defn get-pluginresult
   "Pluginresult that have completed. Returns a map of metadata and objects:
 'meta' key lists total_count, limit, offset and next/previos URIs.
 'objects' key containl list of experiment resources."
-  [host creds & [opts]]
-  (resource host creds "pluginresult/"  (assoc opts "status__startswith" "Completed")))
+  [creds host & [opts]]
+  (get-resource creds host "pluginresult/"  (assoc opts "status__startswith" "Completed")))
 
-;;; Query individual resources by ID
-
-(defn pluginresult-id
+(defn get-pluginresult-id
   "Pluginresult for id."
-  [host creds id]
-  (resource host creds (str "pluginresult/" id "/")))
+  [creds host id]
+  (get-resource creds host (str "pluginresult/" id "/")))
 
-(defn coverage-id
+(defn get-coverage-id
   "coverageAnalysis for id."
-  [host creds id]
-  (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
+  [creds host id]
+  (let [{{name "name"} "plugin" :as res}
+        (get-pluginresult-id creds host id)]
     (if (= "coverageAnalysis" name) res)))
 
-(defn variant-call-id
+(defn get-variant-call-id
   "variantCall for id."
-  [host creds id]
-  (let [{{name "name"} "plugin" :as res} (pluginresult-id host creds id)]
+  [creds host id]
+  (let [{{name "name"} "plugin" :as res}
+        (get-pluginresult-id creds host id)]
     (if (= "variantCaller" name) res)))
 
-;;; query objects by experiment 
 
-(defn experiment-name
-  "Experiment by name."
-  ([exp]
-     (exp "expName"))
-  
-  ([host creds name & [opts]]
-     (let [{{tot "total_count"} "meta"
-            exp "objects"} (resource host creds "experiment/" (merge opts {"expName__exact" name "status__exact" "run"}))]
-       (if (= 1 tot) (first exp)))))
-
-(defn experiment-results
-  "List of results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
-  [host creds exp & [opts]]
-  (sort-by-id-desc
-   (remove #(get-in % ["metaData" "thumb"])
-           (map #(resource host creds % (merge {"status__startswith" "Completed"} opts)) (get exp "results")))))
 
 (defn experiment-pluginresults
   "List of plugin results that have completed for an experiment, returned in most-recent-first order."
-  [host creds exp & [opts]]
+  [creds host exp & [opts]]
   (sort-by-id-desc
-   (map #(resource host creds % (merge {"status__exact" "Completed"} opts))
-        (mapcat #(get % "pluginresults") (experiment-results host creds exp)))))
+   (map #(get-resource creds host % (merge {"status__exact" "Completed"} opts))
+        (mapcat #(get % "pluginresults") (experiment-results creds host exp)))))
 
 (defn experiment-coverage
   "List of coverageAnalysis plugin results that have completed, for an experiment, returned in most-recent-first order."
-  [host creds exp & [opts]]
+  [creds host exp & [opts]]
   (sort-by-id-desc
    (filter (plugin-name? "coverageAnalysis")
-           (experiment-pluginresults host creds exp opts))))
+           (experiment-pluginresults creds host exp opts))))
 
 (defn experiment-variants
   "List of variantCaller plugin results that have completed, for an experiment, returned in most-recent-first order."
-  [host creds exp & [opts]]
+  [creds host exp & [opts]]
   (sort-by-id-desc
    (filter (plugin-name? "variantCaller")
-           (experiment-pluginresults host creds exp opts))))
+           (experiment-pluginresults creds host exp opts))))
 
 (defn- result-metrics
   "Sorted list of metrics for a result."
-  [metric-name host creds res & [opts]]
+  [metric-name creds host res & [opts]]
   (sort-by-id-desc
-   (map #(resource host creds % opts) (get res metric-name))))
+   (map #(get-resource creds host % opts) (get res metric-name))))
 
 (def result-libmetrics
   (partial result-metrics "libmetrics"))
