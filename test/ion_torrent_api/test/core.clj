@@ -49,11 +49,3 @@
                                                     :body (slurp (uri-to-file uri :json))})}
                           (#'ion/get-resource creds host "experiment/name-XXX-24")) "objects"))))
 
-;;; Torrent Objects
-(expect "bob" (experiment-name {"expName" "bob"}))
-
-(expect (more-> "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24" experiment-name
-                ["/rundb/api/v1/results/77/"
-                 "/rundb/api/v1/results/61/"
-                 "/rundb/api/v1/results/62/"] experiment-results)
-        (read-string (slurp (uri-to-file "/rundb/api/v1/experiment/name-XXX-24" :edn))))
