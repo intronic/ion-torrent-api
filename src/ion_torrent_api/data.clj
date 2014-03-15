@@ -8,9 +8,12 @@
 ;;; Experiment
 
 (defn experiment-name
-  "Experiment name."
   [exp]
   (get exp "expName"))
+
+(defn experiment-display-name
+  [exp]
+  (get exp "displayName"))
 
 (defn experiment-id
   [exp]
@@ -19,6 +22,10 @@
 (defn experiment-uri
   [exp]
   (get exp "resource_uri"))
+
+(defn experiment-date
+  [exp]
+  (inst/read-instant-timestamp (get exp "date")))
 
 (defn experiment-keys
   [exp]
@@ -48,9 +55,14 @@
   [exp]
   (get exp "expDir"))
 
-(defn experiment-status-run?
+(defn experiment-run?
   [exp]
   (= "run" (get exp "status")))
+
+(defn experiment-complete?
+  [exp]
+  (and (experiment-run? exp)
+       (= "Complete" (get exp "ftpStatus"))))
 
 (defn experiment-sample-maps
   "Return a list of samples for the experiment. Each sample is a map of the following:
