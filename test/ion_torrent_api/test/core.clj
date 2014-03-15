@@ -33,6 +33,22 @@
 
               (client/get (str host  "/rundb/api/v1/" "experiment/schema/")))))
 
+;;; test meta stuff
+(expect {"meta" {"limit" 20 "total_count" 1 "next" nil "previous" nil "offset" 0}}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (#'ion/get-resource creds host "experiment/name-XXX-24"))))
+
+;;; test object
+(expect {"expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
+        (in (first (get (with-fake-routes-in-isolation
+                          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                                    :body (slurp (uri-to-file uri :json))})}
+                          (#'ion/get-resource creds host "experiment/name-XXX-24")) "objects"))))
+
 ;;; Torrent Objects
 (expect "bob" (experiment-name {"expName" "bob"}))
 
