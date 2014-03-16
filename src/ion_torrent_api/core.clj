@@ -64,7 +64,7 @@ host should "
   (get-resource creds host resource (assoc opts "status__startswith" "Completed")))
 
 ;;; ;;;;;;;;;;;;;;;;;;;;;;;
-;;; Get Torrent API objects
+;;; Get Experiment
 
 (defn get-experiment
   "Experiments that have run. Returns a map of metadata and objects:
@@ -79,7 +79,21 @@ host should "
   (let [res (get-experiment creds host (assoc opts "expName__exact" name))]
     (first (get res "objects"))))
 
-;;; get-result-uri : get-completed-resource
+;;; ;;;;;;;;;;;;;;;;;;;;;;;
+;;; Get Result
+
+(defn get-result-uri
+  [creds host uri]
+  (get-completed-resource creds host uri))
+
+(defn get-result-id
+  [creds host id]
+  (get-completed-resource creds host (str "results/" id)))
+
+
+
+
+
 ;;; get-all-results : get-completed-resource "results/"
 
 (defn get-experiment-results
