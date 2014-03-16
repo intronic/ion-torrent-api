@@ -3,7 +3,10 @@
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
-            [ion-torrent-api.data :as data]))
+            [ion-torrent-api
+             [experiment :as e]
+             [result :as r]
+             [plugin-result :as pr]]))
 
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
@@ -89,6 +92,14 @@ host should "
 (defn get-result-id
   [creds host id]
   (get-completed-resource creds host (str "results/" id)))
+
+(defn get-plugin-result-uri
+  [creds host uri]
+  (get-completed-resource creds host uri))
+
+(defn get-plugin-result-id
+  [creds host id]
+  (get-completed-resource creds host (str "pluginresult/" id)))
 
 
 
