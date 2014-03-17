@@ -21,7 +21,7 @@
           "Completed" (plugin-result-status pr)
           "3:47:09.789983" (plugin-result-duration pr)
           "25242564174" (plugin-result-size pr)
-          "24_reanalyze" (plugin-result-name pr)
+          "24_reanalyze" (plugin-result-result-name pr)
           "/output/Home/24_reanalyze_077/" (plugin-result-report-link pr)
 
           {"versionedName" "variantCaller--v4.0-r76860"
@@ -67,6 +67,30 @@
            "Trim Reads" true,
            "Library Type" "AmpliSeq"}
           (plugin-result-store pr)
+
+          ["IonXpressRNA_001" "IonXpressRNA_002" "IonXpressRNA_003" "IonXpressRNA_004" "IonXpressRNA_005"]
+          (plugin-result-barcodes pr)
+
+          {"IonXpressRNA_001" {"hotspots" {}, "variants"
+                               {"het_indels" 104, "het_snps" 1046, "homo_indels" 21,
+                                "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}
+           "IonXpressRNA_002" {"hotspots" {}, "variants"
+                               {"het_indels" 126, "het_snps" 850, "homo_indels" 24,
+                                "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}
+           "IonXpressRNA_003" {"hotspots" {}, "variants"
+                               {"het_indels" 113, "het_snps" 799, "homo_indels" 22,
+                                "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}
+           "IonXpressRNA_004" {"hotspots" {}, "variants"
+                               {"het_indels" 127, "het_snps" 937, "homo_indels" 26,
+                                "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}
+           "IonXpressRNA_005" {"hotspots" {}, "variants"
+                               {"het_indels" 120, "het_snps" 841, "homo_indels" 21,
+                                "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}
+          (plugin-result-barcode-counts pr)
+
+          "variantCaller--v4.0-r76860" (plugin-result-versioned-name pr)
+
+          "Somatic - Proton - Low Stringency" (plugin-result-configuration pr)
 
           ;; "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed"
           ;; (get-in (result-plugin-store r) ["variantCaller" "targets_bed"])

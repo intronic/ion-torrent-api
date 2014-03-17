@@ -42,7 +42,7 @@
   [pr]
   (get pr "size"))
 
-(defn plugin-result-name
+(defn plugin-result-result-name
   [pr]
   (get pr "resultName"))
 
@@ -58,20 +58,22 @@
   [pr]
   (get pr "store"))
 
-
-(defn plugin-barcodes
+(defn plugin-result-barcodes
   "Return a sorted list of barcodes for the plugin result."
-  [plugin-result]
-  (sort (keys (get-in plugin-result ["store" "barcodes"]))))
+  [pr]
+  (sort (keys (get-in pr ["store" "barcodes"]))))
 
-(defn plugin-versioned-name
-  [plugin-result]
-  (get-in plugin-result ["plugin" "versionedName"]))
+(defn plugin-result-barcode-counts
+  [pr]
+  (get-in pr ["store" "barcodes"]))
 
-(defn plugin-configuration
-  [plugin-result]
-  (get-in plugin-result ["store" "Configuration"]))
+(defn plugin-result-versioned-name
+  [pr]
+  (get-in pr ["plugin" "versionedName"]))
 
+(defn plugin-result-configuration
+  [pr]
+  (get-in pr ["store" "Configuration"]))
 
 ;;; ;;;;;;;;;;;;;;;;;
 ;;; paths
