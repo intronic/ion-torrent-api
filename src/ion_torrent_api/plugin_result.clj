@@ -30,6 +30,10 @@
   [pr]
   (= "Completed" (plugin-result-status pr)))
 
+(defn plugin-result-complete?
+  [pr]
+  (= "Completed" (plugin-result-status pr)))
+
 (defn plugin-result-start-time
   [pr]
   (inst/read-instant-timestamp (get pr "starttime")))
@@ -57,6 +61,18 @@
 (defn plugin-result-plugin
   [pr]
   (get pr "plugin"))
+
+(defn plugin-result-plugin-name
+  [pr]
+  (get-in pr ["plugin" "name"]))
+
+(defn plugin-result-coverage?
+  [pr]
+  (= "coverageAnalysis" (plugin-result-plugin-name pr)))
+
+(defn plugin-result-variant-caller?
+  [pr]
+  (= "variantCaller" (plugin-result-plugin-name pr)))
 
 (defn plugin-result-store
   [pr]

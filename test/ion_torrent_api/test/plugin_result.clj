@@ -61,6 +61,10 @@
            "selected" true, "autorun" false, "description" "", "isInstance" true}
           (plugin-result-plugin pr)
 
+          "variantCaller" (plugin-result-plugin-name pr)
+          true (plugin-result-variant-caller? pr)
+          false (plugin-result-coverage? pr)
+
           {"Aligned Reads" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
            "targets_bed" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed",
            "barcoded" "true",
