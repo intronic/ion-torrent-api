@@ -20,6 +20,10 @@
   (spit "test/data/rundb/api/v1/results/62.edn" (pr-str (ion/get-result-uri creds host2 "/rundb/api/v1/results/62/")))
   (spit "test/data/rundb/api/v1/results/61.edn" (pr-str (ion/get-result-uri creds host2 "/rundb/api/v1/results/61/")))
 
+  (spit "test/data/rundb/api/v1/pluginresult/209.edn" (pr-str (ion/get-plugin-result-uri creds host2 "/rundb/api/v1/pluginresult/209/")))
+  (spit "test/data/rundb/api/v1/pluginresult/89.edn" (pr-str (ion/get-plugin-result-uri creds host2 "/rundb/api/v1/pluginresult/89/")))
+
+
   ;; get single experiment to file
   (#'ion/get-resource-file-to-file creds host2 "/rundb/api/v1/experiment/" "test/data/rundb/api/v1/experiment/name-XXX-24.json" {"status__exact" "run" "expName__exact" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"})
 

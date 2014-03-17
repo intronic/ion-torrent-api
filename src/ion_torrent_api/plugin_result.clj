@@ -2,8 +2,62 @@
   (:require [clojure.java.io :as io]
             [clojure.instant :as inst]))
 
-;;; ;;;;;;;;;;;;;;;;;
-;;; Plugin Result
+(defn plugin-result-keys
+  [pr]
+  (into #{} (keys pr)))
+
+(defn plugin-result-id
+  [pr]
+  (get pr "id"))
+
+(defn plugin-result-uri
+  [pr]
+  (get pr "resource_uri"))
+
+(defn plugin-result-result-uri
+  [pr]
+  (get pr "result"))
+
+(defn plugin-result-path
+  [pr]
+  (get pr "path"))
+
+(defn plugin-result-status
+  [pr]
+  (get pr "state"))
+
+(defn plugin-result-start-time
+  [pr]
+  (inst/read-instant-timestamp (get pr "starttime")))
+
+(defn plugin-result-end-time
+  [pr]
+  (inst/read-instant-timestamp (get pr "endtime")))
+
+(defn plugin-result-duration
+  [pr]
+  (get pr "duration"))
+
+(defn plugin-result-size
+  [pr]
+  (get pr "size"))
+
+(defn plugin-result-name
+  [pr]
+  (get pr "resultName"))
+
+(defn plugin-result-report-link
+  [pr]
+  (get pr "reportLink"))
+
+(defn plugin-result-plugin
+  [pr]
+  (get pr "plugin"))
+
+(defn plugin-result-store
+  [pr]
+  (get pr "store"))
+
 
 (defn plugin-barcodes
   "Return a sorted list of barcodes for the plugin result."
