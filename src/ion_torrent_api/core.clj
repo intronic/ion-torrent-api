@@ -11,11 +11,6 @@
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
 
-(defn- plugin-name?
-  "returns a function that tests if plugin is named 'name'."
-  [name]
-  #(= name (get-in % ["plugin" "name"])))
-
 (defn sort-by-id-desc
   "Sort list of items by elements with 'id' key in descending numeric order."
   [items]
@@ -49,7 +44,6 @@
       (get-resource-file-to-stream creds host file-path out opts)
       dest-file)
     (catch Exception e
-      #_(println "error: " res " -> " dest-file)
       (io/delete-file dest-file)
       (throw e))))
 
