@@ -96,12 +96,11 @@ host should "
   (get-completed-resource creds host (str "pluginresult/" id "/")))
 
 (defn get-experiment-results
-  "List of results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
-  [creds host exp]
-  (->> exp
-       (get exp "results")              ; HACK replace with experiment-results accessor
-       (map #(get-completed-resource creds host %))
-       (remove #(get-in % ["metaData" "thumb"])) ; HACK how to exclude thumbs in the query API?
+  "All results for an experiment (completed, not thumbnails), in most-recent-first order."
+  [creds host e]
+  (->> (e/experiment-result-uri e)
+       (map #(get-result-uri creds host %))
+       (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
        sort-by-id-desc))
 
 ;;; get-pluginresult-uri : get-completed-resource
