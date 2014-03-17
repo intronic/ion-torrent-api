@@ -66,6 +66,10 @@
   [pr]
   (get-in pr ["plugin" "name"]))
 
+(defn plugin-result-plugin-version
+  [pr]
+  (get-in pr ["plugin" "version"]))
+
 (defn plugin-result-coverage?
   [pr]
   (= "coverageAnalysis" (plugin-result-plugin-name pr)))

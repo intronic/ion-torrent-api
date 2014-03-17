@@ -61,6 +61,9 @@
            "selected" true, "autorun" false, "description" "", "isInstance" true}
           (plugin-result-plugin pr)
 
+          "4.0-r76860"
+          (plugin-result-plugin-version pr)
+
           "variantCaller" (plugin-result-plugin-name pr)
           true (plugin-result-variant-caller? pr)
           false (plugin-result-coverage? pr)
