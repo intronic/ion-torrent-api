@@ -26,6 +26,10 @@
   [pr]
   (get pr "state"))
 
+(defn plugin-result-complete?
+  [pr]
+  (= "Completed" (plugin-result-status pr)))
+
 (defn plugin-result-start-time
   [pr]
   (inst/read-instant-timestamp (get pr "starttime")))

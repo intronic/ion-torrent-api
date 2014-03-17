@@ -32,9 +32,12 @@
           "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/"
           (plugin-result-api-path-tsvc-variant-prefix pr)
 
+          "Completed" (plugin-result-status pr)
+          true (plugin-result-complete? pr)
+
           #inst "2014-02-17T09:37:51.000879+00:00" (plugin-result-end-time pr)
           #inst "2014-02-17T05:50:42.000089+00:00" (plugin-result-start-time pr)
-          "Completed" (plugin-result-status pr)
+
           "3:47:09.789983" (plugin-result-duration pr)
           "25242564174" (plugin-result-size pr)
           "24_reanalyze" (plugin-result-result-name pr)
