@@ -3,97 +3,124 @@
             [clojure.instant :as inst]))
 
 (defn result-keys
-  [res]
-  (into #{} (keys res)))
+  [r]
+  (into #{} (keys r)))
 
 (defn result-id
-  [res]
-  (get res "id"))
+  [r]
+  (get r "id"))
 
 (defn result-name
-  [res]
-  (get res "resultsName"))
+  [r]
+  (get r "resultsName"))
 
 (defn result-uri
-  [res]
-  (get res "resource_uri"))
+  [r]
+  (get r "resource_uri"))
 
 (defn result-report-link
-  [res]
-  (get res "reportLink"))
+  [r]
+  (get r "reportLink"))
 
 (defn result-bam-link
-  [res]
-  (get res "bamLink"))
+  [r]
+  (get r "bamLink"))
 
 (defn result-fastq-link
-  [res]
-  (get res "fastqLink"))
+  [r]
+  (get r "fastqLink"))
 
 (defn result-file-path
-  [res]
-  (get res "filesystempath"))
+  [r]
+  (get r "filesystempath"))
 
 (defn result-status
-  [res]
-  (get res "status"))
+  [r]
+  (get r "status"))
+
+(defn result-complete?
+  [r]
+  (= "Completed" (result-status r)))
 
 (defn result-timestamp
-  [res]
-  (inst/read-instant-timestamp (get res "timeStamp")))
+  [r]
+  (inst/read-instant-timestamp (get r "timeStamp")))
 
 (defn result-version
-  [res]
-  (get res "analysisVersion"))
+  [r]
+  (get r "analysisVersion"))
 
 (defn result-experiment
-  [res]
-  (get res "experiment"))
+  [r]
+  (get r "experiment"))
 
-(defn result-plugin-state
-  [res]
-  (get res "pluginState"))
+(defn result-plugin-status
+  [r]
+  (get r "pluginState"))
 
 (defn result-plugin-results
-  [res]
-  (get res "pluginresults"))
+  [r]
+  (get r "pluginresults"))
 
 (defn result-tf-metrics
-  [res]
-  (get res "tfmetrics"))
+  [r]
+  (get r "tfmetrics"))
 
 (defn result-lib-metrics
-  [res]
-  (get res "libmetrics"))
+  [r]
+  (get r "libmetrics"))
 
 (defn result-quality-metrics
-  [res]
-  (get res "qualitymetrics"))
+  [r]
+  (get r "qualitymetrics"))
 
 (defn result-analysis-metrics
-  [res]
-  (get res "analysismetrics"))
+  [r]
+  (get r "analysismetrics"))
 
 (defn result-run-id
-  [res]
-  (get res "runid"))
+  [r]
+  (get r "runid"))
 
 (defn result-reference
-  [res]
-  (get res "reference"))
+  [r]
+  (get r "reference"))
 
 (defn result-projects
-  [res]
-  (get res "projects"))
+  [r]
+  (get r "projects"))
 
 (defn result-report-storage
-  [res]
-  (get res "reportstorage"))
+  [r]
+  (get r "reportstorage"))
 
 (defn result-plugin-store
-  [res]
-  (get res "pluginStore"))
+  [r]
+  (get r "pluginStore"))
 
 (defn result-metadata-thumb
-  [res]
-  (get-in res ["metaData" "thumb"]))
+  [r]
+  (get-in r ["metaData" "thumb"]))
+
+
+;; HACK alternatively, more complicated but possibly less assumptions and safer?:-
+;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
+;; (let [bam (io/as-file (result "bamLink"))]
+;;     (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam)))))
+;; eg:
+;; /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
+
+(defn result-api-path-bam
+  "Return the bam path for a particular barcode based on the result 'bamLink'"
+  [r bc]
+  (str (result-report-link r) (name bc) "_rawlib.bam"))
+
+(defn result-api-path-bai
+  "Return the bam bai path for a particular barcode"
+  [r bc]
+  (str (result-api-path-bam r bc) ".bai"))
+
+(defn result-api-path-pdf
+  "Return the path for a result summary PDF"
+  [r]
+  (format "/report/latex/%d.pdf" (result-id r)))

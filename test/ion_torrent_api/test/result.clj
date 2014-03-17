@@ -42,12 +42,15 @@
           "/output/Home/24_reanalyze_077/basecaller_results/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.fastq"
           (result-fastq-link r)
           "/results/analysis/output/Home/24_reanalyze_077" (result-file-path r)
+
           "Completed" (result-status r)
+          true (result-complete? r)
+
           #inst "2013-07-23T05:18:31.000209+00:00" (result-timestamp r)
           "db:3.6.52-1,al:3.6.3-1,an:3.6.39-1," (result-version r)
           "/rundb/api/v1/experiment/50/" (result-experiment r)
           {"IonReporterUploader" "Completed", "variantCaller" "Completed"}
-          (result-plugin-state r)
+          (result-plugin-status r)
           ["/rundb/api/v1/pluginresult/209/" "/rundb/api/v1/pluginresult/89/"]
           (result-plugin-results r)
           ["/rundb/api/v1/tfmetrics/68/"] (result-tf-metrics r)
@@ -62,7 +65,17 @@
           #{"IonReporterUploader" "variantCaller"}
           (into #{} (keys (result-plugin-store r)))
           "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed"
-          (get-in (result-plugin-store r) ["variantCaller" "targets_bed"]))
+          (get-in (result-plugin-store r) ["variantCaller" "targets_bed"])
+
+          "/output/Home/24_reanalyze_077/IonXpressRNA_001_rawlib.bam"
+          (result-api-path-bam r "IonXpressRNA_001")
+
+          "/output/Home/24_reanalyze_077/IonXpressRNA_001_rawlib.bam.bai"
+          (result-api-path-bai r "IonXpressRNA_001")
+
+          "/report/latex/77.pdf"
+          (result-api-path-pdf r)
+          )
 
  ;; get rid of log slot as it is huge and messes up error output
  (dissoc (read-string (slurp (uri-to-file "/rundb/api/v1/results/77/" :edn))) "log"))
