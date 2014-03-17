@@ -10,7 +10,7 @@
 ;; You must not remove this notice, or any other, from this software.
 
 
-(defproject intronic/ion-torrent-api "0.1.6"
+(defproject intronic/ion-torrent-api "0.2.0"
   :description "Ion Torrent Server API: Convenience functions for accessing data."
   :url "https://github.com/intronic/ion-torrent-api"
   :autodoc {:name "ion-torrent-api", :page-title "Ion Torrent Server API Convenience Functions Documentation."
@@ -33,7 +33,7 @@
 
   :profiles {:dev {:dependencies [[expectations "2.0.6"]]}}
 
+  :lein-release {:deploy-via :clojars}
   :scm {:name "git"
-        :url "https://github.com/intronic/ion-torrent-api"
-        :tag "3e7ef41804a7012d72462a3247b9ba97286dfc24"}
+        :url "https://github.com/intronic/ion-torrent-api"}
   :global-vars {*warn-on-reflection* true})
