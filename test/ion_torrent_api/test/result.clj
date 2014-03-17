@@ -37,9 +37,9 @@
           "/rundb/api/v1/results/77/" (result-uri r)
           "24_reanalyze" (result-name r)
           "/output/Home/24_reanalyze_077/" (result-report-link r)
-          "/output/Home/24_reanalyze_077/R_2013_06_03_23_30_18_user_AIB-24-AmpliSeq_CCP_24_24_reanalyze.bam"
+          "/output/Home/24_reanalyze_077/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.bam"
           (result-bam-link r)
-          "/output/Home/24_reanalyze_077/basecaller_results/R_2013_06_03_23_30_18_user_AIB-24-AmpliSeq_CCP_24_24_reanalyze.fastq"
+          "/output/Home/24_reanalyze_077/basecaller_results/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.fastq"
           (result-fastq-link r)
           "/results/analysis/output/Home/24_reanalyze_077" (result-file-path r)
           "Completed" (result-status r)
@@ -72,8 +72,8 @@
 
 #_{"resultsName" "24_reanalyze",
  "reportLink" "/output/Home/24_reanalyze_077/",
- "bamLink" "/output/Home/24_reanalyze_077/R_2013_06_03_23_30_18_user_AIB-24-AmpliSeq_CCP_24_24_reanalyze.bam",
- "fastqLink" "/output/Home/24_reanalyze_077/basecaller_results/R_2013_06_03_23_30_18_user_AIB-24-AmpliSeq_CCP_24_24_reanalyze.fastq",
+ "bamLink" "/output/Home/24_reanalyze_077/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.bam",
+ "fastqLink" "/output/Home/24_reanalyze_077/basecaller_results/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.fastq",
  "filesystempath" "/results/analysis/output/Home/24_reanalyze_077",
  "status" "Completed",
  "timeStamp" "2013-07-23T05:18:31.000209+00:00",
