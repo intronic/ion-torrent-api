@@ -103,49 +103,12 @@ host should "
        (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
        sort-by-id-desc))
 
-;;; get-pluginresult-uri : get-completed-resource
-;;; get-all-pluginresult : get-completed-resource "pluginresult/"
-
-(defn get-pluginresult-id
-  "Pluginresult for id."
-  [creds host id]
-  (get-completed-resource creds host (str "pluginresult/" id "/")))
-
-(defn get-coverage-id
-  "coverageAnalysis for id."
-  [creds host id]
-  (let [{{name "name"} "plugin" :as res}
-        (get-pluginresult-id creds host id)]
-    (if (= "coverageAnalysis" name) res)))
-
-(defn get-variant-call-id
-  "variantCall for id."
-  [creds host id]
-  (let [{{name "name"} "plugin" :as res}
-        (get-pluginresult-id creds host id)]
-    (if (= "variantCaller" name) res)))
-
-(defn get-experiment-pluginresults
-  "List of plugin results that have completed for an experiment, returned in most-recent-first order."
-  [host creds exp]
-  (sort-by-id-desc
-   (map #(get-completed-resource host creds %)
-        (mapcat #(get % "pluginresults") ; HACK replace with accessor
-                (get-experiment-results host creds exp)))))
-
-(defn get-experiment-coverage
-  "List of coverageAnalysis plugin results that have completed, for an experiment, returned in most-recent-first order."
-  [creds host exp]
-  (sort-by-id-desc
-   (filter (plugin-name? "coverageAnalysis")
-           (get-experiment-pluginresults creds host exp))))
-
-(defn get-experiment-variants
-  "List of variantCaller plugin results that have completed, for an experiment, returned in most-recent-first order."
-  [creds host exp]
-  (sort-by-id-desc
-   (filter (plugin-name? "variantCaller")
-           (get-experiment-pluginresults creds host exp))))
+(defn get-result-plugin-results
+  "All plugin-results for a result (completed), in most-recent-first order."
+  [creds host r]
+  (->> (r/result-plugin-results r)
+       (map #(get-plugin-result-uri creds host %))
+       sort-by-id-desc))
 
 (defn- get-result-metrics
   "Sorted list of metrics for a result."
