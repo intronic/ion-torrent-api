@@ -33,7 +33,8 @@
 
   :profiles {:dev {:dependencies [[expectations "2.0.6"]]}}
 
-  :lein-release {:deploy-via :clojars}
+  :lein-release {:deploy-via :clojars
+                 :scm :git}
   :scm {:name "git"
         :url "https://github.com/intronic/ion-torrent-api"}
   :global-vars {*warn-on-reflection* true})
