@@ -84,17 +84,14 @@
   (if-let [bed (plugin-result-target-bed-file pr)]
     (.. (io/as-file bed) getName)))
 
+;; path:        "/results/analysis/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
+;; reportLink:                   "/output/Home/XXX-24-YYY/"
+;; API path:                     "/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
 (defn plugin-result-api-path-prefix
   "Direct path to pluginresult files through API."
   [pr]
   (let [^String path (plugin-result-path pr)
         ^String link (plugin-result-report-link pr)]
-    ;; sample path:
-    ;;   "/results/analysis/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
-    ;; sample reportLink:
-    ;;   "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/"
-    ;; required API path to report files:
-    ;;   "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
     (subs path (.indexOf path link))))
 
 (defn plugin-result-api-path-coverage-amplicon-file
@@ -123,5 +120,3 @@
   "TSVC variant vcf.gz.tbi file path. Barcode is a keyword or string."
   [pr bc]
   (str (plugin-result-api-path-tsvc-variant-file pr bc) ".tbi"))
-
-

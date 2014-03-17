@@ -24,7 +24,8 @@
           "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out"
           (plugin-result-api-path-prefix pr)
 
-          ;; note: this is note a coverage plugin so amplicon path returns nil
+          ;; note: this is note a coverage plugin so amplicon path returns nil,
+          ;; need to test with different plugin-result record
           nil?
           (plugin-result-api-path-coverage-amplicon-file pr "IonXpressRNA_001")
 
