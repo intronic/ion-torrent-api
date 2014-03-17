@@ -9,13 +9,14 @@
 (def creds ["dummy" "dummy"])
 (def host "http://my-intranet-torrent-server.com")
 
-;;; test private functions by accessing value of symbols directly
+;;; utilities
+(expect [{"id" 3} {"id" 2} {"id" 1}] (sort-by-id-desc [{"id" 2} {"id" 1} {"id" 3}]))
+
+;;; Note: test private functions by accessing vars directly
 (expect "abcdef" (#'ion/ensure-starts-with "abc" "def"))
 (expect "abcxabcdef" (#'ion/ensure-starts-with "abc" "xabcdef"))
 (expect "abcdef" (#'ion/ensure-starts-with "abc" "abcdef"))
 
-;;; utilities
-(expect [{"id" 3} {"id" 2} {"id" 1}] (sort-by-id-desc [{"id" 2} {"id" 1} {"id" 3}]))
 
 ;;; Reading from dummy torrent server
 (expect {:status 200}
