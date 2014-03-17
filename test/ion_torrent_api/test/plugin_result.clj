@@ -15,14 +15,28 @@
           209 (plugin-result-id pr)
           "/rundb/api/v1/pluginresult/209/" (plugin-result-uri pr)
           "/rundb/api/v1/results/77/" (plugin-result-result-uri pr)
-          "/results/analysis/output/Home/24_reanalyze_077/plugin_out/variantCaller_out" (plugin-result-path pr)
+
+          "/results/analysis/output/Home/24_reanalyze_077/plugin_out/variantCaller_out"
+          (plugin-result-path pr)
+
+          "/output/Home/24_reanalyze_077/" (plugin-result-report-link pr)
+
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out"
+          (plugin-result-api-path-prefix pr)
+
+          ;; note: this is note a coverage plugin so amplicon path returns nil
+          nil?
+          (plugin-result-api-path-coverage-amplicon-file pr "IonXpressRNA_001")
+
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/"
+          (plugin-result-api-path-tsvc-variant-prefix pr)
+
           #inst "2014-02-17T09:37:51.000879+00:00" (plugin-result-end-time pr)
           #inst "2014-02-17T05:50:42.000089+00:00" (plugin-result-start-time pr)
           "Completed" (plugin-result-status pr)
           "3:47:09.789983" (plugin-result-duration pr)
           "25242564174" (plugin-result-size pr)
           "24_reanalyze" (plugin-result-result-name pr)
-          "/output/Home/24_reanalyze_077/" (plugin-result-report-link pr)
 
           {"versionedName" "variantCaller--v4.0-r76860"
            "config" {}
@@ -92,8 +106,20 @@
 
           "Somatic - Proton - Low Stringency" (plugin-result-configuration pr)
 
-          ;; "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed"
-          ;; (get-in (result-plugin-store r) ["variantCaller" "targets_bed"])
+          "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed"
+          (plugin-result-target-bed-file pr)
+
+          "4477685_Comprehensive_CCP_bedfile_20120517.bed"
+          (plugin-result-target-bed-file-name pr)
+
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/4477685_Comprehensive_CCP_bedfile_20120517.bed"
+          (plugin-result-api-path-tsvc-variant-target-region pr)
+
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/TSVC_variants.vcf.gz"
+          (plugin-result-api-path-tsvc-variant-file pr "IonXpressRNA_001")
+
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/TSVC_variants.vcf.gz.tbi"
+          (plugin-result-api-path-tsvc-variant-tbi-file pr "IonXpressRNA_001")
           )
  (read-string (slurp (uri-to-file "/rundb/api/v1/pluginresult/209/" :edn))))
 

@@ -75,69 +75,53 @@
   [pr]
   (get-in pr ["store" "Configuration"]))
 
-;;; ;;;;;;;;;;;;;;;;;
-;;; paths
+(defn plugin-result-target-bed-file
+  [pr]
+  (get-in pr ["store" "targets_bed"]))
 
-(defn- pluginresult-api-path
-  "API path to pluginresult files."
-  [res]
-  (let [{^String path "path"
-         ^String report-link "reportLink"} res]
+(defn plugin-result-target-bed-file-name
+  [pr]
+  (if-let [bed (plugin-result-target-bed-file pr)]
+    (.. (io/as-file bed) getName)))
+
+(defn plugin-result-api-path-prefix
+  "Direct path to pluginresult files through API."
+  [pr]
+  (let [^String path (plugin-result-path pr)
+        ^String link (plugin-result-report-link pr)]
     ;; sample path:
     ;;   "/results/analysis/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
     ;; sample reportLink:
     ;;   "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/"
     ;; required API path to report files:
     ;;   "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
-    (.substring path (.indexOf path report-link))))
+    (subs path (.indexOf path link))))
 
-(defn bam-path
-  "Return the bam path for a particular barcode based on the result 'bamLink'"
-  [result barcode]
-  (str (result "reportLink") (name barcode) "_rawlib.bam")
-  ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
-  
-  ;; alternatively, more complicated but possibly less assumptions and
-  ;; safer?:-
-  ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
-  #_(let [bam (io/as-file (result "bamLink"))]
-      (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam))))))
-
-(defn bam-bai-path
-  "Return the bam bai path for a particular barcode"
-  [result barcode]
-  (str (bam-path result barcode) ".bai"))
-
-(defn result-pdf-path
-  "Return the path for a result summary PDF"
-  [{id "id"}]
-  (format "/report/latex/%d.pdf" id))
-
-(defn coverage-amplicon-file-path
+(defn plugin-result-api-path-coverage-amplicon-file
   "Coverage by amplicon file path. Barcode is a keyword or string."
-  [cov barcode]
-  (let [prefix (get-in cov ["store" "barcodes" (name barcode) "Alignments"])]
-    (str (pluginresult-api-path cov) "/" (name barcode) "/" prefix ".amplicon.cov.xls")))
+  [pr-cov bc]
+  (if-let [prefix (get-in pr-cov ["store" "barcodes" (name bc) "Alignments"])]
+    (str (plugin-result-api-path-prefix pr-cov) "/" (name bc) "/" prefix ".amplicon.cov.xls")))
 
-(defn tsvc-variant-path-prefix
+(defn plugin-result-api-path-tsvc-variant-prefix
   "TSVC variant path prefix."
-  [res]
-  (str (pluginresult-api-path res) "/"))
+  [pr]
+  (str (plugin-result-api-path-prefix pr) "/"))
 
-(defn tsvc-variant-target-region-path
+(defn plugin-result-api-path-tsvc-variant-target-region
   "Target region bed file path."
-  [res]
-  (if-let [reg (get-in res ["store" "Target Regions"])]
-    (str (tsvc-variant-path-prefix res) reg ".bed")))
+  [pr]
+  (if-let [bed (plugin-result-target-bed-file-name pr)]
+    (str (plugin-result-api-path-tsvc-variant-prefix pr) bed)))
 
-(defn tsvc-variant-file-path
+(defn plugin-result-api-path-tsvc-variant-file
   "TSVC variant vcf.gz file path. Barcode is a keyword or string."
-  [res barcode]
-  (str (tsvc-variant-path-prefix res) (name barcode) "/TSVC_variants.vcf.gz" ))
+  [pr bc]
+  (str (plugin-result-api-path-tsvc-variant-prefix pr) (name bc) "/TSVC_variants.vcf.gz" ))
 
-(defn tsvc-variant-tbi-file-path
+(defn plugin-result-api-path-tsvc-variant-tbi-file
   "TSVC variant vcf.gz.tbi file path. Barcode is a keyword or string."
-  [res barcode]
-  (str (tsvc-variant-file-path res barcode) ".tbi"))
+  [pr bc]
+  (str (plugin-result-api-path-tsvc-variant-file pr bc) ".tbi"))
 
 
