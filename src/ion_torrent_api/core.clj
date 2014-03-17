@@ -85,7 +85,7 @@ host should "
 
 (defn get-result-id
   [creds host id]
-  (get-completed-resource creds host (str "results/" id)))
+  (get-completed-resource creds host (str "results/" id "/")))
 
 (defn get-plugin-result-uri
   [creds host uri]
@@ -93,13 +93,7 @@ host should "
 
 (defn get-plugin-result-id
   [creds host id]
-  (get-completed-resource creds host (str "pluginresult/" id)))
-
-
-
-
-
-;;; get-all-results : get-completed-resource "results/"
+  (get-completed-resource creds host (str "pluginresult/" id "/")))
 
 (defn get-experiment-results
   "List of results that have completed for an experiment and are not thumbnails, returned in most-recent-first order."
