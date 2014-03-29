@@ -120,9 +120,9 @@
 
 (defn plugin-result-api-path-coverage-amplicon-file
   "Coverage by amplicon file path. Barcode is a keyword or string."
-  [pr-cov bc]
-  (if-let [prefix (get-in pr-cov ["store" "barcodes" (name bc) "Alignments"])]
-    (str (plugin-result-api-path-prefix pr-cov) "/" (name bc) "/" prefix ".amplicon.cov.xls")))
+  [pr bc]
+  (if-let [prefix (get-in pr ["store" "barcodes" (name bc) "Alignments"])]
+    (str (plugin-result-api-path-prefix pr) "/" (name bc) "/" prefix ".amplicon.cov.xls")))
 
 (defn plugin-result-api-path-tsvc-variant-prefix
   "TSVC variant path prefix."
