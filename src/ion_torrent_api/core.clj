@@ -36,7 +36,7 @@
   (let [i (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts})))]
     (io/copy i out-stream :buffer-size BUFFER-SIZE)))
 
-(defn- get-resource-file-to-file
+(defn get-resource-file-to-file
   "Get a file from host to local file. Deletes the local file if an exception occurs."
   [creds host file-path dest-file & [opts]]
   (try
