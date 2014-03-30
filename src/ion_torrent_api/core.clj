@@ -21,6 +21,17 @@
   [^String prefix ^String s]
   (if (.startsWith s prefix) s (str prefix s)))
 
+;;;
+(defn newest-variant-caller-plugin-result
+  "Get the newest completed variantCaller if any from a collection of plugin-results."
+  [pr-coll]
+  (some pr/plugin-result-variant-caller? pr-coll))
+
+(defn newest-coverage-plugin-result
+  "Get the newest completed variantCaller if any from a collection of plugin-results."
+  [pr-coll]
+  (some pr/plugin-result-coverage? pr-coll))
+
 ;;; ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Query Torrent Server API
 
