@@ -46,11 +46,16 @@
   [creds host file-path]
   (:body (io! (client/get (str host file-path) {:basic-auth creds}))))
 
+(defn- get-resource-file-as-stream
+  "Get a file from host as a stream."
+  [creds host file-path & [opts]]
+  (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts}))))
+
 (defn- get-resource-file-to-stream
   "Get a file from host and copy to stream."
   [creds host file-path out-stream & [opts]]
-  (let [i (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts})))]
-    (io/copy i out-stream :buffer-size BUFFER-SIZE)))
+  (io/copy (get-resource-file-as-stream creds host file-path opts)
+           out-stream :buffer-size BUFFER-SIZE))
 
 (defn get-resource-file-to-file
   "Get a file from host to local file. Deletes the local file if an exception occurs."
