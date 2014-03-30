@@ -22,6 +22,11 @@
   (if (.startsWith s prefix) s (str prefix s)))
 
 ;;;
+(defn newest-result
+  "Get the newest completed result from a collection of results."
+  [r-coll]
+  (first (sort-by-id-desc r-coll)))
+
 (defn newest-variant-caller-plugin-result
   "Get the newest completed variantCaller if any from a collection of plugin-results."
   [pr-coll]
