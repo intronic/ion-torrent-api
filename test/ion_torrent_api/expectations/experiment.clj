@@ -1,7 +1,7 @@
-(ns ion-torrent-api.test.experiment
+(ns ion-torrent-api.expectations.experiment
   (:require [expectations :refer :all]
             [ion-torrent-api.experiment :refer :all]
-            [ion-torrent-api.test.util :refer :all]
+            [ion-torrent-api.expectations.util :refer :all]
             [clojure.string :as str]))
 
 (expect "bob" (experiment-name {"expName" "bob"}))

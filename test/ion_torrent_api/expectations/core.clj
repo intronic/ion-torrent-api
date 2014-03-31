@@ -1,7 +1,7 @@
-(ns ion-torrent-api.test.core
+(ns ion-torrent-api.expectations.core
   (:require [expectations :refer :all]
             [ion-torrent-api.core :refer :all :as ion]
-            [ion-torrent-api.test.util :refer :all]
+            [ion-torrent-api.expectations.util :refer :all]
             [clj-http.client :as client]
             [clj-http.fake :refer :all]
             [clojure.string :as str]))

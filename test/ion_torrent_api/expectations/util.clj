@@ -1,4 +1,4 @@
-(ns ion-torrent-api.test.util
+(ns ion-torrent-api.expectations.util
   (:require [expectations :refer :all]
             [clojure.string :as str]))
 

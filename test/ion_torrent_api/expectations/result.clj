@@ -1,7 +1,7 @@
-(ns ion-torrent-api.test.result
+(ns ion-torrent-api.expectations.result
   (:require [expectations :refer :all]
             [ion-torrent-api.result :refer :all]
-            [ion-torrent-api.test.util :refer :all]
+            [ion-torrent-api.expectations.util :refer :all]
             [clojure.string :as str]))
 
 (expect
