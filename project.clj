@@ -28,8 +28,6 @@
   :source-paths ["src"]
   :test-paths ["test"]
 
-;;  :jvm-opts [~(str "-Xmx" (* (.getTotalPhysicalMemorySize (java.lang.management.ManagementFactory/getOperatingSystemMXBean)) 1/2))]
-  :jvm-opts [ "-Xmx2g" ]
 
   :profiles {:dev {:dependencies [[expectations "2.0.6"]]}}
 
