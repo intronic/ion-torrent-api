@@ -28,6 +28,7 @@
   :source-paths ["src"]
   :test-paths ["test"]
 
+  :repositories {"snapshots" ~(str "file://" (System/getProperty "user.home") "/clj-repo/snapshots")}
 
   :profiles {:dev {:dependencies [[expectations "2.0.6"]]}}
 
