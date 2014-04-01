@@ -158,14 +158,6 @@ host should "
 ;;; Get Result
 (comment
 
-  (defn get-plugin-result-uri
-    [creds host uri]
-    (get-completed-resource creds host uri))
-
-  (defn get-plugin-result-id
-    [creds host id]
-    (get-completed-resource creds host (str "pluginresult/" id "/")))
-
   (defn get-experiment-results
     "All results for an experiment (completed, not thumbnails), in most-recent-first order."
     [creds host e]
