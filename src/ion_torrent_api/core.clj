@@ -8,6 +8,75 @@
              [result :as r]
              [plugin-result :as pr]]))
 
+(declare get-resource get-completed-resource ensure-starts-with)
+
+(defprotocol TorrentServerAPI
+  "Torrent Server API calls."
+  (experiments [torrent-server] [torrent-server opts] [torrent-server limit offset]
+    "Get experiments (with options 'opts' or by limit and offset).")
+  (experiment [torrent-server name] [torrent-server name opts]
+    "Get experiment by name (with options 'opts').")
+
+  (result [torrent-server id-or-uri] [torrent-server opts id-or-uri]
+    "Get result by id or uri (with options 'opts')."))
+
+(defrecord TorrentServer [server-url creds api-path]
+
+  TorrentServerAPI
+
+  (experiments [torrent-server]
+    (experiments torrent-server {}))
+
+  (experiments [torrent-server limit offset]
+    (experiments torrent-server {"limit" limit "offset" offset }))
+
+  (experiments [torrent-server opts]
+    (get-completed-resource torrent-server "experiment/" (merge {"status__exact" "run"} opts)))
+
+  (experiment [torrent-server name]
+    (experiment torrent-server {} name))
+
+  (experiment [torrent-server opts name]
+    (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
+          (get-completed-resource torrent-server (str "experiment/" name "/")
+                                  (merge opts {"expName__exact" name "status__exact" "run" "limit" 2}))]
+      ;;      (assert (and meta total-count) "Invalid experiment name query response.")
+      ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
+      (first objects)))
+
+  (result [torrent-server id-or-uri]
+    #_(result torrent-server {} id-or-uri)
+    #_(ensure-starts-with (str (:api-path torrent-server) "results/")
+                          (str id-or-uri))
+    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
+                                                               (str id-or-uri))
+                            {}))
+
+  (result [torrent-server opts id-or-uri]
+    (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
+          (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
+                                                                     (str id-or-uri)))]
+      (first objects))))
+
+(defn torrent-server [server-url creds & [api-path]]
+  (map->TorrentServer {:server-url server-url :creds creds :api-path (or api-path "/rundb/api/v1/")}))
+
+
+;;;
+
+(defn- get-resource
+    "Return a JSON resource from host.
+Keys are not coerced to keywords as the JSON keys can have spaces in them which are invalid as keywords and not printable+readable.
+host should "
+    [ts resource & [opts]]
+    (:body (io! (client/get (str (:server-url ts) (ensure-starts-with (:api-path ts) resource))
+                            {:as :json-string-keys :basic-auth (:creds ts) :query-params opts}))))
+
+(defn- get-completed-resource
+  "Get resources with Completed status."
+  [ts resource & [opts]]
+  (get-resource ts resource (assoc opts "status__startswith" "Completed")))
+
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
 
@@ -22,130 +91,97 @@
   (if (.startsWith s prefix) s (str prefix s)))
 
 ;;;
-(defn newest-result
-  "Get the newest completed result from a collection of results."
-  [r-coll]
-  (first (sort-by-id-desc r-coll)))
+(comment
+  (defn newest-result
+    "Get the newest completed result from a collection of results."
+    [r-coll]
+    (first (sort-by-id-desc r-coll)))
 
-(defn newest-variant-caller-plugin-result
-  "Get the newest completed variantCaller if any from a collection of plugin-results."
-  [pr-coll]
-  (some pr/plugin-result-variant-caller? pr-coll))
+  (defn newest-variant-caller-plugin-result
+    "Get the newest completed variantCaller if any from a collection of plugin-results."
+    [pr-coll]
+    (some pr/plugin-result-variant-caller? pr-coll))
 
-(defn newest-coverage-plugin-result
-  "Get the newest completed variantCaller if any from a collection of plugin-results."
-  [pr-coll]
-  (some pr/plugin-result-coverage? pr-coll))
+  (defn newest-coverage-plugin-result
+    "Get the newest completed variantCaller if any from a collection of plugin-results."
+    [pr-coll]
+    (some pr/plugin-result-coverage? pr-coll)))
 
 ;;; ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Query Torrent Server API
-
+(comment
 ;;; generic calls for resources and resource files
-(defn- get-resource-file
-  "Return a file from host."
-  [creds host file-path]
-  (:body (io! (client/get (str host file-path) {:basic-auth creds}))))
+  (defn- get-resource-file
+    "Return a file from host."
+    [creds host file-path]
+    (:body (io! (client/get (str host file-path) {:basic-auth creds}))))
 
-(defn- get-resource-file-as-stream
-  "Get a file from host as a stream."
-  [creds host file-path & [opts]]
-  (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts}))))
+  (defn- get-resource-file-as-stream
+    "Get a file from host as a stream."
+    [creds host file-path & [opts]]
+    (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts}))))
 
-(defn- get-resource-file-to-stream
-  "Get a file from host and copy to stream."
-  [creds host file-path out-stream & [opts]]
-  (io/copy (get-resource-file-as-stream creds host file-path opts)
-           out-stream :buffer-size BUFFER-SIZE))
+  (defn- get-resource-file-to-stream
+    "Get a file from host and copy to stream."
+    [creds host file-path out-stream & [opts]]
+    (io/copy (get-resource-file-as-stream creds host file-path opts)
+             out-stream :buffer-size BUFFER-SIZE))
 
-(defn get-resource-file-to-file
-  "Get a file from host to local file. Deletes the local file if an exception occurs."
-  [creds host file-path dest-file & [opts]]
-  (try
-    (with-open [out (io/output-stream dest-file)]
-      (get-resource-file-to-stream creds host file-path out opts)
-      dest-file)
-    (catch Exception e
-      (io/delete-file dest-file)
-      (throw e))))
-
-(defn- get-resource
-  "Return a JSON resource from host.
-Keys are not coerced to keywords as the JSON keys can have spaces in them which are invalid as keywords and not printable+readable.
-host should "
-  [creds host resource & [opts]]
-  (:body (io! (client/get (str host (ensure-starts-with "/rundb/api/v1/" resource))
-                          {:as :json-string-keys :basic-auth creds :query-params opts}))))
-
-(defn- get-completed-resource
-  "Get resources with Completed status."
-  [creds host resource & [opts]]
-  (get-resource creds host resource (assoc opts "status__startswith" "Completed")))
-
-;;; ;;;;;;;;;;;;;;;;;;;;;;;
-;;; Get Experiment
-
-(defn get-experiment
-  "Experiments that have run. Returns a map of metadata and objects:
-'meta' key lists total_count, limit, offset and next/previos URIs.
-'objects' key containl list of experiment resources."
-  [creds host & [opts]]
-  (get-resource creds host "experiment/" (assoc opts "status__exact" "run")))
-
-(defn get-experiment-name
-  "Get experiment by name."
-  [creds host name & [opts]]
-  (let [res (get-experiment creds host (assoc opts "expName__exact" name))]
-    (first (get res "objects"))))
+  (defn get-resource-file-to-file
+    "Get a file from host to local file. Deletes the local file if an exception occurs."
+    [creds host file-path dest-file & [opts]]
+    (try
+      (with-open [out (io/output-stream dest-file)]
+        (get-resource-file-to-stream creds host file-path out opts)
+        dest-file)
+      (catch Exception e
+        (io/delete-file dest-file)
+        (throw e))))
+)
 
 ;;; ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Get Result
+(comment
 
-(defn get-result-uri
-  [creds host uri]
-  (get-completed-resource creds host uri))
+  (defn get-plugin-result-uri
+    [creds host uri]
+    (get-completed-resource creds host uri))
 
-(defn get-result-id
-  [creds host id]
-  (get-completed-resource creds host (str "results/" id "/")))
+  (defn get-plugin-result-id
+    [creds host id]
+    (get-completed-resource creds host (str "pluginresult/" id "/")))
 
-(defn get-plugin-result-uri
-  [creds host uri]
-  (get-completed-resource creds host uri))
+  (defn get-experiment-results
+    "All results for an experiment (completed, not thumbnails), in most-recent-first order."
+    [creds host e]
+    (->> (e/experiment-result-uri e)
+         (map #(get-result-uri creds host %))
+         (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
+         sort-by-id-desc)))
 
-(defn get-plugin-result-id
-  [creds host id]
-  (get-completed-resource creds host (str "pluginresult/" id "/")))
+(comment
+  (defn get-result-plugin-results
+    "All plugin-results for a result (completed), in most-recent-first order."
+    [creds host r]
+    (->> (r/result-plugin-results r)
+         (map #(get-plugin-result-uri creds host %))
+         sort-by-id-desc))
 
-(defn get-experiment-results
-  "All results for an experiment (completed, not thumbnails), in most-recent-first order."
-  [creds host e]
-  (->> (e/experiment-result-uri e)
-       (map #(get-result-uri creds host %))
-       (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
-       sort-by-id-desc))
+  (defn- get-result-metrics
+    "Sorted list of metrics for a result."
+    [metric-name creds host res]
+    (sort-by-id-desc
+     (map #(get-resource creds host %)
+          (get res metric-name))))
 
-(defn get-result-plugin-results
-  "All plugin-results for a result (completed), in most-recent-first order."
-  [creds host r]
-  (->> (r/result-plugin-results r)
-       (map #(get-plugin-result-uri creds host %))
-       sort-by-id-desc))
+  (def get-result-libmetrics
+    (partial get-result-metrics "libmetrics"))
 
-(defn- get-result-metrics
-  "Sorted list of metrics for a result."
-  [metric-name creds host res]
-  (sort-by-id-desc
-   (map #(get-resource creds host %)
-        (get res metric-name))))
+  (def get-result-qualitymetrics
+    (partial get-result-metrics "qualitymetrics"))
 
-(def get-result-libmetrics
-  (partial get-result-metrics "libmetrics"))
+  (def get-result-analysismetrics
+    (partial get-result-metrics "analysismetrics"))
 
-(def get-result-qualitymetrics
-  (partial get-result-metrics "qualitymetrics"))
-
-(def get-result-analysismetrics
-  (partial get-result-metrics "analysismetrics"))
-
-(def get-result-tfmetrics
-  (partial get-result-metrics "tfmetrics"))
+  (def get-result-tfmetrics
+    (partial get-result-metrics "tfmetrics")))
