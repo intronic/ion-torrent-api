@@ -13,38 +13,38 @@
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
 
-  (experiments [torrent-server] [torrent-server opts] [torrent-server limit offset]
+  (get-experiments [torrent-server] [torrent-server opts] [torrent-server limit offset]
     "Get experiments (with options 'opts' or by limit and offset).")
 
-  (experiment-name [torrent-server name] [torrent-server name opts]
+  (get-experiment-name [torrent-server name] [torrent-server name opts]
     "Get experiment by name (with options 'opts').")
 
-  (experiment [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+  (get-experiment [torrent-server id-or-uri] [torrent-server id-or-uri opts]
     "Get experiment by id or uri (with options 'opts').")
 
-  (result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+  (get-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
     "Get result by id or uri (with options 'opts').")
 
-  (plugin-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+  (get-plugin-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
     "Get plugin-result by id or uri (with options 'opts')."))
 
 (defrecord TorrentServer [server-url creds api-path]
 
   TorrentServerAPI
 
-  (experiments [torrent-server]
-    (experiments torrent-server {}))
+  (get-experiments [torrent-server]
+    (get-experiments torrent-server {}))
 
-  (experiments [torrent-server limit offset]
-    (experiments torrent-server {"limit" limit "offset" offset }))
+  (get-experiments [torrent-server limit offset]
+    (get-experiments torrent-server {"limit" limit "offset" offset }))
 
-  (experiments [torrent-server opts]
+  (get-experiments [torrent-server opts]
     (get-completed-resource torrent-server "experiment/" (merge {"status__exact" "run"} opts)))
 
-  (experiment-name [torrent-server name]
-    (experiment-name torrent-server name {}))
+  (get-experiment-name [torrent-server name]
+    (get-experiment-name torrent-server name {}))
 
-  (experiment-name [torrent-server name opts]
+  (get-experiment-name [torrent-server name opts]
     ;; query by options returns map with "meta" and "objects" keys
     (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
           (get-completed-resource torrent-server "experiment/"
@@ -53,23 +53,23 @@
       ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
       (first objects)))
 
-  (experiment [torrent-server id-or-uri]
-    (experiment torrent-server id-or-uri {}))
+  (get-experiment [torrent-server id-or-uri]
+    (get-experiment torrent-server id-or-uri {}))
 
-  (experiment [torrent-server id-or-uri opts]
+  (get-experiment [torrent-server id-or-uri opts]
     (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "experiment/")
                                                                (str id-or-uri))))
 
-  (result [torrent-server id-or-uri]
-    (result torrent-server id-or-uri {}))
+  (get-result [torrent-server id-or-uri]
+    (get-result torrent-server id-or-uri {}))
 
-  (result [torrent-server id-or-uri opts]
+  (get-result [torrent-server id-or-uri opts]
     (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
                                                                (str id-or-uri))))
-  (plugin-result [torrent-server id-or-uri]
-    (plugin-result torrent-server id-or-uri {}))
+  (get-plugin-result [torrent-server id-or-uri]
+    (get-plugin-result torrent-server id-or-uri {}))
 
-  (plugin-result [torrent-server id-or-uri opts]
+  (get-plugin-result [torrent-server id-or-uri opts]
     (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "pluginresult/")
                                                                (str id-or-uri)))))
 

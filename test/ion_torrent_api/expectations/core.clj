@@ -82,28 +82,28 @@
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                          {:status 200 :headers {"Content-Type" "application/json"}
                                           :body (slurp (uri-to-file uri :json))})}
-                (experiments ts))
+                (get-experiments ts))
              "meta"))
 (expect 20
         (count (get (with-fake-routes-in-isolation
                       {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                {:status 200 :headers {"Content-Type" "application/json"}
                                                 :body (slurp (uri-to-file uri :json))})}
-                      (experiments ts))
+                      (get-experiments ts))
                     "objects")))
 (expect 20
         (count (get (with-fake-routes-in-isolation
                       {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                {:status 200 :headers {"Content-Type" "application/json"}
                                                 :body (slurp (uri-to-file uri :json))})}
-                      (experiments ts {"some" "opts"}))
+                      (get-experiments ts {"some" "opts"}))
                     "objects")))
 (expect 20
         (count (get (with-fake-routes-in-isolation
                       {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                {:status 200 :headers {"Content-Type" "application/json"}
                                                 :body (slurp (uri-to-file uri :json))})}
-                      (experiments ts 20 20))
+                      (get-experiments ts 20 20))
                     "objects")))
 
 ;;; experiment-name
@@ -114,14 +114,14 @@
            {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                     {:status 200 :headers {"Content-Type" "application/json"}
                                      :body (slurp "test/data/rundb/api/v1/experiment/name-XXX-24.json")})}
-           (experiment-name ts "name-XXX-24"))))
+           (get-experiment-name ts "name-XXX-24"))))
 
 (expect {"pgmName" "XXXNPROTON" "expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
         (in (with-fake-routes-in-isolation
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp "test/data/rundb/api/v1/experiment/name-XXX-24.json")})}
-              (experiment-name ts "name-XXX-24"))))
+              (get-experiment-name ts "name-XXX-24"))))
 
 ;;; experiment
 
@@ -130,21 +130,21 @@
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (experiment ts 50))))
+              (get-experiment ts 50))))
 
 (expect {"pgmName" "XXXNPROTON" "expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
         (in (with-fake-routes-in-isolation
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (experiment ts "/rundb/api/v1/experiment/50/"))))
+              (get-experiment ts "/rundb/api/v1/experiment/50/"))))
 
 (expect {"pgmName" "XXXNPROTON" "expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
         (in (with-fake-routes-in-isolation
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (experiment ts "/rundb/api/v1/experiment/50/" {}))))
+              (get-experiment ts "/rundb/api/v1/experiment/50/" {}))))
 
 ;;; result
 
@@ -157,28 +157,28 @@
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (result ts 77))))
+                        (get-result ts 77))))
 
 (expect '("timeToComplete" "resultsName" "tfFastq" "pluginresults" "diskusage" "qualitymetrics" "log" "runid" "reportStatus" "analysismetrics" "reportstorage" "bamLink" "framesProcessed" "reference" "sffLink" "pluginStore" "parentIDs" "autoExempt" "planShortID" "reportLink" "fastqLink" "metaData" "resultsType" "filesystempath" "tfmetrics" "status" "timeStamp" "processedflows" "eas" "projects" "tfSffLink" "id" "processedCycles" "resource_uri" "analysisVersion" "representative" "experiment" "pluginState" "libmetrics")
                 (keys (with-fake-routes-in-isolation
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (result ts 77 {}))))
+                        (get-result ts 77 {}))))
 
 (expect '("timeToComplete" "resultsName" "tfFastq" "pluginresults" "diskusage" "qualitymetrics" "log" "runid" "reportStatus" "analysismetrics" "reportstorage" "bamLink" "framesProcessed" "reference" "sffLink" "pluginStore" "parentIDs" "autoExempt" "planShortID" "reportLink" "fastqLink" "metaData" "resultsType" "filesystempath" "tfmetrics" "status" "timeStamp" "processedflows" "eas" "projects" "tfSffLink" "id" "processedCycles" "resource_uri" "analysisVersion" "representative" "experiment" "pluginState" "libmetrics")
                 (keys (with-fake-routes-in-isolation
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (result ts 77 {}))))
+                        (get-result ts 77 {}))))
 
 (expect '("timeToComplete" "resultsName" "tfFastq" "pluginresults" "diskusage" "qualitymetrics" "log" "runid" "reportStatus" "analysismetrics" "reportstorage" "bamLink" "framesProcessed" "reference" "sffLink" "pluginStore" "parentIDs" "autoExempt" "planShortID" "reportLink" "fastqLink" "metaData" "resultsType" "filesystempath" "tfmetrics" "status" "timeStamp" "processedflows" "eas" "projects" "tfSffLink" "id" "processedCycles" "resource_uri" "analysisVersion" "representative" "experiment" "pluginState" "libmetrics")
                 (keys (with-fake-routes-in-isolation
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (result ts "/rundb/api/v1/results/77/"))))
+                        (get-result ts "/rundb/api/v1/results/77/"))))
 
 ;;; plugin-result
 
@@ -188,7 +188,7 @@
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (plugin-result ts 209{}))))
+                        (get-plugin-result ts 209{}))))
 
 (expect ["size" "store" "config" "path" "resultName" "endtime" "inodes" "reportLink" "starttime" "state"
          "owner" "plugin" "duration" "jobid" "id" "resource_uri" "result"]
@@ -196,7 +196,7 @@
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (plugin-result ts 209 {}))))
+                        (get-plugin-result ts 209 {}))))
 
 (expect ["size" "store" "config" "path" "resultName" "endtime" "inodes" "reportLink" "starttime" "state"
          "owner" "plugin" "duration" "jobid" "id" "resource_uri" "result"]
@@ -204,4 +204,4 @@
                         {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                  {:status 200 :headers {"Content-Type" "application/json"}
                                                   :body (slurp (uri-to-file uri :json))})}
-                        (plugin-result ts "/rundb/api/v1/pluginresult/209/"))))
+                        (get-plugin-result ts "/rundb/api/v1/pluginresult/209/"))))
