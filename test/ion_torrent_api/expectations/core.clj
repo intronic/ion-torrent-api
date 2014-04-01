@@ -24,6 +24,8 @@
                                             :api-path "/rundb/api/v1/", :creds ["user" "pass"]}
                 ts)
 
+(expect "/rundb/api/v1/" (:api-path ts))
+
 ;;; Reading from dummy torrent server
 (expect {:status 200 :body "12345"}
         (in (with-fake-routes-in-isolation
@@ -119,7 +121,6 @@
                                         :body (slurp "test/data/rundb/api/v1/experiment/name-XXX-24.json")})}
               (experiment-name ts "name-XXX-24"))))
 
-(expect "/rundb/api/v1/" (:api-path ts))
 
 (expect "/rundb/api/v1/results/77"
         (let [id-or-uri 77] (#'ion/ensure-starts-with (str (:api-path ts) "results/")
