@@ -14,7 +14,9 @@
   "Torrent Server API calls."
   (experiments [torrent-server] [torrent-server opts] [torrent-server limit offset]
     "Get experiments (with options 'opts' or by limit and offset).")
-  (experiment [torrent-server name] [torrent-server name opts]
+  (experiment [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+    "Get experiment by id or uri (with options 'opts').")
+  (experiment-name [torrent-server name] [torrent-server name opts]
     "Get experiment by name (with options 'opts').")
 
   (result [torrent-server id-or-uri] [torrent-server opts id-or-uri]
@@ -33,30 +35,32 @@
   (experiments [torrent-server opts]
     (get-completed-resource torrent-server "experiment/" (merge {"status__exact" "run"} opts)))
 
-  (experiment [torrent-server name]
-    (experiment torrent-server {} name))
+  (experiment [torrent-server id-or-uri]
+    (experiment torrent-server id-or-uri {}))
 
-  (experiment [torrent-server opts name]
+  (experiment [torrent-server id-or-uri opts]
+    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "experiment/")
+                                                               (str id-or-uri))))
+
+  (experiment-name [torrent-server name]
+    (experiment-name torrent-server name {}))
+
+  (experiment-name [torrent-server name opts]
+    ;; query by options returns map with "meta" and "objects" keys
     (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (get-completed-resource torrent-server (str "experiment/" name "/")
+          (get-completed-resource torrent-server "experiment/"
                                   (merge opts {"expName__exact" name "status__exact" "run" "limit" 2}))]
       ;;      (assert (and meta total-count) "Invalid experiment name query response.")
       ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
       (first objects)))
 
+
   (result [torrent-server id-or-uri]
-    #_(result torrent-server {} id-or-uri)
-    #_(ensure-starts-with (str (:api-path torrent-server) "results/")
-                          (str id-or-uri))
-    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
-                                                               (str id-or-uri))
-                            {}))
+    (result torrent-server {} id-or-uri))
 
   (result [torrent-server opts id-or-uri]
-    (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
-                                                                     (str id-or-uri)))]
-      (first objects))))
+    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
+                                                               (str id-or-uri)))))
 
 (defn torrent-server [server-url creds & [api-path]]
   (map->TorrentServer {:server-url server-url :creds creds :api-path (or api-path "/rundb/api/v1/")}))
