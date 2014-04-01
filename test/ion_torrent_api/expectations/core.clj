@@ -121,6 +121,29 @@
                                         :body (slurp "test/data/rundb/api/v1/experiment/name-XXX-24.json")})}
               (experiment-name ts "name-XXX-24"))))
 
+(expect {"pgmName" "XXXNPROTON" "expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (experiment ts 50))))
+
+(expect {"pgmName" "XXXNPROTON" "expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (experiment ts "/rundb/api/v1/experiment/50/"))))
+
+(expect {"pgmName" "XXXNPROTON" "expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (experiment ts "/rundb/api/v1/experiment/50/" {}))))
+
+
+;;; results
 
 (expect "/rundb/api/v1/results/77"
         (let [id-or-uri 77] (#'ion/ensure-starts-with (str (:api-path ts) "results/")
