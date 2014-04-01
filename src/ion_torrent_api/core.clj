@@ -12,14 +12,17 @@
 
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
+
   (experiments [torrent-server] [torrent-server opts] [torrent-server limit offset]
     "Get experiments (with options 'opts' or by limit and offset).")
+
   (experiment [torrent-server id-or-uri] [torrent-server id-or-uri opts]
     "Get experiment by id or uri (with options 'opts').")
+
   (experiment-name [torrent-server name] [torrent-server name opts]
     "Get experiment by name (with options 'opts').")
 
-  (result [torrent-server id-or-uri] [torrent-server opts id-or-uri]
+  (result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
     "Get result by id or uri (with options 'opts')."))
 
 (defrecord TorrentServer [server-url creds api-path]
@@ -56,9 +59,9 @@
 
 
   (result [torrent-server id-or-uri]
-    (result torrent-server {} id-or-uri))
+    (result torrent-server id-or-uri {}))
 
-  (result [torrent-server opts id-or-uri]
+  (result [torrent-server id-or-uri opts]
     (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
                                                                (str id-or-uri)))))
 
