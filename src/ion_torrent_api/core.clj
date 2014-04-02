@@ -107,6 +107,17 @@
     (apply ->Result (concat (map (partial get json) main-keys)
                             [(apply dissoc json main-keys)]))))
 
+;;; PluginResult record
+
+(defrecord PluginResult [id uri result-uri result-name state plugin-map store-map
+                         path start-time end-time report-link raw-map])
+
+(defn plugin-result [json]
+  (let [main-keys ["id" "resource_uri" "result" "resultName" "state" "plugin" "store"
+                   "path" "starttime" "endtime" "reportLink"]]
+    (apply ->PluginResult (concat (map (partial get json) main-keys)
+                            [(apply dissoc json main-keys)]))))
+
 
 ;;;
 
