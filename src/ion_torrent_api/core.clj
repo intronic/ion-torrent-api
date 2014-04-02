@@ -147,6 +147,35 @@ host should "
   [ts resource & [opts]]
   (get-resource ts resource (assoc opts "status__startswith" "Completed")))
 
+
+(comment
+  (defn get-result-plugin-results
+    "All plugin-results for a result (completed), in most-recent-first order."
+    [creds host r]
+    (->> (r/result-plugin-results r)
+         (map #(get-plugin-result-uri creds host %))
+         sort-by-id-desc))
+
+  (defn- get-result-metrics
+    "Sorted list of metrics for a result."
+    [metric-name creds host res]
+    (sort-by-id-desc
+     (map #(get-resource creds host %)
+          (get res metric-name))))
+
+  (def get-result-libmetrics
+    (partial get-result-metrics "libmetrics"))
+
+  (def get-result-qualitymetrics
+    (partial get-result-metrics "qualitymetrics"))
+
+  (def get-result-analysismetrics
+    (partial get-result-metrics "analysismetrics"))
+
+  (def get-result-tfmetrics
+    (partial get-result-metrics "tfmetrics")))
+
+
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
 
@@ -227,28 +256,4 @@ host should "
          sort-by-id-desc)))
 
 (comment
-  (defn get-result-plugin-results
-    "All plugin-results for a result (completed), in most-recent-first order."
-    [creds host r]
-    (->> (r/result-plugin-results r)
-         (map #(get-plugin-result-uri creds host %))
-         sort-by-id-desc))
-
-  (defn- get-result-metrics
-    "Sorted list of metrics for a result."
-    [metric-name creds host res]
-    (sort-by-id-desc
-     (map #(get-resource creds host %)
-          (get res metric-name))))
-
-  (def get-result-libmetrics
-    (partial get-result-metrics "libmetrics"))
-
-  (def get-result-qualitymetrics
-    (partial get-result-metrics "qualitymetrics"))
-
-  (def get-result-analysismetrics
-    (partial get-result-metrics "analysismetrics"))
-
-  (def get-result-tfmetrics
-    (partial get-result-metrics "tfmetrics")))
+)
