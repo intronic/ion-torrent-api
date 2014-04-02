@@ -272,3 +272,60 @@
                                     {:status 200 :headers {"Content-Type" "application/json"}
                                      :body (slurp (uri-to-file uri :json))})}
            (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/209/")))))
+
+;;; Results for one experiment
+
+(expect [#inst "2013-07-23T00:32:14.000226000+00:00"
+                 ["/rundb/api/v1/results/77/" "/rundb/api/v1/results/61/" "/rundb/api/v1/results/62/"]]
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          ((juxt :latest-result-date :result-uri-set) (experiment (get-experiment ts 50)))))
+
+(expect [77 "/rundb/api/v1/experiment/50/" "Completed"
+                 ["/rundb/api/v1/pluginresult/209/" "/rundb/api/v1/pluginresult/89/"]
+                 {"IonReporterUploader" "Completed", "variantCaller" "Completed"}
+                 #inst "2013-07-23T05:18:31.000209000-00:00"]
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          ((juxt :id :experiment-uri :status :plugin-result-uri-set :plugin-state-map :timestamp)
+           (result (get-result ts "/rundb/api/v1/results/77/")))))
+
+(expect [62 "/rundb/api/v1/experiment/50/" "Completed"
+                 ["/rundb/api/v1/pluginresult/60/"]
+         {"Alignment" "Completed"}
+         #inst "2013-06-04T06:12:35.000941000+00:00"]
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          ((juxt :id :experiment-uri :status :plugin-result-uri-set :plugin-state-map :timestamp)
+           (result (get-result ts "/rundb/api/v1/results/62/")))))
+
+(expect [61 "/rundb/api/v1/experiment/50/" "Completed"
+         ["/rundb/api/v1/pluginresult/71/", "/rundb/api/v1/pluginresult/66/", "/rundb/api/v1/pluginresult/61/"]
+         {"IonReporterUploader" "Completed", "coverageAnalysis" "Completed", "variantCaller" "Completed"}
+         #inst "2013-06-04T12:26:33.000330000+00:00"]
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          ((juxt :id :experiment-uri :status :plugin-result-uri-set :plugin-state-map :timestamp)
+           (result (get-result ts "/rundb/api/v1/results/61/")))))
+
+;;; the result with the newest timestamp
+(expect [[#inst "2013-07-23T00:32:14.000226000+00:00" #inst "2013-06-03T13:31:54+00:00"]
+                 #inst "2013-07-23T05:18:31.000209000+00:00"
+                 #inst "2013-06-04T06:12:35.000941000+00:00"
+                 #inst "2013-06-04T12:26:33.000330000+00:00"]
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          [((juxt :latest-result-date :date) (experiment (get-experiment ts 50)))
+           (:timestamp (result (get-result ts "/rundb/api/v1/results/77/")))
+           (:timestamp (result (get-result ts "/rundb/api/v1/results/62/")))
+           (:timestamp (result (get-result ts "/rundb/api/v1/results/61/")))]))
