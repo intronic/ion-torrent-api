@@ -98,7 +98,7 @@
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
-                   timestamp raw-map])
+                   timestamp thumbnail? raw-map])
 
 (defn result [json]
   (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status"
@@ -107,6 +107,7 @@
                    "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
     (apply ->Result (concat (map (partial get json) main-keys)
                             [(inst/read-instant-timestamp (get json "timeStamp"))
+                             (boolean (get-in json ["metaData" "thumb"]))
                              (apply dissoc json main-keys)]))))
 
 ;;; PluginResult record
