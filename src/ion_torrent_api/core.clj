@@ -88,6 +88,21 @@
     (apply ->Experiment (concat (map (partial get json) main-keys)
                                 [(apply dissoc json "log" main-keys)]))))
 
+;;;  Result record
+
+(defrecord Result [id name uri experiment-uri status timestamp
+                   plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
+                   bam-link fastq-link report-link filesystem-path reference
+                   lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set raw-map])
+
+(defn result [json]
+  (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status" "timeStamp"
+                   "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
+                   "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
+                   "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
+    (apply ->Result (concat (map (partial get json) main-keys)
+                            [(apply dissoc json main-keys)]))))
+
 
 ;;;
 
