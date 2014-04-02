@@ -94,18 +94,20 @@
 
 ;;;  Result record
 
-(defrecord Result [id name uri experiment-uri status timestamp
+(defrecord Result [id name uri experiment-uri status
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
-                   lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set raw-map])
+                   lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
+                   timestamp raw-map])
 
 (defn result [json]
-  (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status" "timeStamp"
+  (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status"
                    "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
                    "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
                    "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
     (apply ->Result (concat (map (partial get json) main-keys)
-                            [(apply dissoc json main-keys)]))))
+                            [(inst/read-instant-timestamp (get json "timeStamp"))
+                             (apply dissoc json main-keys)]))))
 
 ;;; PluginResult record
 
