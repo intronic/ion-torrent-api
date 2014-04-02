@@ -317,7 +317,7 @@
            (result (get-result ts "/rundb/api/v1/results/61/")))))
 
 ;;; the result with the newest timestamp
-(expect [[#inst "2013-07-23T00:32:14.000226000+00:00" #inst "2013-06-03T13:31:54+00:00"]
+(expect [[#inst "2013-07-23T00:32:14.000226000+00:00" #inst "2013-06-03T13:31:54.000000000-00:00"]
                  #inst "2013-07-23T05:18:31.000209000+00:00"
                  #inst "2013-06-04T06:12:35.000941000+00:00"
                  #inst "2013-06-04T12:26:33.000330000+00:00"]
@@ -329,3 +329,40 @@
            (:timestamp (result (get-result ts "/rundb/api/v1/results/77/")))
            (:timestamp (result (get-result ts "/rundb/api/v1/results/62/")))
            (:timestamp (result (get-result ts "/rundb/api/v1/results/61/")))]))
+
+(expect
+ [[;; one result has timestamp after experiment latest-result-date
+   ;; the same result is only one that has plugin start-times after
+   ;; eg: result, and pluginresults must have ids that are numerically later,
+   ;; and dates that are later than experiment latest-result-date
+   #inst "2013-07-23T00:32:14.000226000-00:00" #inst "2013-06-03T13:31:54.000000000-00:00"]
+  ;; plugin start dates after result timestamp
+  #inst "2013-07-23T05:18:31.000209000-00:00"
+  [#inst "2014-02-17T05:50:42.000089000-00:00" #inst "2014-02-17T09:37:51.000879000-00:00"]
+  [#inst "2013-07-30T13:50:08.000084000-00:00" #inst "2013-07-30T13:50:55.000586000-00:00"]
+  ;; plugin start dates after result timestamp
+  #inst "2013-06-04T06:12:35.000941000-00:00"
+  [#inst "2013-06-05T00:43:52.000099000-00:00" #inst "2013-06-05T01:00:02.000682000-00:00"]
+  ;; plugin start dates after result timestamp
+  #inst "2013-06-04T12:26:33.000330000-00:00"
+  [#inst "2013-07-04T14:14:01.000083000-00:00" #inst "2013-07-04T14:16:23.000038000-00:00"]
+  [#inst "2013-06-07T05:01:28.000148000-00:00" #inst "2013-06-07T10:39:24.000736000-00:00"]
+  [#inst "2013-06-05T01:00:04.000082000-00:00" #inst "2013-06-05T09:59:00.000684000-00:00"]]
+ (with-fake-routes-in-isolation
+   {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                            {:status 200 :headers {"Content-Type" "application/json"}
+                             :body (slurp (uri-to-file uri :json))})}
+   [((juxt :latest-result-date :date) (experiment (get-experiment ts 50)))
+    (:timestamp (result (get-result ts "/rundb/api/v1/results/77/")))
+    ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/209/")))
+    ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/89/")))
+    (:timestamp (result (get-result ts "/rundb/api/v1/results/62/")))
+    ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/60/")))
+    (:timestamp (result (get-result ts "/rundb/api/v1/results/61/")))
+    ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/71/")))
+    ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/66/")))
+    ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/61/")))
+    ]))
+
+
+
