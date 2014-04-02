@@ -76,6 +76,18 @@
 (defn torrent-server [server-url creds & [api-path]]
   (map->TorrentServer {:server-url server-url :creds creds :api-path (or api-path "/rundb/api/v1/")}))
 
+;;; Experiment record
+
+(defrecord Experiment [id name pgm-name display-name uri date run-type chip-type sample-map
+                       latest-result-date result-uri-set dir status ftp-status raw-map])
+
+(defn experiment [json]
+  (let [main-keys ["id" "expName" "pgmName" "displayName" "resource_uri"
+                   "date" "runtype" "chipType" "samples" "resultDate"
+                   "results" "expDir" "status" "ftpStatus"]]
+    (apply ->Experiment (concat (map (partial get json) main-keys)
+                                [(apply dissoc json "log" main-keys)]))))
+
 
 ;;;
 
