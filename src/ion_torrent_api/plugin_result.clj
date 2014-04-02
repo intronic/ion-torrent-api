@@ -18,23 +18,6 @@
     [pr]
     (= "variantCaller" (plugin-result-plugin-name pr)))
 
-  (defn plugin-result-barcodes
-    "Return a sorted list of barcodes for the plugin result."
-    [pr]
-    (sort (keys (get-in pr ["store" "barcodes"]))))
-
-  (defn plugin-result-barcode-counts
-    [pr]
-    (get-in pr ["store" "barcodes"]))
-
-  (defn plugin-result-configuration
-    [pr]
-    (get-in pr ["store" "Configuration"]))
-
-  (defn plugin-result-target-bed-file
-    [pr]
-    (get-in pr ["store" "targets_bed"]))
-
   (defn plugin-result-target-bed-file-name
     [pr]
     (if-let [bed (plugin-result-target-bed-file pr)]
