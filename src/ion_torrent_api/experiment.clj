@@ -1,32 +1,9 @@
 (ns ion-torrent-api.experiment
   (:require [clojure.java.io :as io]
             [clojure.instant :as inst]))
+
+
 (comment
-  (defprotocol UniqueID
-    "Unique Identifier"
-    (unique-id [this]))
-
-
-
-
-  (defrecord Experiment id name pgm-name display-name uri date run-type chip-type
-             sample-map latest-result-date result-uri-set dir status ftp-status raw-map
-             url)
-
-  (defn experiment
-    ([torrent-server name]
-       (experiment (get-experiment torrent-server
-                                   )))
-
-    ([api-map]
-       (let [main-keys ["id" "expName" "pgmName" "displayName" "resource_uri"
-                        "date" "runtype" "chipType" "samples" "resultDate"
-                        "results" "expDir" "status" "ftpStatus"]]
-         (apply ->Experiment (concat (map (partial get api-map) main-keys)
-                                     [(apply dissoc api-map "log" main-keys)])))))
-
-  (defn experiment-get
-    [])
   (defn experiment-run?
     [e]
     (= "run" (experiment-status e)))
