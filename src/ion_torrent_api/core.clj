@@ -112,9 +112,7 @@
 (defrecord PluginResult [id uri result-uri result-name state path report-link
                          name version versioned-name
                          library-type config-desc barcode-map target-name target-bed experiment-name
-                         barcoded? trimmed-reads? start-time end-time raw-map]
-;   end-time raw-map
-  )
+                         barcoded? trimmed-reads? start-time end-time raw-map])
 
 (defn plugin-result [json]
   (let [main-keys ["id" "resource_uri" "result" "resultName" "state"
