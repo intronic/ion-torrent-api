@@ -109,14 +109,21 @@
 
 ;;; PluginResult record
 
-(defrecord PluginResult [id uri result-uri result-name state plugin-map store-map
-                         path report-link name version versioned-name start-time end-time raw-map])
+(defrecord PluginResult [id uri result-uri result-name state path report-link
+                         name version versioned-name
+                         library-type config-desc barcode-map target-name target-bed experiment-name
+                         barcoded? trimmed-reads? start-time end-time raw-map]
+;   end-time raw-map
+  )
 
 (defn plugin-result [json]
-  (let [main-keys ["id" "resource_uri" "result" "resultName" "state" "plugin" "store"
+  (let [main-keys ["id" "resource_uri" "result" "resultName" "state"
                    "path" "reportLink"]]
     (apply ->PluginResult (concat (map (partial get json) main-keys)
-                                  (map (partial get-in json) [["plugin" "name"] ["plugin" "version"] ["plugin" "versionedName"]])
+                                  (map (partial get (get json "plugin")) ["name" "version" "versionedName"])
+                                  (map (partial get (get json "store")) ["Library Type" "Configuration" "barcodes" "Target Regions"
+                                                                   "targets_bed" "Aligned Reads"])
+                                  (map (comp (partial = "true") (partial get (get json "store"))) ["barcoded" "Trim Reads"])
                                   [(inst/read-instant-timestamp (get json "starttime"))
                                    (inst/read-instant-timestamp (get json "endtime"))
                                    (apply dissoc json main-keys)]))))
