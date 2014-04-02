@@ -158,6 +158,11 @@ host should "
   [^String prefix ^String s]
   (if (.startsWith s prefix) s (str prefix s)))
 
+(defn file-name
+  "File name without path."
+    [f]
+    (.. (io/as-file f) getName))
+
 ;;;
 (comment
   (defn newest-result

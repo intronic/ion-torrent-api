@@ -26,6 +26,9 @@
 
 (expect "/rundb/api/v1/" (:api-path ts))
 
+(expect "f1" (file-name "/path/to/f1"))
+(expect "f1.bed" (file-name "/path/../to//f1.bed"))
+
 ;;; Reading from dummy torrent server
 (expect {:status 200 :body "12345"}
         (in (with-fake-routes-in-isolation
