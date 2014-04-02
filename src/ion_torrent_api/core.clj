@@ -28,6 +28,10 @@
   (get-plugin-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
     "Get plugin-result by id or uri (with options 'opts')."))
 
+(defprotocol UniqueID
+    "Unique Identifier"
+    (unique-id [this]))
+
 (defrecord TorrentServer [server-url creds api-path]
 
   TorrentServerAPI
