@@ -396,3 +396,28 @@
                           ;; experiment was first
                           (:date (experiment (get-experiment ts 50)))
                           ])))))
+
+;;; check read and write are equivalent
+(expect-let [e (with-fake-routes-in-isolation
+                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                          {:status 200 :headers {"Content-Type" "application/json"}
+                                           :body (slurp (uri-to-file uri :json))})}
+                 (experiment (get-experiment ts 50)))]
+            e
+            (map->Experiment (read-string (pr-str e))))
+
+(expect-let [r (with-fake-routes-in-isolation
+                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                          {:status 200 :headers {"Content-Type" "application/json"}
+                                           :body (slurp (uri-to-file uri :json))})}
+                 (result (get-result ts 77)))]
+            r
+            (map->Result (read-string (pr-str r))))
+
+(expect-let [x (with-fake-routes-in-isolation
+                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                          {:status 200 :headers {"Content-Type" "application/json"}
+                                           :body (slurp (uri-to-file uri :json))})}
+                 (plugin-result (get-plugin-result ts 209)))]
+            x
+            (map->PluginResult (read-string (pr-str x))))
