@@ -83,16 +83,17 @@
 ;;; Experiment record
 
 (defrecord Experiment [id name pgm-name display-name uri run-type chip-type sample-map
-                       result-uri-set dir status ftp-status date latest-result-date raw-map]
+                       result-uri-set dir status ftp-status barcode-map date latest-result-date raw-map]
   Object
   (toString [this] (pr-str this)))
 
 (defn experiment [json]
   (let [main-keys ["id" "expName" "pgmName" "displayName" "resource_uri"
-                   "runtype" "chipType" "samples" 
+                   "runtype" "chipType" "samples"
                    "results" "expDir" "status" "ftpStatus"]]
     (apply ->Experiment (concat (map (partial get json) main-keys)
-                                [(inst/read-instant-date (get json "date"))
+                                [(apply merge (map #(get % "barcodedSamples") (get json "eas_set")))
+                                 (inst/read-instant-date (get json "date"))
                                  (inst/read-instant-date (get json "resultDate"))
                                  (apply dissoc json "log" main-keys)]))))
 
