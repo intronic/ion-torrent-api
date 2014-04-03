@@ -8,7 +8,7 @@
              [result :as r]
              [plugin-result :as pr]]))
 
-(declare get-resource get-completed-resource ensure-starts-with)
+(declare get-resource get-completed-resource ensure-starts-with barcode-eas-map)
 
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
@@ -83,7 +83,7 @@
 ;;; Experiment record
 
 (defrecord Experiment [id name pgm-name display-name uri run-type chip-type sample-map
-                       result-uri-set dir status ftp-status barcode-map date latest-result-date raw-map]
+                       result-uri-set dir status ftp-status barcode-sample-map date latest-result-date raw-map]
   Object
   (toString [this] (pr-str this)))
 
@@ -94,10 +94,7 @@
     (assert (<= 0 (count (get json "eas_set")) 1) "Zero or one EAS set expected.")
     (apply ->Experiment (concat (map (partial get json) main-keys)
                                 ;; for now, work with one label per barcode and one eas_set per experiment
-                                [(into {} (map (fn [[label {bc "barcodes"}]]
-                                                 (assert (= 1 (count bc)) "Exactly 1 barcode per sample expected.")
-                                                 [(first bc) label])
-                                               (get (first (get json "eas_set")) "barcodedSamples")))
+                                [(barcode-eas-map (get (first (get json "eas_set")) "barcodedSamples"))
                                  (inst/read-instant-date (get json "date"))
                                  (inst/read-instant-date (get json "resultDate"))
                                  (apply dissoc json "log" main-keys)]))))
@@ -148,6 +145,13 @@
   {'ion_torrent_api.core.Experiment ion-torrent-api.core/map->Experiment
    'ion_torrent_api.core.Result ion-torrent-api.core/map->Result
    'ion_torrent_api.core.PluginResult ion-torrent-api.core/map->PluginResult})
+
+(defn- barcode-eas-map [m]
+  (into {} (map (fn [[label {bc "barcodes"}]]
+                 (assert (= 1 (count bc)) "Exactly 1 barcode per sample expected.")
+                 [(first bc) label])
+                m)))
+
 
 
 ;;;
