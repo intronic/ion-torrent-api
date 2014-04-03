@@ -542,3 +542,11 @@
             true
             (> (.getTime ^java.util.Date (:timestamp r155))
                (.getTime ^java.util.Date (:timestamp r156))))
+
+;;; borcode map is empty for plugin-result 251 which comes from result 155
+(expect nil
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (:barcode-map (plugin-result (get-plugin-result ts 251)))))
