@@ -421,3 +421,27 @@
                  (plugin-result (get-plugin-result ts 209)))]
             x
             (map->PluginResult (read-string (pr-str x))))
+
+;;; now testing data-readers / toString round-trip
+
+(expect #ion_torrent_api.core.Experiment{:id 9999}
+        (edn/read-string {:readers data-readers}
+                         (str (map->Experiment { :id 9999}))))
+
+;;; with all fields specified
+(expect #ion_torrent_api.core.Experiment{:id 9999, :name nil, :pgm-name nil, :display-name nil, :uri nil, :run-type nil, :chip-type nil, :sample-map nil, :result-uri-set nil, :dir nil, :status nil, :ftp-status nil, :date nil, :latest-result-date nil, :raw-map nil}
+        (edn/read-string {:readers data-readers}
+                         (str (map->Experiment { :id 9999}))))
+
+(expect #ion_torrent_api.core.Result{:id 99999}
+        (edn/read-string {:readers data-readers}
+                         (str (map->Result { :id 99999}))))
+
+(expect #ion_torrent_api.core.Result{:id 99999, :name nil, :uri nil, :experiment-uri nil, :status nil, :plugin-result-uri-set nil, :plugin-state-map nil, :analysis-version nil, :report-status nil, :plugin-store-map nil, :bam-link nil, :fastq-link nil, :report-link nil, :filesystem-path nil, :reference nil, :lib-metrics-uri-set nil, :tf-metrics-uri-set nil, :analysis-metrics-uri-set nil, :quality-metrics-uri-set nil, :timestamp nil, :thumbnail? nil, :raw-map nil} 
+        (edn/read-string {:readers data-readers}
+                         (str (map->Result { :id 99999}))))
+
+(expect #ion_torrent_api.core.PluginResult{:id 999, :uri nil, :result-uri nil, :result-name nil, :state nil, :path nil, :report-link nil, :name nil, :version nil, :versioned-name nil, :library-type nil, :config-desc nil, :barcode-map nil, :target-name nil, :target-bed nil, :experiment-name nil, :trimmed-reads? nil, :barcoded? nil, :start-time nil, :end-time nil, :raw-map nil}
+        (edn/read-string {:readers data-readers}
+                         (str (map->PluginResult {:id 999}))))
+
