@@ -4,8 +4,7 @@
             [ion-torrent-api.expectations.util :refer :all]
             [clj-http.client :as client]
             [clj-http.fake :refer :all]
-            [clojure.string :as str])
-  #_(:import [ion-torrent-api.core TorrentServer]))
+            [clojure [string :as str] [edn :as edn]]))
 
 (def creds ["user" "pass"])
 (def host "http://my-intranet-torrent-server.com")
