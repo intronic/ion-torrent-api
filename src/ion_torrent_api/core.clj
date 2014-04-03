@@ -90,8 +90,8 @@
                    "runtype" "chipType" "samples" 
                    "results" "expDir" "status" "ftpStatus"]]
     (apply ->Experiment (concat (map (partial get json) main-keys)
-                                [(inst/read-instant-timestamp (get json "date"))
-                                 (inst/read-instant-timestamp (get json "resultDate"))
+                                [(inst/read-instant-date (get json "date"))
+                                 (inst/read-instant-date (get json "resultDate"))
                                  (apply dissoc json "log" main-keys)]))))
 
 ;;;  Result record
@@ -108,7 +108,7 @@
                    "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
                    "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
     (apply ->Result (concat (map (partial get json) main-keys)
-                            [(inst/read-instant-timestamp (get json "timeStamp"))
+                            [(inst/read-instant-date (get json "timeStamp"))
                              (boolean (get-in json ["metaData" "thumb"]))
                              (apply dissoc json main-keys)]))))
 
@@ -127,8 +127,8 @@
                                   (map (partial get (get json "store")) ["Library Type" "Configuration" "barcodes" "Target Regions"
                                                                    "targets_bed" "Aligned Reads" "Trim Reads"])
                                   [(.equalsIgnoreCase "true" (get-in json ["store" "barcoded"])) ; string -> boolean
-                                   (inst/read-instant-timestamp (get json "starttime"))
-                                   (inst/read-instant-timestamp (get json "endtime"))
+                                   (inst/read-instant-date (get json "starttime"))
+                                   (inst/read-instant-date (get json "endtime"))
                                    (apply dissoc json main-keys)]))))
 
 
