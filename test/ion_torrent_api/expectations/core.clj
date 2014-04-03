@@ -373,7 +373,7 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (map (partial apply >)
                (partition
-                2 1 (map #(.getTime %)
+                2 1 (map #(.getTime ^java.util.Date %)
                          [(:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/209/")))
                           (:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/89/")))
                           (:timestamp (result (get-result ts "/rundb/api/v1/results/77/")))
