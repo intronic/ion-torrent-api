@@ -123,7 +123,7 @@
 
 (defrecord PluginResult [id uri result-uri result-name state path report-link
                          name version versioned-name
-                         library-type config-desc barcode-map target-name target-bed experiment-name
+                         library-type config-desc barcode-result-map target-name target-bed experiment-name
                          trimmed-reads? barcoded? start-time end-time raw-map]
   Object
   (toString [this] (pr-str this)))
