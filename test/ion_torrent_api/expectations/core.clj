@@ -364,5 +364,41 @@
     ((juxt :start-time :end-time) (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/61/")))
     ]))
 
+;;; expect that the dates are in the order:
+;;; newest plugin result for newest result
+;;; experiment latest-result-date
 
-
+;;; then, the later plugin results and results can be in various orders
+;;; depending on when the plugins were run, but all results are older than their
+;;; pluginresults
+;;; and the experiment is older than the results
+(expect '(true true true true true true true true true true)
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (map (partial apply >)
+               (partition
+                2 1 (map #(.getTime %)
+                         [(:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/209/")))
+                          (:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/89/")))
+                          (:timestamp (result (get-result ts "/rundb/api/v1/results/77/")))
+                          ;; newest result is older than its
+                          ;; plugin-results, but newer than the
+                          ;; experiment latest-result-date
+                          (:latest-result-date (experiment (get-experiment ts 50)))
+                          ;; and all other plugin-results and results
+                          ;; are older than this
+                          ;; but pluginresults are newer than their
+                          ;; results
+                          ;; and I'm not sure how result 61 is newer
+                          ;; than 62
+                          (:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/71/"))) ; res 61
+                          (:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/66/"))) ; res 61
+                          (:start-time (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/61/"))) ; res 61
+                          (:start-time  (plugin-result (get-plugin-result ts "/rundb/api/v1/pluginresult/60/"))) ;res 62
+                          (:timestamp (result (get-result ts "/rundb/api/v1/results/61/")))
+                          (:timestamp (result (get-result ts "/rundb/api/v1/results/62/")))
+                          ;; experiment was first
+                          (:date (experiment (get-experiment ts 50)))
+                          ])))))
