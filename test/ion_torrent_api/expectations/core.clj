@@ -445,3 +445,45 @@
         (edn/read-string {:readers data-readers}
                          (str (map->PluginResult {:id 999}))))
 
+;;; testing RNA seq stuff
+
+(expect ["RNA" "P1.1.17"
+         ["/rundb/api/v1/results/155/" "/rundb/api/v1/results/156/"]
+         "/rawdata/XXXNPROTON/R_2014_03_26_23_36_32_user_XXX-65-RNASeq_1-73"
+         "run" "Complete" #inst "2014-03-27T11:24:17.000-00:00"]
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          ((juxt :run-type :chip-type
+                 :result-uri-set
+                 :dir
+                 :status :ftp-status :latest-result-date)
+           (experiment (get-experiment ts 97)))))
+
+(expect [{"externalId" "", "name" "INQ0082TT01_F2__2257-112", "displayedName" "INQ0082TT01 F2  2257-112",
+          "date" "2014-03-27T01:19:13.000203+00:00", "status" "run",
+          "experiments" ["/rundb/api/v1/experiment/97/"], "id" 344, "sampleSets" [],
+          "resource_uri" "/rundb/api/v1/sample/344/", "description" ""}
+
+         {"externalId" "", "name" "INQ0159TT01_PS__2257-112", "displayedName" "INQ0159TT01 PS  2257-112",
+          "date" "2014-03-27T01:19:13.000206+00:00", "status" "run",
+          "experiments" ["/rundb/api/v1/experiment/97/"], "id" 345, "sampleSets" [],
+          "resource_uri" "/rundb/api/v1/sample/345/", "description" ""}
+
+         {"externalId" "", "name" "INQ0077ME01_SW__2257-112", "displayedName" "INQ0077ME01 SW  2257-112",
+          "date" "2014-03-27T01:19:13.000209+00:00", "status" "run",
+          "experiments" ["/rundb/api/v1/experiment/97/"], "id" 346, "sampleSets" [],
+          "resource_uri" "/rundb/api/v1/sample/346/", "description" ""}
+
+         {"externalId" "", "name" "INQ0067TT01_35__2257-112", "displayedName" "INQ0067TT01 35  2257-112",
+          "date" "2014-03-27T01:19:13.000211+00:00", "status" "run",
+          "experiments" ["/rundb/api/v1/experiment/97/"], "id" 347, "sampleSets" [],
+          "resource_uri" "/rundb/api/v1/sample/347/", "description" ""}]
+
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (:sample-map (experiment (get-experiment ts 97)))))
+
