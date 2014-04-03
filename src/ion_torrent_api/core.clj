@@ -91,8 +91,13 @@
   (let [main-keys ["id" "expName" "pgmName" "displayName" "resource_uri"
                    "runtype" "chipType" "samples"
                    "results" "expDir" "status" "ftpStatus"]]
+    (assert (<= 0 (count (get json "eas_set")) 1) "Zero or one EAS set expected.")
     (apply ->Experiment (concat (map (partial get json) main-keys)
-                                [(apply merge (map #(get % "barcodedSamples") (get json "eas_set")))
+                                ;; for now, work with one label per barcode and one eas_set per experiment
+                                [(into {} (map (fn [[label {bc "barcodes"}]]
+                                                 (assert (= 1 (count bc)) "Exactly 1 barcode per sample expected.")
+                                                 [(first bc) label])
+                                               (get (first (get json "eas_set")) "barcodedSamples")))
                                  (inst/read-instant-date (get json "date"))
                                  (inst/read-instant-date (get json "resultDate"))
                                  (apply dissoc json "log" main-keys)]))))

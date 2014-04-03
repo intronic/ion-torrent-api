@@ -226,7 +226,11 @@
                                           :pgm-name "XXXNPROTON", :display-name "user XXX-24-AmpliSeq CCP 24",
                                           :uri "/rundb/api/v1/experiment/50/",
                                           :run-type "AMPS", :chip-type "900",
-                                          :barcode-map {"inq-022-me" {"barcodes" ["IonXpressRNA_003"]}, "inq-024-me" {"barcodes" ["IonXpressRNA_004"]}, "inq-025-tt" {"barcodes" ["IonXpressRNA_005"]}, "inq-037-me" {"barcodes" ["IonXpressRNA_002"]}, "inq-052-tt" {"barcodes" ["IonXpressRNA_001"]}}
+                                          :barcode-map {"IonXpressRNA_003" "inq-022-me"
+                                                        "IonXpressRNA_004" "inq-024-me"
+                                                        "IonXpressRNA_005" "inq-025-tt"
+                                                        "IonXpressRNA_002" "inq-037-me"
+                                                        "IonXpressRNA_001" "inq-052-tt"}
                                           :sample-map [{"externalId" "", "name" "inq-037-me", "displayedName" "inq-037-me", "date" "2013-06-01T06:30:44.000910+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 76, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/76/", "description" nil} {"externalId" "", "name" "inq-052-tt", "displayedName" "inq-052-tt", "date" "2013-06-01T06:30:44.000906+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 75, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/75/", "description" nil} {"externalId" "", "name" "inq-024-me", "displayedName" "inq-024-me", "date" "2013-06-03T04:51:46.000218+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/49/"], "id" 83, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/83/", "description" nil} {"externalId" "", "name" "inq-022-me", "displayedName" "inq-022-me", "date" "2013-06-03T04:51:46.000222+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/49/"], "id" 84, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/84/", "description" nil} {"externalId" "", "name" "inq-025-tt", "displayedName" "inq-025-tt", "date" "2013-06-01T06:30:44.000903+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 74, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/74/", "description" nil}],
                                           :result-uri-set ["/rundb/api/v1/results/77/" "/rundb/api/v1/results/61/" "/rundb/api/v1/results/62/"],
                                           :dir "/rawdata/XXXNPROTON/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
@@ -497,14 +501,10 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (:sample-map (experiment (get-experiment ts 97)))))
 
-(expect {"INQ0067TT01 35  2257-112" {"barcodeSampleInfo" {"IonXpressRNA_002" {"description" "", "externalId" ""}}
-                                     "barcodes" ["IonXpressRNA_002"]},
-         "INQ0077ME01 SW  2257-112" {"barcodeSampleInfo" {"IonXpressRNA_005" {"description" "", "externalId" ""}}
-                                     "barcodes" ["IonXpressRNA_005"]},
-         "INQ0082TT01 F2  2257-112" {"barcodeSampleInfo" {"IonXpressRNA_004" {"description" "", "externalId" ""}}
-                                     "barcodes" ["IonXpressRNA_004"]},
-         "INQ0159TT01 PS  2257-112" {"barcodeSampleInfo" {"IonXpressRNA_013" {"description" "", "externalId" ""}}
-                                     "barcodes" ["IonXpressRNA_013"]}}
+(expect {"IonXpressRNA_002" "INQ0067TT01 35  2257-112",
+         "IonXpressRNA_005" "INQ0077ME01 SW  2257-112",
+         "IonXpressRNA_004" "INQ0082TT01 F2  2257-112",
+         "IonXpressRNA_013" "INQ0159TT01 PS  2257-112"}
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
