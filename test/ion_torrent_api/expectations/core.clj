@@ -462,7 +462,8 @@
 (expect ["RNA" "P1.1.17"
          ["/rundb/api/v1/results/155/" "/rundb/api/v1/results/156/"]
          "/rawdata/XXXNPROTON/R_2014_03_26_23_36_32_user_XXX-65-RNASeq_1-73"
-         "run" "Complete" #inst "2014-03-27T11:24:17.000-00:00"]
+         "run" "Complete"
+         #inst "2014-03-27T11:24:17.000-00:00"]
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
