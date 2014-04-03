@@ -510,3 +510,35 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (:barcode-map (experiment (get-experiment ts 97)))))
+
+;;; Experimnt 97   #inst "2014-03-27T11:24:17.000-00:00"
+;;; Result   155   #inst "2014-03-27T11:24:17.000-00:00"
+;;; Result   156   #inst "2014-03-27T06:21:05.000-00:00"
+;;; Result 155 timestamp is *after* result 156
+
+(expect-let [e97 (with-fake-routes-in-isolation
+                   {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                            {:status 200 :headers {"Content-Type" "application/json"}
+                                             :body (slurp (uri-to-file uri :json))})}
+                   (experiment (get-experiment ts 97)))
+             r155 (with-fake-routes-in-isolation
+                    {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                             {:status 200 :headers {"Content-Type" "application/json"}
+                                              :body (slurp (uri-to-file uri :json))})}
+                    (result (get-result ts 155)))]
+            (:latest-result-date e97)
+            (:timestamp r155))
+
+(expect-let [r155 (with-fake-routes-in-isolation
+                    {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                             {:status 200 :headers {"Content-Type" "application/json"}
+                                              :body (slurp (uri-to-file uri :json))})}
+                    (result (get-result ts 155)))
+             r156 (with-fake-routes-in-isolation
+                    {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                             {:status 200 :headers {"Content-Type" "application/json"}
+                                              :body (slurp (uri-to-file uri :json))})}
+                    (result (get-result ts 156)))]
+            true
+            (> (.getTime ^java.util.Date (:timestamp r155))
+               (.getTime ^java.util.Date (:timestamp r156))))
