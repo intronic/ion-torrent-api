@@ -83,7 +83,9 @@
 ;;; Experiment record
 
 (defrecord Experiment [id name pgm-name display-name uri run-type chip-type sample-map
-                       result-uri-set dir status ftp-status date latest-result-date raw-map])
+                       result-uri-set dir status ftp-status date latest-result-date raw-map]
+  Object
+  (toString [this] (pr-str this)))
 
 (defn experiment [json]
   (let [main-keys ["id" "expName" "pgmName" "displayName" "resource_uri"
@@ -100,7 +102,9 @@
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
-                   timestamp thumbnail? raw-map])
+                   timestamp thumbnail? raw-map]
+  Object
+  (toString [this] (pr-str this)))
 
 (defn result [json]
   (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status"
@@ -117,7 +121,9 @@
 (defrecord PluginResult [id uri result-uri result-name state path report-link
                          name version versioned-name
                          library-type config-desc barcode-map target-name target-bed experiment-name
-                         trimmed-reads? barcoded? start-time end-time raw-map])
+                         trimmed-reads? barcoded? start-time end-time raw-map]
+  Object
+  (toString [this] (pr-str this)))
 
 (defn plugin-result [json]
   (let [main-keys ["id" "resource_uri" "result" "resultName" "state"
@@ -130,6 +136,12 @@
                                    (inst/read-instant-date (get json "starttime"))
                                    (inst/read-instant-date (get json "endtime"))
                                    (apply dissoc json main-keys)]))))
+
+
+(def data-readers
+  {'ion_torrent_api.core.Experiment ion-torrent-api.core/map->Experiment
+   'ion_torrent_api.core.Result ion-torrent-api.core/map->Result
+   'ion_torrent_api.core.PluginResult ion-torrent-api.core/map->PluginResult})
 
 
 ;;;
