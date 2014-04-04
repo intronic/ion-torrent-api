@@ -8,7 +8,7 @@
              [result :as r]
              [plugin-result :as pr]]))
 
-(declare get-resource get-completed-resource ensure-starts-with barcode-eas-map)
+(declare get-json get-completed-resource ensure-starts-with barcode-eas-map BUFFER-SIZE)
 
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
@@ -188,7 +188,7 @@
 
 ;;;
 
-(defn- get-resource
+(defn- get-json
     "Return a JSON resource from host.
 Keys are not coerced to keywords as the JSON keys can have spaces in them which are invalid as keywords and not printable+readable.
 host should "
@@ -199,7 +199,8 @@ host should "
 (defn- get-completed-resource
   "Get resources with Completed status."
   [ts resource & [opts]]
-  (get-resource ts resource (assoc opts "status__startswith" "Completed")))
+  (get-json ts resource (assoc opts "status__startswith" "Completed")))
+
 
 
 (comment
@@ -214,7 +215,7 @@ host should "
     "Sorted list of metrics for a result."
     [metric-name creds host res]
     (sort-by-id-desc
-     (map #(get-resource creds host %)
+     (map #(get-json creds host %)
           (get res metric-name))))
 
   (def get-result-libmetrics

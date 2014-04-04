@@ -56,7 +56,7 @@
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (#'ion/get-resource ts "experiment/name-XXX-24"))))
+              (#'ion/get-json ts "experiment/name-XXX-24"))))
 
 ;;; test object
 (expect {"expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
@@ -64,7 +64,7 @@
                           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                    {:status 200 :headers {"Content-Type" "application/json"}
                                                     :body (slurp (uri-to-file uri :json))})}
-                          (#'ion/get-resource ts "experiment/name-XXX-24"))
+                          (#'ion/get-json ts "experiment/name-XXX-24"))
                         "objects"))))
 
 (expect {"expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
