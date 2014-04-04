@@ -184,6 +184,58 @@
 
 ;;; plugin-result
 
+;;; barcode map of variantCaller results
+(expect (more-of x
+                 ["variantCaller" "variantCaller--v4.0-r76860"]
+                 ((juxt #(% "name") #(% "versionedName")) (get x "plugin"))
+                 {"IonXpressRNA_001"
+                  {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046,
+                                              "homo_indels" 21, "homo_snps" 267,
+                                              "no_call" 0, "other" 9, "variants" 1447}},
+                  "IonXpressRNA_002"
+                  {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850,
+                                              "homo_indels" 24, "homo_snps" 306,
+                                              "no_call" 0, "other" 6, "variants" 1312}},
+                  "IonXpressRNA_003"
+                  {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799,
+                                              "homo_indels" 22, "homo_snps" 303,
+                                              "no_call" 0, "other" 11, "variants" 1248}},
+                  "IonXpressRNA_004"
+                  {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937,
+                                              "homo_indels" 26, "homo_snps" 292,
+                                              "no_call" 0, "other" 6, "variants" 1388}},
+                  "IonXpressRNA_005"
+                  {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841,
+                                              "homo_indels" 21, "homo_snps" 316,
+                                              "no_call" 0, "other" 6, "variants" 1304}}}
+                 (get-in x ["store" "barcodes"]))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (get-plugin-result ts 209 {})))
+
+;;; barcode map of coverageAnalysis
+(expect (more-of x
+                 ["coverageAnalysis" "coverageAnalysis--v3.6.58977"]
+                 ((juxt #(% "name") #(% "versionedName")) (get x "plugin"))
+                 {"IonXpressRNA_001"
+                  {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.97%", "Target bases with no strand bias" "79.94%", "Number of mapped reads" "13541550", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "84.72%", "Target base coverage at 20x" "96.51%", "Total aligned base reads" "1185203398", "Average reads per amplicon" "794.0", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_001_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "96.94%", "Uniformity of base coverage" "83.69%", "Percent reads on target" "93.77%", "Total assigned amplicon reads" "12697352", "Percent assigned amplicon reads" "93.77%", "Amplicons with at least 100 reads" "90.96%", "Average base coverage depth" "671.9", "Target base coverage at 500x" "47.27%", "Amplicons with at least 500 reads" "53.41%", "Reference (File)" "hg19", "Percent base reads on target" "95.73%", "Total base reads on target" "1134571007", "Target base coverage at 1x" "99.34%", "Target base coverage at 100x" "88.24%", "Amplicons with at least 1 read" "99.51%", "Amplicons reading end-to-end" "8.67%"},
+                  "IonXpressRNA_002"
+                  {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.33%", "Target bases with no strand bias" "79.28%", "Number of mapped reads" "13579387", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "86.64%", "Target base coverage at 20x" "95.16%", "Total aligned base reads" "1228217548", "Average reads per amplicon" "815.0", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_002_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "95.56%", "Uniformity of base coverage" "85.89%", "Percent reads on target" "95.97%", "Total assigned amplicon reads" "13032709", "Percent assigned amplicon reads" "95.97%", "Amplicons with at least 100 reads" "90.11%", "Average base coverage depth" "707.7", "Target base coverage at 500x" "52.31%", "Amplicons with at least 500 reads" "59.97%", "Reference (File)" "hg19", "Percent base reads on target" "97.30%", "Total base reads on target" "1195050872", "Target base coverage at 1x" "99.00%", "Target base coverage at 100x" "89.04%", "Amplicons with at least 1 read" "99.19%", "Amplicons reading end-to-end" "8.34%"},
+                  "IonXpressRNA_003"
+                  {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.60%", "Target bases with no strand bias" "80.47%", "Number of mapped reads" "12145531", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "88.99%", "Target base coverage at 20x" "95.99%", "Total aligned base reads" "1085455295", "Average reads per amplicon" "733.3", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_003_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "96.33%", "Uniformity of base coverage" "88.03%", "Percent reads on target" "96.56%", "Total assigned amplicon reads" "11727495", "Percent assigned amplicon reads" "96.56%", "Amplicons with at least 100 reads" "91.72%", "Average base coverage depth" "624.3", "Target base coverage at 500x" "47.29%", "Amplicons with at least 500 reads" "56.77%", "Reference (File)" "hg19", "Percent base reads on target" "97.12%", "Total base reads on target" "1054159542", "Target base coverage at 1x" "99.33%", "Target base coverage at 100x" "90.07%", "Amplicons with at least 1 read" "99.50%", "Amplicons reading end-to-end" "8.90%"},
+                  "IonXpressRNA_004"
+                  {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.52%", "Target bases with no strand bias" "78.41%", "Number of mapped reads" "11984953", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "83.01%", "Target base coverage at 20x" "95.09%", "Total aligned base reads" "1041277993", "Average reads per amplicon" "719.0", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_004_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "95.80%", "Uniformity of base coverage" "82.07%", "Percent reads on target" "95.94%", "Total assigned amplicon reads" "11498272", "Percent assigned amplicon reads" "95.94%", "Amplicons with at least 100 reads" "87.60%", "Average base coverage depth" "596.4", "Target base coverage at 500x" "42.30%", "Amplicons with at least 500 reads" "51.26%", "Reference (File)" "hg19", "Percent base reads on target" "96.73%", "Total base reads on target" "1007191043", "Target base coverage at 1x" "99.14%", "Target base coverage at 100x" "84.54%", "Amplicons with at least 1 read" "99.37%", "Amplicons reading end-to-end" "7.47%"},
+                  "IonXpressRNA_005"
+                  {"Number of amplicons" "15992", "Amplicons with no strand bias" "94.23%", "Target bases with no strand bias" "81.41%", "Number of mapped reads" "13717156", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "89.76%", "Target base coverage at 20x" "96.53%", "Total aligned base reads" "1215435073", "Average reads per amplicon" "825.4", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_005_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "96.85%", "Uniformity of base coverage" "88.68%", "Percent reads on target" "96.23%", "Total assigned amplicon reads" "13200287", "Percent assigned amplicon reads" "96.23%", "Amplicons with at least 100 reads" "92.85%", "Average base coverage depth" "697.9", "Target base coverage at 500x" "53.15%", "Amplicons with at least 500 reads" "63.03%", "Reference (File)" "hg19", "Percent base reads on target" "96.96%", "Total base reads on target" "1178467512", "Target base coverage at 1x" "99.34%", "Target base coverage at 100x" "91.41%", "Amplicons with at least 1 read" "99.49%", "Amplicons reading end-to-end" "8.25%"}}
+                 (get-in x ["store" "barcodes"]))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (get-plugin-result ts 66)))
+
 (expect ["size" "store" "config" "path" "resultName" "endtime" "inodes" "reportLink" "starttime" "state"
          "owner" "plugin" "duration" "jobid" "id" "resource_uri" "result"]
                 (keys (with-fake-routes-in-isolation
@@ -225,12 +277,14 @@
 (expect  #ion_torrent_api.core.Experiment{:id 50, :name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
                                           :pgm-name "XXXNPROTON", :display-name "user XXX-24-AmpliSeq CCP 24",
                                           :uri "/rundb/api/v1/experiment/50/",
-                                          :run-type "AMPS", :chip-type "900",
-                                          :barcode-map {"IonXpressRNA_003" "inq-022-me"
-                                                        "IonXpressRNA_004" "inq-024-me"
-                                                        "IonXpressRNA_005" "inq-025-tt"
-                                                        "IonXpressRNA_002" "inq-037-me"
-                                                        "IonXpressRNA_001" "inq-052-tt"}
+                                          :run-type "AMPS",
+                                          :chip-type "900",
+                                          :barcode-sample-map
+                                          {"IonXpressRNA_003" "inq-022-me"
+                                           "IonXpressRNA_004" "inq-024-me"
+                                           "IonXpressRNA_005" "inq-025-tt"
+                                           "IonXpressRNA_002" "inq-037-me"
+                                           "IonXpressRNA_001" "inq-052-tt"}
                                           :sample-map [{"externalId" "", "name" "inq-037-me", "displayedName" "inq-037-me", "date" "2013-06-01T06:30:44.000910+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 76, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/76/", "description" nil} {"externalId" "", "name" "inq-052-tt", "displayedName" "inq-052-tt", "date" "2013-06-01T06:30:44.000906+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 75, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/75/", "description" nil} {"externalId" "", "name" "inq-024-me", "displayedName" "inq-024-me", "date" "2013-06-03T04:51:46.000218+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/49/"], "id" 83, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/83/", "description" nil} {"externalId" "", "name" "inq-022-me", "displayedName" "inq-022-me", "date" "2013-06-03T04:51:46.000222+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/49/"], "id" 84, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/84/", "description" nil} {"externalId" "", "name" "inq-025-tt", "displayedName" "inq-025-tt", "date" "2013-06-01T06:30:44.000903+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 74, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/74/", "description" nil}],
                                           :result-uri-set ["/rundb/api/v1/results/77/" "/rundb/api/v1/results/61/" "/rundb/api/v1/results/62/"],
                                           :dir "/rawdata/XXXNPROTON/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
@@ -255,19 +309,57 @@
 
 ;;; PluginResult record
 
-(expect #ion_torrent_api.core.PluginResult{:name "variantCaller", :version "4.0-r76860", :versioned-name "variantCaller--v4.0-r76860", :path "/results/analysis/output/Home/24_reanalyze_077/plugin_out/variantCaller_out", :state "Completed", :result-uri "/rundb/api/v1/results/77/", :uri "/rundb/api/v1/pluginresult/209/", :result-name "24_reanalyze", :id 209, , :report-link "/output/Home/24_reanalyze_077/" :target-name "4477685_Comprehensive_CCP_bedfile_20120517", :target-bed "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed", :library-type "AmpliSeq"  :barcode-map {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}, :experiment-name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24", :config-desc "Somatic - Proton - Low Stringency", :barcoded? true, :trimmed-reads? true :start-time #inst "2014-02-17T05:50:42.000089000-00:00" :end-time #inst "2014-02-17T09:37:51.000879000-00:00" :raw-map {"size" "25242564174", "store" {"Aligned Reads" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24", "targets_bed" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed", "barcoded" "true", "Target Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "barcodes" {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}, "Configuration" "Somatic - Proton - Low Stringency", "Target Loci" "Not using", "Trim Reads" true, "Library Type" "AmpliSeq"}, "config" {}, "endtime" "2014-02-17T09:37:51.000879+00:00", "inodes" "391", "starttime" "2014-02-17T05:50:42.000089+00:00", "owner" {"last_login" "2014-04-01T05:48:44.000235+00:00", "profile" {"id" 1, "last_read_news_post" "2013-11-02T02:33:07.000710+00:00", "name" "", "note" "", "phone_number" "", "resource_uri" "", "title" "user"}, "last_name" "", "username" "ionadmin", "date_joined" "2011-05-03T18:37:38+00:00", "first_name" "", "id" 1, "resource_uri" "/rundb/api/v1/user/1/", "full_name" "", "is_active" true, "email" "ionadmin@iontorrent.com"}, "plugin" {"versionedName" "variantCaller--v4.0-r76860", "config" {}, "path" "/results/plugins/variantCaller", "active" true, "autorunMutable" true, "script" "launch.sh", "name" "variantCaller", "isConfig" false, "date" "2013-11-22T08:38:55.000219+00:00", "url" "", "status" {}, "hasAbout" false, "majorBlock" true, "isPlanConfig" true, "pluginsettings" {"depends" [], "features" [], "runlevel" [], "runtype" ["composite" "wholechip" "thumbnail"]}, "version" "4.0-r76860", "userinputfields" {}, "id" 54, "resource_uri" "/rundb/api/v1/plugin/54/", "selected" true, "autorun" false, "description" "", "isInstance" true}, "duration" "3:47:09.789983", "jobid" nil}}
-                (with-fake-routes-in-isolation
-                  {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                           {:status 200 :headers {"Content-Type" "application/json"}
-                                            :body (slurp (uri-to-file uri :json))})}
-                  (plugin-result (get-plugin-result ts 209))))
+(expect #ion_torrent_api.core.PluginResult{:name "variantCaller", :version "4.0-r76860",
+                                           :versioned-name "variantCaller--v4.0-r76860",
+                                           :path "/results/analysis/output/Home/24_reanalyze_077/plugin_out/variantCaller_out",
+                                           :state "Completed", :result-uri "/rundb/api/v1/results/77/",
+                                           :uri "/rundb/api/v1/pluginresult/209/"
+                                           :result-name "24_reanalyze", :id 209
+                                           :report-link "/output/Home/24_reanalyze_077/"
+                                           :target-name "4477685_Comprehensive_CCP_bedfile_20120517"
+                                           :target-bed "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed"
+                                           :library-type "AmpliSeq"
+                                           :barcode-result-map
+                                           {"IonXpressRNA_001" {"hotspots" {},
+                                                                "variants" {"het_indels" 104, "het_snps" 1046,
+                                                                            "homo_indels" 21, "homo_snps" 267,
+                                                                            "no_call" 0, "other" 9, "variants" 1447}},
+                                            "IonXpressRNA_002" {"hotspots" {},
+                                                                "variants" {"het_indels" 126, "het_snps" 850,
+                                                                            "homo_indels" 24, "homo_snps" 306,
+                                                                            "no_call" 0, "other" 6, "variants" 1312}},
+                                            "IonXpressRNA_003" {"hotspots" {},
+                                                                "variants" {"het_indels" 113, "het_snps" 799,
+                                                                            "homo_indels" 22, "homo_snps" 303,
+                                                                            "no_call" 0, "other" 11, "variants" 1248}},
+                                            "IonXpressRNA_004" {"hotspots" {},
+                                                                "variants" {"het_indels" 127, "het_snps" 937,
+                                                                            "homo_indels" 26, "homo_snps" 292,
+                                                                            "no_call" 0, "other" 6, "variants" 1388}},
+                                            "IonXpressRNA_005" {"hotspots" {},
+                                                                "variants" {"het_indels" 120, "het_snps" 841,
+                                                                            "homo_indels" 21, "homo_snps" 316,
+                                                                            "no_call" 0, "other" 6, "variants" 1304}}},
+                                           :experiment-name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
+                                           :config-desc "Somatic - Proton - Low Stringency",
+                                           :barcoded? true,
+                                           :trimmed-reads? true
+                                           :start-time #inst "2014-02-17T05:50:42.000089000-00:00"
+                                           :end-time #inst "2014-02-17T09:37:51.000879000-00:00"
+                                           :raw-map
+                                           {"size" "25242564174", "store" {"Aligned Reads" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24", "targets_bed" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed", "barcoded" "true", "Target Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "barcodes" {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}, "Configuration" "Somatic - Proton - Low Stringency", "Target Loci" "Not using", "Trim Reads" true, "Library Type" "AmpliSeq"}, "config" {}, "endtime" "2014-02-17T09:37:51.000879+00:00", "inodes" "391", "starttime" "2014-02-17T05:50:42.000089+00:00", "owner" {"last_login" "2014-04-01T05:48:44.000235+00:00", "profile" {"id" 1, "last_read_news_post" "2013-11-02T02:33:07.000710+00:00", "name" "", "note" "", "phone_number" "", "resource_uri" "", "title" "user"}, "last_name" "", "username" "ionadmin", "date_joined" "2011-05-03T18:37:38+00:00", "first_name" "", "id" 1, "resource_uri" "/rundb/api/v1/user/1/", "full_name" "", "is_active" true, "email" "ionadmin@iontorrent.com"}, "plugin" {"versionedName" "variantCaller--v4.0-r76860", "config" {}, "path" "/results/plugins/variantCaller", "active" true, "autorunMutable" true, "script" "launch.sh", "name" "variantCaller", "isConfig" false, "date" "2013-11-22T08:38:55.000219+00:00", "url" "", "status" {}, "hasAbout" false, "majorBlock" true, "isPlanConfig" true, "pluginsettings" {"depends" [], "features" [], "runlevel" [], "runtype" ["composite" "wholechip" "thumbnail"]}, "version" "4.0-r76860", "userinputfields" {}, "id" 54, "resource_uri" "/rundb/api/v1/plugin/54/", "selected" true, "autorun" false, "description" "", "isInstance" true}, "duration" "3:47:09.789983", "jobid" nil}}
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result (get-plugin-result ts 209))))
 
 (expect {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (:barcode-map (plugin-result (get-plugin-result ts 209)))))
+          (:barcode-result-map (plugin-result (get-plugin-result ts 209)))))
 
 (expect true
         (=
@@ -452,11 +544,11 @@
         (edn/read-string {:readers data-readers}
                          (str (map->Result { :id 99999}))))
 
-(expect #ion_torrent_api.core.Result{:id 99999, :name nil, :uri nil, :experiment-uri nil, :status nil, :plugin-result-uri-set nil, :plugin-state-map nil, :analysis-version nil, :report-status nil, :plugin-store-map nil, :bam-link nil, :fastq-link nil, :report-link nil, :filesystem-path nil, :reference nil, :lib-metrics-uri-set nil, :tf-metrics-uri-set nil, :analysis-metrics-uri-set nil, :quality-metrics-uri-set nil, :timestamp nil, :thumbnail? nil, :raw-map nil} 
+(expect #ion_torrent_api.core.Result{:id 99999, :name nil, :uri nil, :experiment-uri nil, :status nil, :plugin-result-uri-set nil, :plugin-state-map nil, :analysis-version nil, :report-status nil, :plugin-store-map nil, :bam-link nil, :fastq-link nil, :report-link nil, :filesystem-path nil, :reference nil, :lib-metrics-uri-set nil, :tf-metrics-uri-set nil, :analysis-metrics-uri-set nil, :quality-metrics-uri-set nil, :timestamp nil, :thumbnail? nil, :raw-map nil}
         (edn/read-string {:readers data-readers}
                          (str (map->Result { :id 99999}))))
 
-(expect #ion_torrent_api.core.PluginResult{:id 999, :uri nil, :result-uri nil, :result-name nil, :state nil, :path nil, :report-link nil, :name nil, :version nil, :versioned-name nil, :library-type nil, :config-desc nil, :barcode-map nil, :target-name nil, :target-bed nil, :experiment-name nil, :trimmed-reads? nil, :barcoded? nil, :start-time nil, :end-time nil, :raw-map nil}
+(expect #ion_torrent_api.core.PluginResult{:id 999, :uri nil, :result-uri nil, :result-name nil, :state nil, :path nil, :report-link nil, :name nil, :version nil, :versioned-name nil, :library-type nil, :config-desc nil, :barcode-result-map nil, :target-name nil, :target-bed nil, :experiment-name nil, :trimmed-reads? nil, :barcoded? nil, :start-time nil, :end-time nil, :raw-map nil}
         (edn/read-string {:readers data-readers}
                          (str (map->PluginResult {:id 999}))))
 
@@ -509,7 +601,7 @@
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (:barcode-map (experiment (get-experiment ts 97)))))
+          (:barcode-sample-map (experiment (get-experiment ts 97)))))
 
 ;;; Experimnt 97   #inst "2014-03-27T11:24:17.000-00:00"
 ;;; Result   155   #inst "2014-03-27T11:24:17.000-00:00"
