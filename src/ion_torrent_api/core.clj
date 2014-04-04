@@ -12,168 +12,166 @@
 
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
-
-  (get-experiments [torrent-server] [torrent-server opts] [torrent-server limit offset]
+  (experiments [this] [this opts] [this limit offset]
     "Get experiments (with options 'opts' or by limit and offset).")
-
-  (get-experiment-name [torrent-server name] [torrent-server name opts]
+  (experiment-name [this name] [this name opts]
     "Get experiment by name (with options 'opts').")
-
-  (get-experiment [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+  (experiment [this] [this id-or-uri] [this id-or-uri opts]
     "Get experiment by id or uri (with options 'opts').")
-
-  (get-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+  (result [this] [this id-or-uri] [this id-or-uri opts]
     "Get result by id or uri (with options 'opts').")
-
-  (get-plugin-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
+  (plugin-result [this] [this id-or-uri] [this id-or-uri opts]
     "Get plugin-result by id or uri (with options 'opts').")
-
+  (barcode-set [this]
+    "Set of barcodes.")
   (bam-uri [this bc]
   "BAM uri for barcode.")
-
   (bai-uri [this bc]
   "BAM BAI uri for barcode.")
-
   (bam-header-uri [this bc]
-  "BAM header uri for barcode."))
-
+    "BAM header uri for barcode."))
 
 (defprotocol UniqueID
     "Unique Identifier"
     (unique-id [this]))
 
+(defrecord Experiment [torrent-server id name pgm-name display-name uri run-type chip-type sample-map
+                       result-uri-set dir status ftp-status barcode-sample-map date
+                       latest-result-date raw-map]
 
-(defrecord TorrentServer [server-url creds api-path]
+  Object
+  (toString [this] (pr-str this))
 
   TorrentServerAPI
+  (barcode-set [this] (into #{} (keys barcode-sample-map)))
+  (result [this]
+    (result torrent-server )))
 
-  (get-experiments [torrent-server]
-    (get-experiments torrent-server {}))
-
-  (get-experiments [torrent-server limit offset]
-    (get-experiments torrent-server {"limit" limit "offset" offset }))
-
-  (get-experiments [torrent-server opts]
-    (get-completed-resource torrent-server "experiment/" (merge {"status__exact" "run"} opts)))
-
-  (get-experiment-name [torrent-server name]
-    (get-experiment-name torrent-server name {}))
-
-  (get-experiment-name [torrent-server name opts]
-    ;; query by options returns map with "meta" and "objects" keys
-    (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (get-completed-resource torrent-server "experiment/"
-                                  (merge opts {"expName__exact" name "status__exact" "run" "limit" 2}))]
-      ;;      (assert (and meta total-count) "Invalid experiment name query response.")
-      ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
-      (first objects)))
-
-  (get-experiment [torrent-server id-or-uri]
-    (get-experiment torrent-server id-or-uri {}))
-
-  (get-experiment [torrent-server id-or-uri opts]
-    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "experiment/")
-                                                               (str id-or-uri))))
-
-  (get-result [torrent-server id-or-uri]
-    (get-result torrent-server id-or-uri {}))
-
-  (get-result [torrent-server id-or-uri opts]
-    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "results/")
-                                                               (str id-or-uri))))
-  (get-plugin-result [torrent-server id-or-uri]
-    (get-plugin-result torrent-server id-or-uri {}))
-
-  (get-plugin-result [torrent-server id-or-uri opts]
-    (get-completed-resource torrent-server (ensure-starts-with (str (:api-path torrent-server) "pluginresult/")
-                                                               (str id-or-uri)))))
-
-(defn torrent-server [server-url creds & [api-path]]
-  (map->TorrentServer {:server-url server-url :creds creds :api-path (or api-path "/rundb/api/v1/")}))
-
-;;; Experiment record
-
-(defrecord Experiment [id name pgm-name display-name uri run-type chip-type sample-map
-                       result-uri-set dir status ftp-status barcode-sample-map date latest-result-date raw-map]
-  Object
-  (toString [this] (pr-str this)))
-
-(defn experiment [json]
-  (let [main-keys ["id" "expName" "pgmName" "displayName" "resource_uri"
-                   "runtype" "chipType" "samples"
-                   "results" "expDir" "status" "ftpStatus"]]
-    (assert (<= 0 (count (get json "eas_set")) 1) "Zero or one EAS set expected.")
-    (apply ->Experiment (concat (map (partial get json) main-keys)
-                                ;; for now, work with one label per barcode and one eas_set per experiment
-                                [(barcode-eas-map (get (first (get json "eas_set")) "barcodedSamples"))
-                                 (inst/read-instant-date (get json "date"))
-                                 (inst/read-instant-date (get json "resultDate"))
-                                 (apply dissoc json "log" main-keys)]))))
-
-;;;  Result record
-
-(defrecord Result [id name uri experiment-uri status
+(defrecord Result [torrent-server id name uri experiment-uri status
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
                    timestamp thumbnail? raw-map]
-  Object
 
+  Object
   (toString [this] (pr-str this))
 
   TorrentServerAPI
-
   (bam-uri [_ bc]
     (str report-link bc "_rawlib.bam"))
-
   (bai-uri [_ bc]
     (str report-link bc "_rawlib.bam.bai"))
-
   (bam-header-uri [_ bc]
     (str report-link bc "_rawlib.bam.header.sam")))
 
-
-(defn result [json]
-  (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status"
-                   "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
-                   "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
-                   "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
-    (apply ->Result (concat (map (partial get json) main-keys)
-                            [(inst/read-instant-date (get json "timeStamp"))
-                             (boolean (get-in json ["metaData" "thumb"]))
-                             (apply dissoc json main-keys)]))))
-
-;;; PluginResult record
-
-(defrecord PluginResult [id uri result-uri result-name state path report-link
+(defrecord PluginResult [torrent-server id uri result-uri result-name state path report-link
                          name version versioned-name
                          library-type config-desc barcode-result-map target-name target-bed experiment-name
                          trimmed-reads? barcoded? start-time end-time raw-map]
+
   Object
   (toString [this] (pr-str this)))
 
-(defn plugin-result [json]
-  (let [main-keys ["id" "resource_uri" "result" "resultName" "state"
-                   "path" "reportLink"]]
-    (apply ->PluginResult (concat (map (partial get json) main-keys)
-                                  (map (partial get (get json "plugin")) ["name" "version" "versionedName"])
-                                  (map (partial get (get json "store")) ["Library Type" "Configuration" "barcodes" "Target Regions"
-                                                                   "targets_bed" "Aligned Reads" "Trim Reads"])
-                                  [(.equalsIgnoreCase "true" (get-in json ["store" "barcoded"])) ; string -> boolean
-                                   (inst/read-instant-date (get json "starttime"))
-                                   (inst/read-instant-date (get json "endtime"))
-                                   (apply dissoc json main-keys)]))))
+(extend-protocol TorrentServerAPI
+  ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
+  clojure.lang.IPersistentMap
+  (experiment [json-map]
+    (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
+                     "runtype" "chipType" "samples"
+                     "results" "expDir" "status" "ftpStatus"]]
+      (assert (<= 0 (count (get json-map "eas_set")) 1) "Zero or one EAS set expected.")
+      (assert (seq (get json-map "date")) "date required.")
+      (assert (seq (get json-map "resultDate")) "resultDate required.")
+      (apply ->Experiment (concat (map (partial get json-map) main-keys)
+                                  ;; for now, work with one label per barcode and one eas_set per experiment
+                                  [(barcode-eas-map (get (first (get json-map "eas_set")) "barcodedSamples"))
+                                   (inst/read-instant-date (get json-map "date"))
+                                   (inst/read-instant-date (get json-map "resultDate"))
+                                   (apply dissoc json-map "log" main-keys)]))))
+  (result [json-map]
+    (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"
+                     "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
+                     "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
+                     "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
+      (assert (seq (get json-map "timeStamp")) "timeStamp required.")
+      (apply ->Result (concat (map (partial get json-map) main-keys)
+                              [(inst/read-instant-date (get json-map "timeStamp"))
+                               (boolean (get-in json-map ["metaData" "thumb"]))
+                               (apply dissoc json-map main-keys)]))))
+  (plugin-result [json-map]
+    (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
+                     "path" "reportLink"]]
+      (assert (seq (get json-map "starttime")) "starttime required.")
+      (assert (seq (get json-map "endtime")) "endtime required.")
+      (apply ->PluginResult (concat (map (partial get json-map) main-keys)
+                                    (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
+                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration" "barcodes"
+                                                                         "Target Regions" "targets_bed"
+                                                                         "Aligned Reads" "Trim Reads"])
+                                    [(.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
+                                     (inst/read-instant-date (get json-map "starttime"))
+                                     (inst/read-instant-date (get json-map "endtime"))
+                                     (apply dissoc json-map main-keys)])))))
 
+(defrecord TorrentServer [server-url creds api-path]
+
+  Object
+  (toString [this] (pr-str this))
+
+  TorrentServerAPI
+  (experiments [this]
+    (experiments this {}))
+  (experiments [this limit offset]
+    (experiments this {"limit" limit "offset" offset }))
+  (experiments [this opts]
+    (get-completed-resource this "experiment/" (merge {"status__exact" "run"} opts)))
+  (experiment-name [this name]
+    (experiment-name this name {}))
+  (experiment-name [this name opts]
+    ;; query by options returns map with "meta" and "objects" keys
+    (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
+          (get-completed-resource this "experiment/"
+                                  (merge opts {"expName__exact" name "status__exact" "run" "limit" 2}))]
+      ;;      (assert (and meta total-count) "Invalid experiment name query response.")
+      ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
+      (experiment (assoc (first objects) :torrent-server this))))
+  (experiment [this id-or-uri]
+    (experiment this id-or-uri {}))
+  (experiment [this id-or-uri opts]
+    (experiment (assoc (get-completed-resource this (ensure-starts-with (str (:api-path this) "experiment/")
+                                                                        (str id-or-uri)))
+                  :torrent-server this)))
+  (result [this id-or-uri]
+    (result this id-or-uri {}))
+  (result [this id-or-uri opts]
+    (result (assoc (get-completed-resource this (ensure-starts-with (str (:api-path this) "results/")
+                                                                    (str id-or-uri)))
+              :torrent-server this)))
+  (plugin-result [this id-or-uri]
+    (plugin-result this id-or-uri {}))
+  (plugin-result [this id-or-uri opts]
+    (plugin-result (assoc (get-completed-resource this (ensure-starts-with (str (:api-path this) "pluginresult/")
+                                                                           (str id-or-uri)))
+                     :torrent-server this))))
+
+(defmethod print-method TorrentServer [x w]
+  (do (.append w \#)
+      (print-method (class x) w)
+      (print-method (into {} (assoc x :creds nil)) w))) ; hide user/pass
+
+(defn torrent-server
+  [server-url creds & [api-path]] (->TorrentServer server-url creds (or api-path "/rundb/api/v1/")))
 
 (def data-readers
-  {'ion_torrent_api.core.Experiment ion-torrent-api.core/map->Experiment
+  {'ion_torrent_api.core.TorrentServer ion-torrent-api.core/map->TorrentServer
+   'ion_torrent_api.core.Experiment ion-torrent-api.core/map->Experiment
    'ion_torrent_api.core.Result ion-torrent-api.core/map->Result
    'ion_torrent_api.core.PluginResult ion-torrent-api.core/map->PluginResult})
 
 (defn- barcode-eas-map [m]
   (into {} (map (fn [[label {bc "barcodes"}]]
-                 (assert (= 1 (count bc)) "Exactly 1 barcode per sample expected.")
-                 [(first bc) label])
+                  (assert (= 1 (count bc)) "Exactly 1 barcode per sample expected.")
+                  [(first bc) label])
                 m)))
 
 (defn latest-result
@@ -185,22 +183,26 @@
     (assert (<= 0 (count res) 1) "0 or 1 latest results expected.")
     (first r-coll)))
 
-
 ;;;
 
 (defn- get-json
-    "Return a JSON resource from host.
+  "Return a JSON resource from host.
 Keys are not coerced to keywords as the JSON keys can have spaces in them which are invalid as keywords and not printable+readable.
 host should "
-    [ts resource & [opts]]
-    (:body (io! (client/get (str (:server-url ts) (ensure-starts-with (:api-path ts) resource))
-                            {:as :json-string-keys :basic-auth (:creds ts) :query-params opts}))))
+  [ts resource & [opts]]
+  (:body (io! (client/get (str (:server-url ts) (ensure-starts-with (:api-path ts) resource))
+                          {:as :json-string-keys :basic-auth (:creds ts) :query-params opts}))))
 
 (defn- get-completed-resource
   "Get resources with Completed status."
   [ts resource & [opts]]
   (get-json ts resource (assoc opts "status__startswith" "Completed")))
 
+(defn- get-resource-file
+  "Return a file from host."
+  [ts file-path]
+  (:body (io! (client/get (str (:server-url ts) file-path)
+                          {:basic-auth (:creds ts)}))))
 
 
 (comment
@@ -255,17 +257,22 @@ host should "
   (defn newest-coverage-plugin-result
     "Get the newest completed variantCaller if any from a collection of plugin-results."
     [pr-coll]
-    (some pr/plugin-result-coverage? pr-coll)))
+    (some pr/plugin-result-coverage? pr-coll))
+
+  (defn get-experiment-results
+    "All results for an experiment (completed, not thumbnails), in most-recent-first order."
+    [creds host e]
+    (->> (e/experiment-result-uri e)
+         (map #(get-result-uri creds host %))
+         (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
+         sort-by-id-desc)))
 
 ;;; ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Query Torrent Server API
-(comment
-;;; generic calls for resources and resource files
-  (defn- get-resource-file
-    "Return a file from host."
-    [creds host file-path]
-    (:body (io! (client/get (str host file-path) {:basic-auth creds}))))
 
+;;; generic calls for resources and resource files
+
+(comment
   (defn- get-resource-file-as-stream
     "Get a file from host as a stream."
     [creds host file-path & [opts]]
@@ -287,16 +294,4 @@ host should "
       (catch Exception e
         (io/delete-file dest-file)
         (throw e))))
-)
-
-;;; ;;;;;;;;;;;;;;;;;;;;;;;
-;;; Get Result
-(comment
-
-  (defn get-experiment-results
-    "All results for an experiment (completed, not thumbnails), in most-recent-first order."
-    [creds host e]
-    (->> (e/experiment-result-uri e)
-         (map #(get-result-uri creds host %))
-         (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
-         sort-by-id-desc)))
+  )
