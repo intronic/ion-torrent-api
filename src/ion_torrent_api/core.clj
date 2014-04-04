@@ -152,6 +152,14 @@
                  [(first bc) label])
                 m)))
 
+(defn latest-result
+  "Get the newest completed result matching the experiment from a collection of results."
+  [e r-coll]
+  (let [date (.getTime ^java.util.Date (:latest-result-date e))
+        res (filter #(<= date (.getTime ^java.util.Date (:timestamp %)))
+                    r-coll)]
+    (assert (<= 0 (count res) 1) "0 or 1 latest results expected.")
+    (first r-coll)))
 
 
 ;;;

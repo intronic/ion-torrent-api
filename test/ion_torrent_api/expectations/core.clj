@@ -642,3 +642,24 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (:barcode-map (plugin-result (get-plugin-result ts 251)))))
+;;;
+(expect-focused (more-of coll
+                         ion_torrent_api.core.Experiment
+                         (first coll)
+                         [ion_torrent_api.core.Result ion_torrent_api.core.Result]
+                         (map type (rest coll))
+                         #inst "2014-03-27T11:24:17.000-00:00"
+                         (:latest-result-date (first coll))
+                         1395919457000
+                         (.getTime ^java.util.Date (:latest-result-date (first coll)))
+                         [[1395919457000 155] [1395901265000 156]]
+                         (sort-by first > (map (juxt #(.getTime (:timestamp %)) :id) (rest coll)))
+                         155
+                         (:id (latest-result (first coll) (rest coll))))
+                (with-fake-routes-in-isolation
+                  {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                           {:status 200 :headers {"Content-Type" "application/json"}
+                                            :body (slurp (uri-to-file uri :json))})}
+                  [(experiment (get-experiment ts 97))
+                   (result (get-result ts 155))
+                   (result (get-result ts 156))]))
