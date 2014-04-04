@@ -10,7 +10,6 @@
 (def host "http://my-intranet-torrent-server.com")
 (def ts (torrent-server host creds))
 ;;; utilities
-(expect [{"id" 3} {"id" 2} {"id" 1}] (sort-by-id-desc [{"id" 2} {"id" 1} {"id" 3}]))
 
 ;;; Note: test private functions by accessing vars directly
 (expect "abcdef" (#'ion/ensure-starts-with "abc" "def"))

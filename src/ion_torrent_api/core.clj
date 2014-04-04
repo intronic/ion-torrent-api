@@ -234,11 +234,6 @@ host should "
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
 
-(defn sort-by-id-desc
-  "Sort list of items by elements with 'id' key in descending numeric order."
-  [items]
-  (sort-by #(get % "id") > items))
-
 (defn- ensure-starts-with
   "Ensure s starts with prefix."
   [^String prefix ^String s]
