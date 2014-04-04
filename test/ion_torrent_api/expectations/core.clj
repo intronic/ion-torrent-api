@@ -555,7 +555,8 @@
 ;;; testing RNA seq stuff
 ;;; '("sequencekitname" "pgmName" "notes" "pinnedRepResult" "storageHost" "flowsInOrder" "diskusage" "log" "runtype" "flows" "chipType" "baselineRun" "expName" "samples" "seqKitBarcode" "plan" "sample" "resultDate" "sequencekitbarcode" "cycles" "displayName" "runMode" "reagentBarcode" "date" "metaData" "expDir" "reverse_primer" "unique" "star" "status" "isReverseRun" "chipBarcode" "ftpStatus" "user_ack" "results" "storage_options" "expCompInfo" "eas_set" "id" "resource_uri" "usePreBeadfind" "autoAnalyze" "rawdatastyle")
 
-(expect ["RNA" "P1.1.17"
+(expect ["RNA"                          ; RNA-seq run type
+         "P1.1.17"                      ; p1 chip
          ["/rundb/api/v1/results/155/" "/rundb/api/v1/results/156/"]
          "/rawdata/XXXNPROTON/R_2014_03_26_23_36_32_user_XXX-65-RNASeq_1-73"
          "run" "Complete"
@@ -564,7 +565,8 @@
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          ((juxt :run-type :chip-type
+          ((juxt :run-type
+                 :chip-type
                  :result-uri-set
                  :dir
                  :status :ftp-status :latest-result-date)
