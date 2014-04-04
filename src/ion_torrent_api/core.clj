@@ -37,7 +37,7 @@
 
 (defrecord Experiment [torrent-server id name pgm-name display-name uri run-type chip-type sample-map
                        result-uri-set dir status ftp-status barcode-sample-map date
-                       latest-result-date raw-map]
+                       latest-result-date latest-result raw-map]
 
   Object
   (toString [this] (pr-str this))
@@ -45,7 +45,8 @@
   TorrentServerAPI
   (barcode-set [this] (into #{} (keys barcode-sample-map)))
   (result [this]
-    (result torrent-server )))
+    (or latest-result
+      (assoc this :latest-result (result torrent-server)))))
 
 (defrecord Result [torrent-server id name uri experiment-uri status
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
@@ -87,6 +88,7 @@
                                   [(barcode-eas-map (get (first (get json-map "eas_set")) "barcodedSamples"))
                                    (inst/read-instant-date (get json-map "date"))
                                    (inst/read-instant-date (get json-map "resultDate"))
+                                   nil
                                    (apply dissoc json-map "log" main-keys)]))))
   (result [json-map]
     (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"

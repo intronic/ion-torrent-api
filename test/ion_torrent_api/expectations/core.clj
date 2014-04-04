@@ -109,7 +109,7 @@
 
 ;;; experiment-name
 
-(expect '(:torrent-server :id :name :pgm-name :display-name :uri :run-type :chip-type :sample-map :result-uri-set :dir :status :ftp-status :barcode-sample-map :date :latest-result-date :raw-map)
+(expect '(:torrent-server :id :name :pgm-name :display-name :uri :run-type :chip-type :sample-map :result-uri-set :dir :status :ftp-status :barcode-sample-map :date :latest-result-date :latest-result :raw-map)
         (keys 
          (with-fake-routes-in-isolation
            {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
