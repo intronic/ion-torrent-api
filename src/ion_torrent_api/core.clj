@@ -26,11 +26,22 @@
     "Get result by id or uri (with options 'opts').")
 
   (get-plugin-result [torrent-server id-or-uri] [torrent-server id-or-uri opts]
-    "Get plugin-result by id or uri (with options 'opts')."))
+    "Get plugin-result by id or uri (with options 'opts').")
+
+  (bam-uri [this bc]
+  "BAM uri for barcode.")
+
+  (bai-uri [this bc]
+  "BAM BAI uri for barcode.")
+
+  (bam-header-uri [this bc]
+  "BAM header uri for barcode."))
+
 
 (defprotocol UniqueID
     "Unique Identifier"
     (unique-id [this]))
+
 
 (defrecord TorrentServer [server-url creds api-path]
 
@@ -107,7 +118,20 @@
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
                    timestamp thumbnail? raw-map]
   Object
-  (toString [this] (pr-str this)))
+
+  (toString [this] (pr-str this))
+
+  TorrentServerAPI
+
+  (bam-uri [_ bc]
+    (str report-link bc "_rawlib.bam"))
+
+  (bai-uri [_ bc]
+    (str report-link bc "_rawlib.bam.bai"))
+
+  (bam-header-uri [_ bc]
+    (str report-link bc "_rawlib.bam.header.sam")))
+
 
 (defn result [json]
   (let [main-keys ["id" "resultsName" "resource_uri" "experiment" "status"

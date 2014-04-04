@@ -666,3 +666,16 @@
            (result (get-result ts 155))
            (result (get-result ts 156))]))
 
+(expect (more-of x
+                 (str "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/" "Bar-code-name" "_rawlib.bam")
+                 (bam-uri x "Bar-code-name")
+                 (str "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/" "Bar-code-name" "_rawlib.bam.bai")
+                 (bai-uri x "Bar-code-name")
+                 (str "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/" "Bar-code-name" "_rawlib.bam.header.sam")
+                 (bam-header-uri x "Bar-code-name"))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (result (get-result ts 155))))
+
