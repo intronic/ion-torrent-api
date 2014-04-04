@@ -226,10 +226,6 @@ host should "
 
 ;;;
 (comment
-  (defn newest-result
-    "Get the newest completed result from a collection of results."
-    [r-coll]
-    (first (sort-by-id-desc r-coll)))
 
   (defn newest-variant-caller-plugin-result
     "Get the newest completed variantCaller if any from a collection of plugin-results."
@@ -284,6 +280,3 @@ host should "
          (map #(get-result-uri creds host %))
          (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
          sort-by-id-desc)))
-
-(comment
-)
