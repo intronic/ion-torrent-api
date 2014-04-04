@@ -715,7 +715,7 @@
                  [[1395919457000 155] [1395901265000 156]]
                  (sort-by first > (map (juxt #(.getTime ^java.util.Date (:timestamp %)) :id) (rest coll)))
                  155
-                 (:id (latest-result (first coll) (rest coll))))
+                 (:id (filter-latest-result (first coll) (rest coll))))
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
@@ -736,3 +736,11 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (result ts 155)))
+
+(expect-focused 155
+        (:id
+         (with-fake-routes-in-isolation
+           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                    {:status 200 :headers {"Content-Type" "application/json"}
+                                     :body (slurp (uri-to-file uri :json))})}
+           (result (experiment ts 97)))))

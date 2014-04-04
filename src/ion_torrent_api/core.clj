@@ -8,7 +8,7 @@
              [result :as r]
              [plugin-result :as pr]]))
 
-(declare get-json get-completed-resource ensure-starts-with barcode-eas-map BUFFER-SIZE)
+(declare get-json get-completed-resource ensure-starts-with filter-latest-result barcode-eas-map BUFFER-SIZE)
 
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
@@ -45,8 +45,11 @@
   TorrentServerAPI
   (barcode-set [this] (into #{} (keys barcode-sample-map)))
   (result [this]
-    (or latest-result
-      (assoc this :latest-result (result torrent-server)))))
+    (if latest-result
+      latest-result
+      (->> result-uri-set
+           (map (partial result torrent-server))
+           (filter-latest-result this)))))
 
 (defrecord Result [torrent-server id name uri experiment-uri status
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
@@ -176,7 +179,7 @@
                   [(first bc) label])
                 m)))
 
-(defn latest-result
+(defn filter-latest-result
   "Get the newest completed result matching the experiment from a collection of results."
   [e r-coll]
   (let [date (.getTime ^java.util.Date (:latest-result-date e))
