@@ -463,12 +463,34 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (plugin-result ts 209)))
 
-(expect {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}
+(expect (more-> {"IonXpressRNA_001"
+                 {"hotspots" {},
+                  "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21,
+                              "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}},
+                 "IonXpressRNA_002"
+                 {"hotspots" {},
+                  "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24,
+                              "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}},
+                 "IonXpressRNA_003"
+                 {"hotspots" {},
+                  "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22,
+                              "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}},
+                 "IonXpressRNA_004"
+                 {"hotspots" {},
+                  "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26,
+                              "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}},
+                 "IonXpressRNA_005"
+                 {"hotspots" {},
+                  "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21,
+                              "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}
+                :barcode-result-map
+                #{"IonXpressRNA_001" "IonXpressRNA_002" "IonXpressRNA_003" "IonXpressRNA_004" "IonXpressRNA_005"}
+                barcode-set)
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (:barcode-result-map  (plugin-result ts 209))))
+          (plugin-result ts 209)))
 
 (expect true
         (=
@@ -717,15 +739,18 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (:sample-map  (experiment ts 97))))
 
-(expect {"IonXpressRNA_002" "INQ0067TT01 35  2257-112",
-         "IonXpressRNA_005" "INQ0077ME01 SW  2257-112",
-         "IonXpressRNA_004" "INQ0082TT01 F2  2257-112",
-         "IonXpressRNA_013" "INQ0159TT01 PS  2257-112"}
+(expect (more->
+         {"IonXpressRNA_002" "INQ0067TT01 35  2257-112",
+          "IonXpressRNA_005" "INQ0077ME01 SW  2257-112",
+          "IonXpressRNA_004" "INQ0082TT01 F2  2257-112",
+          "IonXpressRNA_013" "INQ0159TT01 PS  2257-112"} :barcode-sample-map
+         #{"IonXpressRNA_013" "IonXpressRNA_002" "IonXpressRNA_004" "IonXpressRNA_005"}
+         barcode-set)
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (:barcode-sample-map (experiment ts 97))))
+          (experiment ts 97)))
 
 ;;; Experimnt 97   #inst "2014-03-27T11:24:17.000-00:00"
 ;;; Result   155   #inst "2014-03-27T11:24:17.000-00:00"
@@ -822,7 +847,8 @@
 
 (expect (more-of x
                  nil (:type x)
-                 nil (tsvc-target-bed-uri x))
+                 nil (tsvc-target-bed-uri x)
+                 #{} (barcode-set x))
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
