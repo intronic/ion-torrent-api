@@ -1,5 +1,6 @@
 (ns ion-torrent-api.core
   (:require [clj-http.client :as client]
+            [clojure.core :as core]
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
@@ -29,7 +30,10 @@
   (bai-uri [this bc]
   "BAM BAI uri for barcode.")
   (bam-header-uri [this bc]
-    "BAM header uri for barcode."))
+    "BAM header uri for barcode.")
+  (pdf-uri [this]
+    "PDF report uri.")
+  (complete? [this]))
 
 (defprotocol UniqueID
     "Unique Identifier"
@@ -61,12 +65,22 @@
   (toString [this] (pr-str this))
 
   TorrentServerAPI
+
+  ;; HACK alternatively, more complicated but possibly less assumptions and safer?:-
+  ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
+  ;; (let [bam (io/as-file (result "bamLink"))]
+  ;;     (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam)))))
+  ;; eg:
+  ;; /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
   (bam-uri [_ bc]
-    (str report-link bc "_rawlib.bam"))
-  (bai-uri [_ bc]
-    (str report-link bc "_rawlib.bam.bai"))
-  (bam-header-uri [_ bc]
-    (str report-link bc "_rawlib.bam.header.sam")))
+    (str report-link (core/name bc) "_rawlib.bam"))
+  (bai-uri [this bc]
+    (str (bam-uri this bc) ".bai"))
+  (bam-header-uri [this bc]
+    (str (bam-uri this bc) ".header.sam"))
+  (complete? [_] (= "Completed" report-status))
+  (pdf-uri [_]
+    (format "/report/latex/%d.pdf" id)))
 
 (defrecord PluginResult [torrent-server id uri result-uri result-name state path report-link
                          name version versioned-name

@@ -737,10 +737,18 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (result ts 155)))
 
-(expect-focused 155
-        (:id
-         (with-fake-routes-in-isolation
-           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                    {:status 200 :headers {"Content-Type" "application/json"}
-                                     :body (slurp (uri-to-file uri :json))})}
-           (result (experiment ts 97)))))
+(expect (more-of x
+                 155 (:id x)
+                 false (complete? x)
+                 "/report/latex/155.pdf" (pdf-uri x)
+                 "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/IonXpressRNA_001_rawlib.bam"
+                 (bam-uri x :IonXpressRNA_001)
+                 "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/IonXpressRNA_001_rawlib.bam.bai"
+                 (bai-uri x :IonXpressRNA_001)
+                 "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/IonXpressRNA_001_rawlib.bam.header.sam"
+                 (bam-header-uri x :IonXpressRNA_001))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (result (experiment ts 97))))
