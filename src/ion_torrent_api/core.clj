@@ -6,7 +6,9 @@
             [clojure.instant :as inst]
             [ion-torrent-api [experiment :as e]]))
 
-(declare get-json get-completed-resource ensure-starts-with filter-latest-result barcode-eas-map BUFFER-SIZE)
+(declare get-json get-completed-resource ensure-starts-with filter-latest-result
+         plugin-result-type-map barcode-eas-map plugin-result-api-path-prefix
+         file-name BUFFER-SIZE)
 
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
@@ -91,7 +93,7 @@
   (pdf-uri [_]
     (format "/report/latex/%d.pdf" id)))
 
-(defrecord PluginResult [torrent-server id uri result-uri result-name state path report-link
+(defrecord PluginResult [type torrent-server id uri result-uri result-name state path report-link
                          name version versioned-name
                          library-type config-desc barcode-result-map target-name target-bed experiment-name
                          trimmed-reads? barcoded? start-time end-time raw-map]
@@ -131,7 +133,8 @@
                      "path" "reportLink"]]
       (assert (seq (get json-map "starttime")) "starttime required.")
       (assert (seq (get json-map "endtime")) "endtime required.")
-      (apply ->PluginResult (concat (map (partial get json-map) main-keys)
+      (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
+                                    (map (partial get json-map) main-keys)
                                     (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
                                     (map (partial get (get json-map "store")) ["Library Type" "Configuration" "barcodes"
                                                                          "Target Regions" "targets_bed"
@@ -195,6 +198,9 @@
    'ion_torrent_api.core.Experiment ion-torrent-api.core/map->Experiment
    'ion_torrent_api.core.Result ion-torrent-api.core/map->Result
    'ion_torrent_api.core.PluginResult ion-torrent-api.core/map->PluginResult})
+
+(def ^:private plugin-result-type-map {"variantCaller" :tsvc
+                                       "coverageAnalysis" :coverage})
 
 (defn- barcode-eas-map [m]
   (into {} (map (fn [[label {bc "barcodes"}]]
