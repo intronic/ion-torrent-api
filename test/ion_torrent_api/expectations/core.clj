@@ -183,10 +183,10 @@
 
 ;;; plugin-result
 
-#_(expect-focused (more->
+(expect (more->
          :tsvc :type
-         true  :variant-caller?
-         "variantCaller":name
+         true  variant-caller?
+         "variantCaller" :name
          "variantCaller--v4.0-r76860" :versioned-name)
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
@@ -194,12 +194,54 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (plugin-result ts 209 {})))
 
-#_(expect-focused 1
-                (with-fake-routes-in-isolation
-                  {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                           {:status 200 :headers {"Content-Type" "application/json"}
-                                            :body (slurp (uri-to-file uri :json))})}
-                  (plugin-result ts 209)))
+(expect #ion_torrent_api.core.PluginResult{:type :tsvc,
+                                           :torrent-server #ion_torrent_api.core.TorrentServer{:server-url "http://my-intranet-torrent-server.com", :creds ["user" "pass"], :api-path "/rundb/api/v1/"},
+                                           :id 209,
+                                           :uri "/rundb/api/v1/pluginresult/209/",
+                                           :result-uri "/rundb/api/v1/results/77/",
+                                           :result-name "24_reanalyze",
+                                           :state "Completed",
+                                           :path "/results/analysis/output/Home/24_reanalyze_077/plugin_out/variantCaller_out",
+                                           :report-link "/output/Home/24_reanalyze_077/",
+                                           :name "variantCaller",
+                                           :version "4.0-r76860",
+                                           :versioned-name "variantCaller--v4.0-r76860",
+                                           :library-type "AmpliSeq",
+                                           :config-desc "Somatic - Proton - Low Stringency",
+                                           :barcode-result-map
+                                           {"IonXpressRNA_001" {"hotspots" {},
+                                                                "variants" {"het_indels" 104, "het_snps" 1046,
+                                                                            "homo_indels" 21, "homo_snps" 267,
+                                                                            "no_call" 0, "other" 9, "variants" 1447}},
+                                            "IonXpressRNA_002" {"hotspots" {},
+                                                                "variants" {"het_indels" 126, "het_snps" 850,
+                                                                            "homo_indels" 24, "homo_snps" 306,
+                                                                            "no_call" 0, "other" 6, "variants" 1312}},
+                                            "IonXpressRNA_003" {"hotspots" {},
+                                                                "variants" {"het_indels" 113, "het_snps" 799,
+                                                                            "homo_indels" 22, "homo_snps" 303,
+                                                                            "no_call" 0, "other" 11, "variants" 1248}},
+                                            "IonXpressRNA_004" {"hotspots" {},
+                                                                "variants" {"het_indels" 127, "het_snps" 937,
+                                                                            "homo_indels" 26, "homo_snps" 292,
+                                                                            "no_call" 0, "other" 6, "variants" 1388}},
+                                            "IonXpressRNA_005" {"hotspots" {},
+                                                                "variants" {"het_indels" 120, "het_snps" 841,
+                                                                            "homo_indels" 21, "homo_snps" 316,
+                                                                            "no_call" 0, "other" 6, "variants" 1304}}},
+                                           :target-name "4477685_Comprehensive_CCP_bedfile_20120517",
+                                           :target-bed "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed",
+                                           :experiment-name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
+                                           :trimmed-reads? true,
+                                           :barcoded? true,
+                                           :start-time #inst "2014-02-17T05:50:42.000-00:00",
+                                           :end-time #inst "2014-02-17T09:37:51.000-00:00",
+                                           :raw-map {"size" "25242564174", "store" {"Aligned Reads" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24", "targets_bed" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed", "barcoded" "true", "Target Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "barcodes" {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}, "Configuration" "Somatic - Proton - Low Stringency", "Target Loci" "Not using", "Trim Reads" true, "Library Type" "AmpliSeq"}, "config" {}, "endtime" "2014-02-17T09:37:51.000879+00:00", "inodes" "391", "starttime" "2014-02-17T05:50:42.000089+00:00", "owner" {"last_login" "2014-04-01T05:48:44.000235+00:00", "profile" {"id" 1, "last_read_news_post" "2013-11-02T02:33:07.000710+00:00", "name" "", "note" "", "phone_number" "", "resource_uri" "", "title" "user"}, "last_name" "", "username" "ionadmin", "date_joined" "2011-05-03T18:37:38+00:00", "first_name" "", "id" 1, "resource_uri" "/rundb/api/v1/user/1/", "full_name" "", "is_active" true, "email" "ionadmin@iontorrent.com"}, "plugin" {"versionedName" "variantCaller--v4.0-r76860", "config" {}, "path" "/results/plugins/variantCaller", "active" true, "autorunMutable" true, "script" "launch.sh", "name" "variantCaller", "isConfig" false, "date" "2013-11-22T08:38:55.000219+00:00", "url" "", "status" {}, "hasAbout" false, "majorBlock" true, "isPlanConfig" true, "pluginsettings" {"depends" [], "features" [], "runlevel" [], "runtype" ["composite" "wholechip" "thumbnail"]}, "version" "4.0-r76860", "userinputfields" {}, "id" 54, "resource_uri" "/rundb/api/v1/plugin/54/", "selected" true, "autorun" false, "description" "", "isInstance" true}, "duration" "3:47:09.789983", "jobid" nil}}
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 209)))
 
 ;;; barcode map of variantCaller results
 (expect (more-of x
