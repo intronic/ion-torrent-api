@@ -102,6 +102,7 @@
   (toString [this] (pr-str this))
 
   TorrentServerAPI
+  (barcode-set [_] (into #{} (keys barcode-result-map)))
   (complete? [_] (= "Completed" state))
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
