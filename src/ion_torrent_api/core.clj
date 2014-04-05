@@ -272,7 +272,7 @@ host should "
 (defn file-name
   "File name without path."
     [f]
-    (.. (io/as-file f) getName))
+    (and f (.. (io/as-file f) getName)))
 
 ;;;
 (comment
