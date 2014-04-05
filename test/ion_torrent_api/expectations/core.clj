@@ -183,14 +183,23 @@
 
 ;;; plugin-result
 
-(expect (more-of x
-                 ["variantCaller" "variantCaller--v4.0-r76860"]
-                 ((juxt :name :versioned-name) x))
+#_(expect-focused (more->
+         :tsvc :type
+         true  :variant-caller?
+         "variantCaller":name
+         "variantCaller--v4.0-r76860" :versioned-name)
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (plugin-result ts 209 {})))
+
+#_(expect-focused 1
+                (with-fake-routes-in-isolation
+                  {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                           {:status 200 :headers {"Content-Type" "application/json"}
+                                            :body (slurp (uri-to-file uri :json))})}
+                  (plugin-result ts 209)))
 
 ;;; barcode map of variantCaller results
 (expect (more-of x
@@ -223,6 +232,18 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (#'ion/get-completed-resource ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
                                                                      (str 209)))))
+
+(expect (more-of x
+                 true (complete? x)
+                 "variantCaller" (:name x)
+                 :tsvc (:type x)
+                 true (variant-caller? x)
+                 false (coverage? x))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts (str 209))))
 
 (expect (more-of x
                  ["variantCaller" "variantCaller--v4.0-r76860"]
@@ -276,21 +297,21 @@
           (#'ion/get-completed-resource ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
                                                                      (str 66)))))
 
-(expect [:torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
+(expect [:type :torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
         (keys (with-fake-routes-in-isolation
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                          {:status 200 :headers {"Content-Type" "application/json"}
                                           :body (slurp (uri-to-file uri :json))})}
                 (plugin-result ts 209{}))))
 
-(expect '[:torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
+(expect '[:type :torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
         (keys (with-fake-routes-in-isolation
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                          {:status 200 :headers {"Content-Type" "application/json"}
                                           :body (slurp (uri-to-file uri :json))})}
                 (plugin-result ts 209 {}))))
 
-(expect [:torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
+(expect [:type :torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
         (keys (with-fake-routes-in-isolation
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                          {:status 200 :headers {"Content-Type" "application/json"}
@@ -353,7 +374,8 @@
 
 ;;; PluginResult record
 
-(expect #ion_torrent_api.core.PluginResult{:name "variantCaller", :version "4.0-r76860",
+(expect #ion_torrent_api.core.PluginResult{:type :tsvc
+                                           :name "variantCaller", :version "4.0-r76860",
                                            :versioned-name "variantCaller--v4.0-r76860",
                                            :path "/results/analysis/output/Home/24_reanalyze_077/plugin_out/variantCaller_out",
                                            :state "Completed", :result-uri "/rundb/api/v1/results/77/",
@@ -606,7 +628,7 @@
         (edn/read-string {:readers data-readers}
                          (str (map->Result { :id 99999}))))
 
-(expect #ion_torrent_api.core.PluginResult{:id 999, :uri nil, :result-uri nil, :result-name nil, :state nil, :path nil, :report-link nil, :name nil, :version nil, :versioned-name nil, :library-type nil, :config-desc nil, :barcode-result-map nil, :target-name nil, :target-bed nil, :experiment-name nil, :trimmed-reads? nil, :barcoded? nil, :start-time nil, :end-time nil, :raw-map nil}
+(expect #ion_torrent_api.core.PluginResult{:type nil :id 999, :uri nil, :result-uri nil, :result-name nil, :state nil, :path nil, :report-link nil, :name nil, :version nil, :versioned-name nil, :library-type nil, :config-desc nil, :barcode-result-map nil, :target-name nil, :target-bed nil, :experiment-name nil, :trimmed-reads? nil, :barcoded? nil, :start-time nil, :end-time nil, :raw-map nil}
         (edn/read-string {:readers data-readers}
                          (str (map->PluginResult {:id 999}))))
 
@@ -752,3 +774,15 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (result (experiment ts 97))))
+
+;;; plugin-result: coverage
+;;; plugin-result: variant-caller
+
+(expect (more-of x
+                 nil (:type x)
+                 nil (tsvc-target-bed-uri x))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 251)))
