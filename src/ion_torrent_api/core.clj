@@ -99,11 +99,30 @@
                          trimmed-reads? barcoded? start-time end-time raw-map]
 
   Object
-  (toString [this] (pr-str this)))
+  (toString [this] (pr-str this))
+
+  TorrentServerAPI
+  (complete? [_] (= "Completed" state))
+  (coverage? [_] (= :coverage type))
+  (variant-caller? [_] (= :tsvc type))
+  (tsvc-vcf-uri [this bc]
+    (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/TSVC_variants.vcf.gz"))
+  (tsvc-vcf-tbi-uri [this bc]
+    (str (tsvc-vcf-uri this bc) ".tbi"))
+  (tsvc-target-bed-uri [this]
+    target-bed)
+  (coverage-ampl-uri [this bc]
+    (if-let [prefix (get-in barcode-result-map [(core/name bc) "Alignments"])]
+      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" prefix ".amplicon.cov.xls"))))
+
+;; path:       "/results/analysis/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
+;; reportLink: "/output/Home/XXX-24-YYY/"
+;; API path:   "/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
 
 (extend-protocol TorrentServerAPI
   ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
   clojure.lang.IPersistentMap
+
   (experiment [json-map]
     (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
                      "runtype" "chipType" "samples"
@@ -118,6 +137,7 @@
                                    (inst/read-instant-date (get json-map "resultDate"))
                                    nil
                                    (apply dissoc json-map "log" main-keys)]))))
+
   (result [json-map]
     (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"
                      "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
@@ -128,6 +148,7 @@
                               [(inst/read-instant-date (get json-map "timeStamp"))
                                (boolean (get-in json-map ["metaData" "thumb"]))
                                (apply dissoc json-map main-keys)]))))
+
   (plugin-result [json-map]
     (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
                      "path" "reportLink"]]
@@ -201,6 +222,13 @@
 
 (def ^:private plugin-result-type-map {"variantCaller" :tsvc
                                        "coverageAnalysis" :coverage})
+
+(defn- plugin-result-api-path-prefix
+  "Direct path to pluginresult files through API."
+  [plugin-result]
+  (let [^String path (:filesystem-path plugin-result)
+        ^String link (:report-link plugin-result)]
+    (subs path (.indexOf path link))))
 
 (defn- barcode-eas-map [m]
   (into {} (map (fn [[label {bc "barcodes"}]]
