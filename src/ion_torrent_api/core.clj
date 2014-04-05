@@ -4,10 +4,7 @@
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
-            [ion-torrent-api
-             [experiment :as e]
-             [result :as r]
-             [plugin-result :as pr]]))
+            [ion-torrent-api [experiment :as e]]))
 
 (declare get-json get-completed-resource ensure-starts-with filter-latest-result barcode-eas-map BUFFER-SIZE)
 
