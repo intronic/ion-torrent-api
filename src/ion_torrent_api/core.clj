@@ -25,6 +25,11 @@
     "Get plugin-result by id or uri (with options 'opts').")
   (barcode-set [this]
     "Set of barcodes.")
+  (complete? [this])
+  (coverage? [this]
+    "Coverage analysis plugin.")
+  (variant-caller? [this]
+    "Variant caller plugin.")
   (bam-uri [this bc]
   "BAM uri for barcode.")
   (bai-uri [this bc]
@@ -33,7 +38,14 @@
     "BAM header uri for barcode.")
   (pdf-uri [this]
     "PDF report uri.")
-  (complete? [this]))
+  (tsvc-vcf-uri [this bc]
+    "TorrentSuite VCF uri for barcode.")
+  (tsvc-vcf-tbi-uri [this bc]
+    "TorrentSuite VCF TBI uri for barcode.")
+  (tsvc-target-bed-uri [this]
+    "TorrentSuite target bed uri.")
+  (coverage-ampl-uri [this bc]
+    "Amplicon Coverage analysis uri for barcode."))
 
 (defprotocol UniqueID
     "Unique Identifier"
