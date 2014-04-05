@@ -23,7 +23,7 @@ ts
 exp
 ; #ion_torrent_api.core.Experiment{...}
 
-(ion/experiment-name ts "R_2014_03_01_..._015/")
+(ion/experiment-name ts "R_2014_03_01_..._015")
 ; #ion_torrent_api.core.Experiment{...}
 
 (ion/barcode-set exp)
