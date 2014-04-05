@@ -211,8 +211,8 @@
       (print-method (class x) w)
       (print-method (into {} (assoc x :creds nil)) w))) ; hide user/pass
 
-(defn torrent-server
-  [server-url creds & [api-path]] (->TorrentServer server-url creds (or api-path "/rundb/api/v1/")))
+(defn torrent-server [server-url creds & [api-path]]
+  (->TorrentServer server-url creds (or api-path "/rundb/api/v1/")))
 
 (def data-readers
   {'ion_torrent_api.core.TorrentServer ion-torrent-api.core/map->TorrentServer
