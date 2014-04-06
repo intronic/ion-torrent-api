@@ -59,6 +59,7 @@
 
   TorrentServerAPI
   (barcode-set [this] (into #{} (keys barcode-sample-map)))
+  (complete? [_] (= ["run" "Complete"] [status ftp-status]))
   (result [this]
     (if latest-result
       latest-result
