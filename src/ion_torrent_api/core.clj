@@ -3,8 +3,7 @@
             [clojure.core :as core]
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
-            [clojure.instant :as inst]
-            [ion-torrent-api [experiment :as e]]))
+            [clojure.instant :as inst]))
 
 (declare get-json get-completed-resource ensure-starts-with filter-latest-result
          plugin-result-type-map barcode-eas-map plugin-result-api-path-prefix
@@ -354,3 +353,47 @@ host should "
         (io/delete-file dest-file)
         (throw e))))
   )
+
+(comment
+  (defn experiment-sample-names
+    "Return a sorted list of sample names for the experiment."
+    [e]
+    (sort (map #(% "displayedName") (experiment-sample-maps e))))
+
+  (defn experiment-sample-barcode-map
+    "Return a map of samples and vector of barcodes for the experiment."
+    [e]
+    (let [samp-bc-map (into {}
+                            (for [[s {barcodes "barcodes"}] (mapcat #(% "barcodedSamples")
+                                                                    (get e "eas_set"))]
+                              [s barcodes]))
+          samps (sort (keys samp-bc-map))
+          names (experiment-sample-names e)]
+      (assert (= samps names)
+              (pr-str "Sample name mismatch (samples=" samps ", names=" names ")"))
+      samp-bc-map))
+
+  (defn experiment-barcode-sample-map
+    "Return a map of barcodes to sample for the experiment.
+Fails if there is more than one barcode for a single sample."
+    [e]
+    (into {} (for [[s barcodes] (experiment-sample-barcode-map e)
+                   bc barcodes]
+               [bc s])))
+
+  (defn experiment-barcode-sample-map-with-dups
+    "Return a map of barcodes and vector of samples for the experiment.
+Handles the case where a sample has 2 barcodes."
+    [e]
+    (reduce (fn [m [k v]]
+              (update-in m [k] (fnil conj []) v))
+            {}
+            (for [[s barcodes] (experiment-sample-barcode-map e)
+                  bc barcodes]
+              [bc s])))
+
+  (defn experiment-samples
+    "Return a sorted list of samples for the experiment."
+    [e]
+    (sort (keys (experiment-sample-barcode-map e))))
+)
