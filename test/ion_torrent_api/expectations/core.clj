@@ -134,6 +134,13 @@
               (experiment-name ts "name-XXX-24"))))
 
 ;;; experiment
+(expect {"expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
+        (in (first (get (with-fake-routes-in-isolation
+                          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                                    :body (slurp (uri-to-file uri :json))})}
+                          (#'ion/get-completed-resource ts "experiment/name-XXX-24"))
+                        "objects"))))
 
 (expect {:pgm-name "XXXNPROTON" :name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
         (in (with-fake-routes-in-isolation
@@ -197,9 +204,21 @@
 
 (expect "/rundb/api/v1/results/77"
         (let [id-or-uri 77] (#'ion/ensure-starts-with (str (:api-path ts) "results/")
-                                                (str id-or-uri))))
+                                                      (str id-or-uri))))
+(expect {"id" 77}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (#'ion/get-completed-resource ts "results/77"))))
+(expect {:id 77}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (result ts 77))))
 
-(expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :raw-map]
+(expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :plugin-result-set :raw-map]
         (keys (with-fake-routes-in-isolation
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                          {:status 200 :headers {"Content-Type" "application/json"}
@@ -220,33 +239,36 @@
                  (result ts 77))]
             x (edn/read-string {:readers data-readers} (pr-str x)))
 
-(expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :raw-map]
-        (keys (with-fake-routes-in-isolation
-                {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                         {:status 200 :headers {"Content-Type" "application/json"}
-                                          :body (slurp (uri-to-file uri :json))})}
-                (result ts 77 {}))))
-
-(expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :raw-map]
-        (keys (with-fake-routes-in-isolation
-                {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                         {:status 200 :headers {"Content-Type" "application/json"}
-                                          :body (slurp (uri-to-file uri :json))})}
-                (result ts "/rundb/api/v1/results/77/"))))
-
-;;; plugin-result
-
-(expect (more->
-         :tsvc :type
-         true  variant-caller?
-         "variantCaller" :name
-         "variantCaller--v4.0-r76860" :versioned-name)
+(expect (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (result ts 77))
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (plugin-result ts 209 {})))
+          (result ts 77 {})))
 
+(expect (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (result ts 77))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (result ts "/rundb/api/v1/results/77/")))
+
+;;; plugin-result
+
+(expect {"id" 209 "resultName" "24_reanalyze"}
+        (in (with-fake-routes-in-isolation
+              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                       {:status 200 :headers {"Content-Type" "application/json"}
+                                        :body (slurp (uri-to-file uri :json))})}
+              (#'ion/get-completed-resource ts "pluginresult/209"))))
 (expect #ion_torrent_api.core.PluginResult{:type :tsvc,
                                            :torrent-server #ion_torrent_api.core.TorrentServer{:server-url "http://my-intranet-torrent-server.com", :api-path "/rundb/api/v1/"},
                                            :id 209,
@@ -261,27 +283,7 @@
                                            :versioned-name "variantCaller--v4.0-r76860",
                                            :library-type "AmpliSeq",
                                            :config-desc "Somatic - Proton - Low Stringency",
-                                           :barcode-result-map
-                                           {"IonXpressRNA_001" {"hotspots" {},
-                                                                "variants" {"het_indels" 104, "het_snps" 1046,
-                                                                            "homo_indels" 21, "homo_snps" 267,
-                                                                            "no_call" 0, "other" 9, "variants" 1447}},
-                                            "IonXpressRNA_002" {"hotspots" {},
-                                                                "variants" {"het_indels" 126, "het_snps" 850,
-                                                                            "homo_indels" 24, "homo_snps" 306,
-                                                                            "no_call" 0, "other" 6, "variants" 1312}},
-                                            "IonXpressRNA_003" {"hotspots" {},
-                                                                "variants" {"het_indels" 113, "het_snps" 799,
-                                                                            "homo_indels" 22, "homo_snps" 303,
-                                                                            "no_call" 0, "other" 11, "variants" 1248}},
-                                            "IonXpressRNA_004" {"hotspots" {},
-                                                                "variants" {"het_indels" 127, "het_snps" 937,
-                                                                            "homo_indels" 26, "homo_snps" 292,
-                                                                            "no_call" 0, "other" 6, "variants" 1388}},
-                                            "IonXpressRNA_005" {"hotspots" {},
-                                                                "variants" {"het_indels" 120, "het_snps" 841,
-                                                                            "homo_indels" 21, "homo_snps" 316,
-                                                                            "no_call" 0, "other" 6, "variants" 1304}}},
+                                           :barcode-result-map {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}},
                                            :target-name "4477685_Comprehensive_CCP_bedfile_20120517",
                                            :target-bed "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed",
                                            :experiment-name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
@@ -296,6 +298,29 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (plugin-result ts 209)))
 
+(expect (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 209))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 209 {})))
+
+(expect (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 209))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts "/rundb/api/v1/pluginresult/209")))
+
+
 (expect-let [x (with-fake-routes-in-isolation
                  {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                           {:status 200 :headers {"Content-Type" "application/json"}
@@ -309,6 +334,17 @@
                                            :body (slurp (uri-to-file uri :json))})}
                  (plugin-result ts 209))]
             x (edn/read-string {:readers data-readers} (pr-str x)))
+
+(expect (more->
+         :tsvc :type
+         true  variant-caller?
+         "variantCaller" :name
+         "variantCaller--v4.0-r76860" :versioned-name)
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 209 {})))
 
 ;;; barcode map of variantCaller results
 (expect (more-of x
@@ -463,14 +499,37 @@
 
 ;;; Result record
 
-(expect #ion_torrent_api.core.Result{:id 77, :name "24_reanalyze", :uri "/rundb/api/v1/results/77/", :experiment-uri "/rundb/api/v1/experiment/50/", :status "Completed", :plugin-result-uri-set ["/rundb/api/v1/pluginresult/209/" "/rundb/api/v1/pluginresult/89/"], :plugin-state-map {"IonReporterUploader" "Completed", "variantCaller" "Completed"}, :analysis-version "db:3.6.52-1,al:3.6.3-1,an:3.6.39-1,", :report-status "Nothing", :plugin-store-map {"IonReporterUploader" {}, "variantCaller" {"Aligned Reads" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24", "targets_bed" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed", "barcoded" "true", "Target Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "barcodes" {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}}, "Configuration" "Somatic - Proton - Low Stringency", "Target Loci" "Not using", "Trim Reads" true, "Library Type" "AmpliSeq"}},
+(expect #ion_torrent_api.core.Result{:id 77, :name "24_reanalyze",
+                                     :uri "/rundb/api/v1/results/77/",
+                                     :experiment-uri "/rundb/api/v1/experiment/50/", :status "Completed",
+                                     :plugin-result-set #{}
+                                     :plugin-result-uri-set ["/rundb/api/v1/pluginresult/209/" "/rundb/api/v1/pluginresult/89/"],
+                                     :plugin-state-map {"IonReporterUploader" "Completed", "variantCaller" "Completed"},
+                                     :analysis-version "db:3.6.52-1,al:3.6.3-1,an:3.6.39-1,",
+                                     :report-status "Nothing",
+                                     :plugin-store-map
+                                     {"IonReporterUploader" {},
+                                      "variantCaller"
+                                      {"Aligned Reads" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24",
+                                       "targets_bed" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed",
+                                       "barcoded" "true",
+                                       "Target Regions" "4477685_Comprehensive_CCP_bedfile_20120517",
+                                       "barcodes" {"IonXpressRNA_001" {"hotspots" {}, "variants" {"het_indels" 104, "het_snps" 1046, "homo_indels" 21, "homo_snps" 267, "no_call" 0, "other" 9, "variants" 1447}}, "IonXpressRNA_002" {"hotspots" {}, "variants" {"het_indels" 126, "het_snps" 850, "homo_indels" 24, "homo_snps" 306, "no_call" 0, "other" 6, "variants" 1312}}, "IonXpressRNA_003" {"hotspots" {}, "variants" {"het_indels" 113, "het_snps" 799, "homo_indels" 22, "homo_snps" 303, "no_call" 0, "other" 11, "variants" 1248}}, "IonXpressRNA_004" {"hotspots" {}, "variants" {"het_indels" 127, "het_snps" 937, "homo_indels" 26, "homo_snps" 292, "no_call" 0, "other" 6, "variants" 1388}}, "IonXpressRNA_005" {"hotspots" {}, "variants" {"het_indels" 120, "het_snps" 841, "homo_indels" 21, "homo_snps" 316, "no_call" 0, "other" 6, "variants" 1304}}},
+                                       "Configuration" "Somatic - Proton - Low Stringency",
+                                       "Target Loci" "Not using",
+                                       "Trim Reads" true, "Library Type" "AmpliSeq"}},
                                      :bam-link "/output/Home/24_reanalyze_077/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.bam",
                                      :fastq-link "/output/Home/24_reanalyze_077/basecaller_results/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_24_reanalyze.fastq",
                                      :report-link "/output/Home/24_reanalyze_077/",
                                      :filesystem-path "/results/analysis/output/Home/24_reanalyze_077",
-                                               :reference "hg19", :lib-metrics-uri-set ["/rundb/api/v1/libmetrics/68/"], :tf-metrics-uri-set ["/rundb/api/v1/tfmetrics/68/"], :analysis-metrics-uri-set ["/rundb/api/v1/analysismetrics/74/"], :quality-metrics-uri-set ["/rundb/api/v1/qualitymetrics/74/"]  :timestamp #inst "2013-07-23T05:18:31.000209000-00:00", :thumbnail? false
-                                               :raw-map {"timeToComplete" "0", "tfFastq" "_", "diskusage" 154878, "log" "/output/Home/24_reanalyze_077/log.html", "runid" "ZTVA2", "reportstorage" {"default" true, "dirPath" "/results/analysis/output", "id" 1, "name" "Home", "resource_uri" "", "webServerPath" "/output"}, "framesProcessed" 0, "sffLink" nil, "parentIDs" "", "autoExempt" false, "planShortID" "3XNXT", "metaData" {}, "resultsType" "", "timeStamp" "2013-07-23T05:18:31.000209+00:00", "processedflows" 0, "eas" "/rundb/api/v1/experimentanalysissettings/47/", "projects" ["/rundb/api/v1/project/3/"], "tfSffLink" nil, "processedCycles" 0, "representative" false}
-                                               :torrent-server #ion_torrent_api.core.TorrentServer{:server-url "http://my-intranet-torrent-server.com", :api-path "/rundb/api/v1/"}}
+                                     :reference "hg19",
+                                     :lib-metrics-uri-set ["/rundb/api/v1/libmetrics/68/"],
+                                     :tf-metrics-uri-set ["/rundb/api/v1/tfmetrics/68/"],
+                                     :analysis-metrics-uri-set ["/rundb/api/v1/analysismetrics/74/"],
+                                     :quality-metrics-uri-set ["/rundb/api/v1/qualitymetrics/74/"]
+                                     :timestamp #inst "2013-07-23T05:18:31.000209000-00:00", :thumbnail? false
+                                     :raw-map {"timeToComplete" "0", "tfFastq" "_", "diskusage" 154878, "log" "/output/Home/24_reanalyze_077/log.html", "runid" "ZTVA2", "reportstorage" {"default" true, "dirPath" "/results/analysis/output", "id" 1, "name" "Home", "resource_uri" "", "webServerPath" "/output"}, "framesProcessed" 0, "sffLink" nil, "parentIDs" "", "autoExempt" false, "planShortID" "3XNXT", "metaData" {}, "resultsType" "", "timeStamp" "2013-07-23T05:18:31.000209+00:00", "processedflows" 0, "eas" "/rundb/api/v1/experimentanalysissettings/47/", "projects" ["/rundb/api/v1/project/3/"], "tfSffLink" nil, "processedCycles" 0, "representative" false}
+                                     :torrent-server #ion_torrent_api.core.TorrentServer{:server-url "http://my-intranet-torrent-server.com", :api-path "/rundb/api/v1/"}}
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
