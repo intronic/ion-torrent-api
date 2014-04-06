@@ -208,7 +208,7 @@
 
 (defn torrent-server [server-url & {:keys [creds api-path] :or {api-path "/rundb/api/v1/"}}]
   ;; creds are attached to record as metadata
-  (with-meta (->TorrentServer server-url api-path) {:creds creds}))
+  (TorrentServer. server-url api-path {:creds creds} nil))
 
 (def data-readers
   {'ion_torrent_api.core.TorrentServer ion-torrent-api.core/map->TorrentServer
