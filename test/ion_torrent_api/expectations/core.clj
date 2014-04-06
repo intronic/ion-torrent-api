@@ -502,7 +502,7 @@
 (expect #ion_torrent_api.core.Result{:id 77, :name "24_reanalyze",
                                      :uri "/rundb/api/v1/results/77/",
                                      :experiment-uri "/rundb/api/v1/experiment/50/", :status "Completed",
-                                     :plugin-result-set #{}
+                                     :plugin-result-set nil
                                      :plugin-result-uri-set ["/rundb/api/v1/pluginresult/209/" "/rundb/api/v1/pluginresult/89/"],
                                      :plugin-state-map {"IonReporterUploader" "Completed", "variantCaller" "Completed"},
                                      :analysis-version "db:3.6.52-1,al:3.6.3-1,an:3.6.39-1,",
@@ -913,6 +913,14 @@
           (result ts 155)))
 
 (expect (more-of x
+                 97 (:id x))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (experiment ts 97)))
+
+(expect (more-of x
                  155 (:id x)
                  false (complete? x)
                  "/report/latex/155.pdf" (pdf-uri x)
@@ -940,3 +948,30 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (plugin-result ts 251)))
+
+;;; recursively get experiment, latest result, and pluginresults
+(expect
+ (more-of x
+          50 (:id x)
+          ion_torrent_api.core.Result (:latest-result x)
+          77 (:id (:latest-result x))
+          [[89 nil "IonReporterUploader"] [209 :tsvc "variantCaller"]]
+          (map (juxt :id :type :name)
+               (:plugin-result-set (:latest-result x))))
+ (with-fake-routes-in-isolation
+   {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                            {:status 200 :headers {"Content-Type" "application/json"}
+                             :body (slurp (uri-to-file uri :json))})}
+   (experiment ts 50 {:recurse? true})))
+
+(expect
+ (more-of x
+          97 (:id x)
+          ion_torrent_api.core.Result (:latest-result x)
+          155 (:id (:latest-result x))
+          [251] (map :id (:plugin-result-set (:latest-result x))))
+ (with-fake-routes-in-isolation
+   {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                            {:status 200 :headers {"Content-Type" "application/json"}
+                             :body (slurp (uri-to-file uri :json))})}
+   (experiment ts 97 {:recurse? true})))
