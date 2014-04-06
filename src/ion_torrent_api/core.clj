@@ -63,10 +63,14 @@
   (barcode-set [this] (into #{} (keys barcode-sample-map)))
   (complete? [_] (= ["run" "Complete"] [status ftp-status]))
   (result [this]
+    (result this nil {}))
+  (result [this _]
+    (result this nil {}))
+  (result [this _ opts]
     (if latest-result
       latest-result
       (->> result-uri-set
-           (map (partial result torrent-server))
+           (map #(result torrent-server % opts))
            (filter-latest-result this)))))
 
 
@@ -88,10 +92,13 @@
   ;; eg:
   ;; /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
   (plugin-result [this]
+    (plugin-result this nil {}))
+  (plugin-result [this _]
+    (plugin-result this nil {}))
+  (plugin-result [this _ opts]
     (if plugin-result-set
       plugin-result-set
-      (->> plugin-result-uri-set
-           (map (partial plugin-result torrent-server)))))
+      (into #{} (map #(plugin-result torrent-server % opts) plugin-result-uri-set))))
   (bam-uri [_ bc]
     (str report-link (core/name bc) "_rawlib.bam"))
   (bai-uri [this bc]
@@ -189,6 +196,7 @@
     (experiments this {"limit" limit "offset" offset }))
   (experiments [this opts]
     (get-completed-resource this "experiment/" (merge {"status__exact" "run"} opts)))
+
   (experiment-name [this name]
     (experiment-name this name {}))
   (experiment-name [this name opts]
@@ -207,7 +215,7 @@
           json (get-completed-resource this (ensure-starts-with (str (:api-path this) "experiment/")
                                                                 (str id-or-uri)))
           e (experiment (assoc json :torrent-server this))
-          r (if recurse? (result e opts))]
+          r (if recurse? (result e nil opts))]
       (assoc e :latest-result r)))
 
   (result [this id-or-uri]
@@ -217,7 +225,7 @@
           json (get-completed-resource this (ensure-starts-with (str (:api-path this) "results/")
                                                                 (str id-or-uri)))
           r (result (assoc json :torrent-server this))
-          pr-set (into #{} (if recurse? (map #(plugin-result r % opts) (:plugin-result-uri-set r))))]
+          pr-set (if recurse? (plugin-result r))]
       (assoc r :plugin-result-set pr-set)))
 
   (plugin-result [this id-or-uri]
