@@ -9,6 +9,7 @@
          plugin-result-type-map barcode-eas-map plugin-result-api-path-prefix
          file-name BUFFER-SIZE)
 
+
 (defprotocol TorrentServerAPI
   "Torrent Server API calls."
   (experiments [this] [this opts] [this limit offset]
@@ -45,9 +46,11 @@
   (coverage-ampl-uri [this bc]
     "Amplicon Coverage analysis uri for barcode."))
 
+
 (defprotocol UniqueID
     "Unique Identifier"
     (unique-id [this]))
+
 
 (defrecord Experiment [torrent-server id name pgm-name display-name uri run-type chip-type sample-map
                        result-uri-set dir status ftp-status barcode-sample-map date
@@ -66,11 +69,12 @@
            (map (partial result torrent-server))
            (filter-latest-result this)))))
 
+
 (defrecord Result [torrent-server id name uri experiment-uri status
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
-                   timestamp thumbnail? raw-map]
+                   timestamp thumbnail? plugin-result-set raw-map]
 
   Object
   (toString [this] (pr-str this))
@@ -83,6 +87,11 @@
   ;;     (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam)))))
   ;; eg:
   ;; /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
+  (plugin-result [this]
+    (if plugin-result-set
+      plugin-result-set
+      (->> plugin-result-uri-set
+           (map (partial plugin-result torrent-server)))))
   (bam-uri [_ bc]
     (str report-link (core/name bc) "_rawlib.bam"))
   (bai-uri [this bc]
@@ -92,6 +101,7 @@
   (complete? [_] (= "Completed" report-status))
   (pdf-uri [_]
     (format "/report/latex/%d.pdf" id)))
+
 
 (defrecord PluginResult [type torrent-server id uri result-uri result-name state path report-link
                          name version versioned-name
@@ -119,6 +129,7 @@
 ;; path:       "/results/analysis/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
 ;; reportLink: "/output/Home/XXX-24-YYY/"
 ;; API path:   "/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
+
 
 (extend-protocol TorrentServerAPI
   ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
@@ -148,6 +159,7 @@
       (apply ->Result (concat (map (partial get json-map) main-keys)
                               [(inst/read-instant-date (get json-map "timeStamp"))
                                (boolean (get-in json-map ["metaData" "thumb"]))
+                               nil
                                (apply dissoc json-map main-keys)]))))
 
   (plugin-result [json-map]
@@ -187,28 +199,39 @@
       ;;      (assert (and meta total-count) "Invalid experiment name query response.")
       ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
       (experiment (assoc (first objects) :torrent-server this))))
+
   (experiment [this id-or-uri]
     (experiment this id-or-uri {}))
   (experiment [this id-or-uri opts]
-    (experiment (assoc (get-completed-resource this (ensure-starts-with (str (:api-path this) "experiment/")
-                                                                        (str id-or-uri)))
-                  :torrent-server this)))
+    (let [{:keys [recurse?]} opts
+          json (get-completed-resource this (ensure-starts-with (str (:api-path this) "experiment/")
+                                                                (str id-or-uri)))
+          e (experiment (assoc json :torrent-server this))
+          r (if recurse? (result e opts))]
+      (assoc e :latest-result r)))
+
   (result [this id-or-uri]
     (result this id-or-uri {}))
   (result [this id-or-uri opts]
-    (result (assoc (get-completed-resource this (ensure-starts-with (str (:api-path this) "results/")
-                                                                    (str id-or-uri)))
-              :torrent-server this)))
+    (let [{:keys [recurse?]} opts
+          json (get-completed-resource this (ensure-starts-with (str (:api-path this) "results/")
+                                                                (str id-or-uri)))
+          r (result (assoc json :torrent-server this))
+          pr-set (into #{} (if recurse? (map #(plugin-result r % opts) (:plugin-result-uri-set r))))]
+      (assoc r :plugin-result-set pr-set)))
+
   (plugin-result [this id-or-uri]
     (plugin-result this id-or-uri {}))
   (plugin-result [this id-or-uri opts]
-    (plugin-result (assoc (get-completed-resource this (ensure-starts-with (str (:api-path this) "pluginresult/")
-                                                                           (str id-or-uri)))
-                     :torrent-server this))))
+    (let [json (get-completed-resource this (ensure-starts-with (str (:api-path this) "pluginresult/")
+                                                                (str id-or-uri)))]
+      (plugin-result (assoc json :torrent-server this)))))
+
 
 (defn torrent-server [server-url & {:keys [creds api-path] :or {api-path "/rundb/api/v1/"}}]
   ;; creds are attached to record as metadata
   (TorrentServer. server-url api-path {:creds creds} nil))
+
 
 (def data-readers
   {'ion_torrent_api.core.TorrentServer ion-torrent-api.core/map->TorrentServer
