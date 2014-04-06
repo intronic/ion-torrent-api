@@ -166,8 +166,7 @@
                                      (inst/read-instant-date (get json-map "endtime"))
                                      (apply dissoc json-map main-keys)])))))
 
-(defrecord TorrentServer [server-url creds api-path]
-
+(defrecord TorrentServer [server-url api-path]
   Object
   (toString [this] (pr-str this))
 
@@ -207,13 +206,9 @@
                                                                            (str id-or-uri)))
                      :torrent-server this))))
 
-(defmethod print-method TorrentServer [x w]
-  (do (.append w \#)
-      (print-method (class x) w)
-      (print-method (into {} (assoc x :creds nil)) w))) ; hide user/pass
-
-(defn torrent-server [server-url creds & [api-path]]
-  (->TorrentServer server-url creds (or api-path "/rundb/api/v1/")))
+(defn torrent-server [server-url & {:keys [creds api-path] :or {api-path "/rundb/api/v1/"}}]
+  ;; creds are attached to record as metadata
+  (with-meta (->TorrentServer server-url api-path) {:creds creds}))
 
 (def data-readers
   {'ion_torrent_api.core.TorrentServer ion-torrent-api.core/map->TorrentServer
