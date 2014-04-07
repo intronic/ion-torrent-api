@@ -280,7 +280,7 @@ Keys are not coerced to keywords as the JSON keys can have spaces in them which 
 host should "
   [ts resource & [opts]]
   (:body (io! (client/get (str (:server-url ts) (ensure-starts-with (:api-path ts) resource))
-                          {:as :json-string-keys :basic-auth (:creds ts) :query-params opts}))))
+                          {:as :json-string-keys :basic-auth (:creds (meta ts)) :query-params opts}))))
 
 (defn- get-completed-resource
   "Get resources with Completed status."
@@ -291,7 +291,7 @@ host should "
   "Return a file from host."
   [ts file-path]
   (:body (io! (client/get (str (:server-url ts) file-path)
-                          {:basic-auth (:creds ts)}))))
+                          {:basic-auth (:creds (meta ts))}))))
 
 
 (comment
