@@ -12,9 +12,19 @@
 (expect "test/data/my/path/to/file" (uri-to-file "/my/path/to/file/"))
 
 (comment
+  (require '[ion-torrent-api.core :as ion])
+  (import '[ion_torrent_api.core TorrentServer Experiment Result PluginResult])
+
   ;; to get test data from torrent:
   (def creds ["ion user" "ion pass"])
   (def host2 "http://my-internal-torrent-server.com")
+
+  (def ts2 (ion/torrent-server host2 :creds ["" ""]))
+  (def ts3 (ion/torrent-server host3 :creds ["" ""]))
+
+  (spit "test/e2.edn" (ion/experiments ts2 0 0))
+  (spit "test/e3.edn" (ion/experiments ts3 0 0))
+
 
   (spit "test/data/rundb/api/v1/results/77.edn" (pr-str (ion/get-result-uri creds host2 "/rundb/api/v1/results/77/")))
   (spit "test/data/rundb/api/v1/results/62.edn" (pr-str (ion/get-result-uri creds host2 "/rundb/api/v1/results/62/")))

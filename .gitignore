@@ -16,3 +16,5 @@ pom.xml.asc
 /test.clj
 \#*\#
 .\#*
+test/e2.edn
+test/e3.edn
