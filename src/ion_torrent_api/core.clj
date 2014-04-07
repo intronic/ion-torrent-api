@@ -52,8 +52,8 @@
     (unique-id [this]))
 
 
-(defrecord Experiment [torrent-server id name pgm-name display-name uri run-type chip-type sample-map
-                       result-uri-set dir status ftp-status barcode-sample-map date
+(defrecord Experiment [torrent-server id name pgm-name display-name uri run-type chip-type
+                       result-uri-set dir status ftp-status sample-map barcode-sample-map date
                        latest-result-date latest-result raw-map]
 
   Object
@@ -144,17 +144,24 @@
 
   (experiment [json-map]
     (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
-                     "runtype" "chipType" "samples"
+                     "runtype" "chipType"
                      "results" "expDir" "status" "ftpStatus"]
-          bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))]
-      (assert (<= 0 (count bc-samp) 1)
-              (str "Zero or one distinct EAS set expected. Found " (count bc-samp)
-                   " in experiment: " (get json-map "expName") " with results: "(get json-map "results") "."))
+          exp-name (get json-map "expName")
+          bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))
+          bc-samp-map (barcode-eas-map (first bc-samp))
+          samp-map (into {} (map (juxt #(get % "displayedName") identity) (get json-map "samples")))]
       (assert (seq (get json-map "date")) "date required.")
       (assert (seq (get json-map "resultDate")) "resultDate required.")
+      (assert (<= 0 (count bc-samp) 1)
+              (str "Zero or one distinct EAS set expected. Found " (count bc-samp)
+                   " in experiment: " exp-name " with results: " (pr-str (get json-map "results")) "."))
+      (assert (= (into #{} (keys samp-map)) (into #{} (vals bc-samp-map)))
+              (str "Samples dont match barcoded samples. Experiment: " exp-name
+                   ", Samples: " (pr-str (into #{} (keys samp-map))) ", Barcode samples: " (pr-str bc-samp-map) "."))
       (apply ->Experiment (concat (map (partial get json-map) main-keys)
                                   ;; for now, work with one label per barcode and one eas_set per experiment
-                                  [(barcode-eas-map (first bc-samp))
+                                  [samp-map
+                                   bc-samp-map
                                    (inst/read-instant-date (get json-map "date"))
                                    (inst/read-instant-date (get json-map "resultDate"))
                                    nil
