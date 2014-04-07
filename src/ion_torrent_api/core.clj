@@ -195,15 +195,14 @@
   (experiments [this limit offset]
     (experiments this {"limit" limit "offset" offset }))
   (experiments [this opts]
-    (get-completed-resource this "experiment/" (merge {"status__exact" "run"} opts)))
+    (get-json this "experiment/" (merge {"status__exact" "run" "ftpStatus__exact" "Complete"} opts)))
 
   (experiment-name [this name]
     (experiment-name this name {}))
   (experiment-name [this name opts]
     ;; query by options returns map with "meta" and "objects" keys
     (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (get-completed-resource this "experiment/"
-                                  (merge opts {"expName__exact" name "status__exact" "run" "limit" 2}))]
+          (experiments this (merge opts {"expName__exact" name "limit" 2}))]
       ;;      (assert (and meta total-count) "Invalid experiment name query response.")
       ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
       (experiment (assoc (first objects) :torrent-server this))))
