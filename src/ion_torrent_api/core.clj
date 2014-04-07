@@ -145,13 +145,16 @@
   (experiment [json-map]
     (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
                      "runtype" "chipType" "samples"
-                     "results" "expDir" "status" "ftpStatus"]]
-      (assert (<= 0 (count (get json-map "eas_set")) 1) "Zero or one EAS set expected.")
+                     "results" "expDir" "status" "ftpStatus"]
+          bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))]
+      (assert (<= 0 (count bc-samp) 1)
+              (str "Zero or one distinct EAS set expected. Found " (count bc-samp)
+                   " in experiment: " (get json-map "expName") " with results: "(get json-map "results") "."))
       (assert (seq (get json-map "date")) "date required.")
       (assert (seq (get json-map "resultDate")) "resultDate required.")
       (apply ->Experiment (concat (map (partial get json-map) main-keys)
                                   ;; for now, work with one label per barcode and one eas_set per experiment
-                                  [(barcode-eas-map (get (first (get json-map "eas_set")) "barcodedSamples"))
+                                  [(barcode-eas-map (first bc-samp))
                                    (inst/read-instant-date (get json-map "date"))
                                    (inst/read-instant-date (get json-map "resultDate"))
                                    nil
