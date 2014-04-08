@@ -5,8 +5,8 @@
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]))
 
-(declare get-json get-completed-resource ensure-starts-with filter-latest-result
-         plugin-result-type-map barcode-eas-map plugin-result-api-path-prefix
+(declare get-json ensure-starts-with filter-latest-result plugin-result-type-map
+         barcode-eas-map plugin-result-api-path-prefix
          file-name BUFFER-SIZE)
 
 
@@ -228,8 +228,8 @@
     (experiment this id-or-uri {}))
   (experiment [this id-or-uri opts]
     (let [{:keys [recurse?]} opts
-          json (get-completed-resource this (ensure-starts-with (str (:api-path this) "experiment/")
-                                                                (str id-or-uri)))
+          json (get-json this (ensure-starts-with (str (:api-path this) "experiment/")
+                                                  (str id-or-uri)))
           e (experiment (assoc json :torrent-server this))
           r (if recurse? (result e nil opts))]
       (assoc e :latest-result r)))
@@ -238,8 +238,8 @@
     (result this id-or-uri {}))
   (result [this id-or-uri opts]
     (let [{:keys [recurse?]} opts
-          json (get-completed-resource this (ensure-starts-with (str (:api-path this) "results/")
-                                                                (str id-or-uri)))
+          json (get-json this (ensure-starts-with (str (:api-path this) "results/")
+                                                  (str id-or-uri)))
           r (result (assoc json :torrent-server this))
           pr-set (if recurse? (plugin-result r))]
       (assoc r :plugin-result-set pr-set)))
@@ -247,8 +247,8 @@
   (plugin-result [this id-or-uri]
     (plugin-result this id-or-uri {}))
   (plugin-result [this id-or-uri opts]
-    (let [json (get-completed-resource this (ensure-starts-with (str (:api-path this) "pluginresult/")
-                                                                (str id-or-uri)))]
+    (let [json (get-json this (ensure-starts-with (str (:api-path this) "pluginresult/")
+                                                  (str id-or-uri)))]
       (plugin-result (assoc json :torrent-server this)))))
 
 
@@ -297,11 +297,6 @@ host should "
   [ts resource & [opts]]
   (:body (io! (client/get (str (:server-url ts) (ensure-starts-with (:api-path ts) resource))
                           {:as :json-string-keys :basic-auth (:creds (meta ts)) :query-params opts}))))
-
-(defn- get-completed-resource
-  "Get resources with Completed status."
-  [ts resource & [opts]]
-  (get-json ts resource (assoc opts "status__startswith" "Completed")))
 
 (defn- get-resource-file
   "Return a file from host."
