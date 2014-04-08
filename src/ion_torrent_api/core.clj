@@ -298,12 +298,34 @@ host should "
   (:body (io! (client/get (str (:server-url ts) (ensure-starts-with (:api-path ts) resource))
                           {:as :json-string-keys :basic-auth (:creds (meta ts)) :query-params opts}))))
 
-(defn- get-resource-file
-  "Return a file from host."
+(defn get-file
+  "Return a file as bytes from host."
   [ts file-path]
   (:body (io! (client/get (str (:server-url ts) file-path)
                           {:basic-auth (:creds (meta ts))}))))
 
+(defn get-file-as-stream
+  "Get a file from host as a stream."
+  [ts file-path & [opts]]
+  (:body (io! (client/get (str (:server-url ts) file-path)
+                          {:as :stream :basic-auth (:creds (meta ts)) :query-params opts}))))
+
+(defn get-file-to-stream
+  "Get a file from host and copy to stream."
+  [ts file-path out-stream & [opts]]
+  (io/copy (get-file-as-stream ts file-path opts)
+           out-stream :buffer-size BUFFER-SIZE))
+
+(defn get-file-to-file
+  "Get a file from host to local file. Deletes the local file if an exception occurs."
+  [ts file-path dest-file & [opts]]
+  (try
+    (with-open [out (io/output-stream dest-file)]
+      (get-file-to-stream ts file-path out opts)
+      dest-file)
+    (catch Exception e
+      (io/delete-file dest-file)
+      (throw e))))
 
 (comment
   (defn get-result-plugin-results
