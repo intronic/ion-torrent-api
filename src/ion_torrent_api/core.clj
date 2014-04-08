@@ -149,9 +149,11 @@
           exp-name (get json-map "expName")
           bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))
           bc-samp-map (barcode-eas-map (first bc-samp))
-          samp-map (into {} (map (juxt #(get % "displayedName") identity) (get json-map "samples")))]
-      (assert (seq (get json-map "date")) "date required.")
-      (assert (seq (get json-map "resultDate")) "resultDate required.")
+          samp-map (into {} (map (juxt #(get % "displayedName") identity) (get json-map "samples")))
+          date (inst/read-instant-date (get json-map "date"))
+          result-date (inst/read-instant-date (get json-map "resultDate"))]
+      (assert date "date required.")
+      (assert result-date "resultDate required.")
       (assert (<= 0 (count bc-samp) 1)
               (str "Zero or one distinct EAS set expected. Found " (count bc-samp)
                    " in experiment: " exp-name " with results: " (pr-str (get json-map "results")) "."))
@@ -162,8 +164,8 @@
                                   ;; for now, work with one label per barcode and one eas_set per experiment
                                   [samp-map
                                    bc-samp-map
-                                   (inst/read-instant-date (get json-map "date"))
-                                   (inst/read-instant-date (get json-map "resultDate"))
+                                   date
+                                   result-date
                                    nil
                                    (apply dissoc json-map "log" main-keys)]))))
 
