@@ -214,10 +214,15 @@
   (experiment-name [this name opts]
     ;; query by options returns map with "meta" and "objects" keys
     (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (experiments this (merge opts {"expName__exact" name "limit" 2}))]
-      ;;      (assert (and meta total-count) "Invalid experiment name query response.")
-      ;;      (assert (<= 0 total-count 1) (str "More than one experiment (" total-count ") for name [" name "]."))
-      (experiment (assoc (first objects) :torrent-server this))))
+          (experiments this {"expName__exact" name "limit" 2})]
+      (assert (and meta total-count) "Invalid experiment name query response.")
+      (assert (<= 0 total-count 1) (str "More than one experiment ("
+                                        total-count ") for name[" name "]."))
+      (let [{:keys [recurse?]} opts]
+        (if-let [json (first objects)]
+          (let [e (experiment (assoc json :torrent-server this))
+                r (if recurse? (result e nil opts))]
+            (assoc e :latest-result r))))))
 
   (experiment [this id-or-uri]
     (experiment this id-or-uri {}))
