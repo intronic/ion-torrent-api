@@ -397,27 +397,7 @@ host should "
 ;;; generic calls for resources and resource files
 
 (comment
-  (defn- get-resource-file-as-stream
-    "Get a file from host as a stream."
-    [creds host file-path & [opts]]
-    (:body (io! (client/get (str host file-path) {:as :stream :basic-auth creds :query-params opts}))))
 
-  (defn- get-resource-file-to-stream
-    "Get a file from host and copy to stream."
-    [creds host file-path out-stream & [opts]]
-    (io/copy (get-resource-file-as-stream creds host file-path opts)
-             out-stream :buffer-size BUFFER-SIZE))
-
-  (defn get-resource-file-to-file
-    "Get a file from host to local file. Deletes the local file if an exception occurs."
-    [creds host file-path dest-file & [opts]]
-    (try
-      (with-open [out (io/output-stream dest-file)]
-        (get-resource-file-to-stream creds host file-path out opts)
-        dest-file)
-      (catch Exception e
-        (io/delete-file dest-file)
-        (throw e))))
   )
 
 (comment
