@@ -146,12 +146,14 @@
     (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
                      "runtype" "chipType"
                      "results" "expDir" "status" "ftpStatus"]
+          id (get json-map "id")
           exp-name (get json-map "expName")
           bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))
           bc-samp-map (barcode-eas-map (first bc-samp))
           samp-map (into {} (map (juxt #(get % "displayedName") identity) (get json-map "samples")))
-          date (inst/read-instant-date (get json-map "date"))
-          result-date (inst/read-instant-date (get json-map "resultDate"))]
+          date (get json-map "date")
+          result-date (get json-map "resultDate")]
+      (assert id "id required.")
       (assert date "date required.")
       (assert result-date "resultDate required.")
       (assert (<= 0 (count bc-samp) 1)
@@ -164,8 +166,8 @@
                                   ;; for now, work with one label per barcode and one eas_set per experiment
                                   [samp-map
                                    bc-samp-map
-                                   date
-                                   result-date
+                                   (inst/read-instant-date date)
+                                   (inst/read-instant-date result-date)
                                    nil
                                    (apply dissoc json-map "log" main-keys)]))))
 
