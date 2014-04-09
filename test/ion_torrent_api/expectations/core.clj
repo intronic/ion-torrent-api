@@ -64,7 +64,7 @@
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (#'ion/get-json ts "experiment/name-XXX-24"))))
+              (get-json ts "experiment/name-XXX-24"))))
 
 ;;; test object
 (expect {"expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
@@ -72,7 +72,7 @@
                           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                    {:status 200 :headers {"Content-Type" "application/json"}
                                                     :body (slurp (uri-to-file uri :json))})}
-                          (#'ion/get-json ts "experiment/name-XXX-24"))
+                          (get-json ts "experiment/name-XXX-24"))
                         "objects"))))
 
 (expect {"expName" "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
@@ -80,7 +80,7 @@
                           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                    {:status 200 :headers {"Content-Type" "application/json"}
                                                     :body (slurp (uri-to-file uri :json))})}
-                          (#'ion/get-json ts "experiment/name-XXX-24"))
+                          (get-json ts "experiment/name-XXX-24"))
                         "objects"))))
 
 ;;; ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -139,7 +139,7 @@
                           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                    {:status 200 :headers {"Content-Type" "application/json"}
                                                     :body (slurp (uri-to-file uri :json))})}
-                          (#'ion/get-json ts "experiment/name-XXX-24"))
+                          (get-json ts "experiment/name-XXX-24"))
                         "objects"))))
 
 (expect {:pgm-name "XXXNPROTON" :name "R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24"}
@@ -214,7 +214,7 @@
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (#'ion/get-json ts "results/77"))))
+              (get-json ts "results/77"))))
 (expect {:id 77}
         (in (with-fake-routes-in-isolation
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
@@ -272,7 +272,7 @@
               {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                        {:status 200 :headers {"Content-Type" "application/json"}
                                         :body (slurp (uri-to-file uri :json))})}
-              (#'ion/get-json ts "pluginresult/209"))))
+              (get-json ts "pluginresult/209"))))
 (expect #ion_torrent_api.core.PluginResult{:type :tsvc,
                                            :torrent-server #ion_torrent_api.core.TorrentServer{:server-url "http://my-intranet-torrent-server.com", :api-path "/rundb/api/v1/"},
                                            :id 209,
@@ -379,7 +379,7 @@
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (#'ion/get-json ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
+          (get-json ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
                                                        (str 209)))))
 
 (expect (more-of x
@@ -443,7 +443,7 @@
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          (#'ion/get-json ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
+          (get-json ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
                                                        (str 66)))))
 
 (expect '[:type :torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
