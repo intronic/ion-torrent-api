@@ -22,6 +22,14 @@
     "Get result by id or uri (with options 'opts').")
   (plugin-result [this] [this id-or-uri] [this id-or-uri opts]
     "Get plugin-result by id or uri (with options 'opts').")
+  (lib-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get lib-metrics by id or uri (with options 'opts').")
+  (tf-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get tf-metrics by id or uri (with options 'opts').")
+  (analysis-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get analysis-metrics by id or uri (with options 'opts').")
+  (quality-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get quality-metrics by id or uri (with options 'opts').")
   (barcode-set [this]
     "Set of barcodes.")
   (complete? [this])
@@ -78,7 +86,8 @@
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
-                   timestamp thumbnail? plugin-result-set raw-map]
+                   timestamp thumbnail? plugin-result-set lib-metrics-set tf-metrics-set
+                   analysis-metrics-set quality-metrics-set raw-map]
 
   Object
   (toString [this] (pr-str this))
@@ -99,6 +108,38 @@
     (if plugin-result-set
       plugin-result-set
       (into #{} (map #(plugin-result torrent-server % opts) plugin-result-uri-set))))
+  (lib-metrics [this]
+    (lib-metrics this nil {}))
+  (lib-metrics [this _]
+    (lib-metrics this nil {}))
+  (lib-metrics [this _ opts]
+    (if lib-metrics-set
+      lib-metrics-set
+      (into #{} (map #(lib-metrics torrent-server % opts) lib-metrics-uri-set))))
+  (tf-metrics [this]
+    (tf-metrics this nil {}))
+  (tf-metrics [this _]
+    (tf-metrics this nil {}))
+  (tf-metrics [this _ opts]
+    (if tf-metrics-set
+      tf-metrics-set
+      (into #{} (map #(tf-metrics torrent-server % opts) tf-metrics-uri-set))))
+  (analysis-metrics [this]
+    (analysis-metrics this nil {}))
+  (analysis-metrics [this _]
+    (analysis-metrics this nil {}))
+  (analysis-metrics [this _ opts]
+    (if analysis-metrics-set
+      analysis-metrics-set
+      (into #{} (map #(analysis-metrics torrent-server % opts) analysis-metrics-uri-set))))
+  (quality-metrics [this]
+    (quality-metrics this nil {}))
+  (quality-metrics [this _]
+    (quality-metrics this nil {}))
+  (quality-metrics [this _ opts]
+    (if quality-metrics-set
+      quality-metrics-set
+      (into #{} (map #(quality-metrics torrent-server % opts) quality-metrics-uri-set))))
   (bam-uri [_ bc]
     (str report-link (core/name bc) "_rawlib.bam"))
   (bai-uri [this bc]
@@ -180,7 +221,7 @@
       (apply ->Result (concat (map (partial get json-map) main-keys)
                               [(inst/read-instant-date (get json-map "timeStamp"))
                                (boolean (get-in json-map ["metaData" "thumb"]))
-                               nil
+                               nil nil nil nil nil
                                (apply dissoc json-map main-keys)]))))
 
   (plugin-result [json-map]
@@ -198,6 +239,7 @@
                                      (inst/read-instant-date (get json-map "starttime"))
                                      (inst/read-instant-date (get json-map "endtime"))
                                      (apply dissoc json-map main-keys)])))))
+
 
 (defrecord TorrentServer [server-url api-path]
   Object
@@ -219,7 +261,7 @@
           (experiments this {"expName__contains" name "limit" 2})]
       (assert (and meta total-count) "Invalid experiment name query response.")
       (assert (not (> total-count 1)) (str "More than one experiment matching name '" name "': "
-                                        (pr-str (map #(get % "expName") objects))))
+                                           (pr-str (map #(get % "expName") objects))))
       (assert (not (zero? total-count)) (str "No experiments matching name '" name "'."))
       (let [{:keys [recurse?]} opts]
         (if-let [json (first objects)]
@@ -243,16 +285,46 @@
     (let [{:keys [recurse?]} opts
           json (get-json this (ensure-starts-with (str (:api-path this) "results/")
                                                   (str id-or-uri)))
-          r (result (assoc json :torrent-server this))
-          pr-set (if recurse? (plugin-result r))]
-      (assoc r :plugin-result-set pr-set)))
+          r (result (assoc json :torrent-server this))]
+      (merge r (when recurse?
+                 {:plugin-result-set (plugin-result r)
+                  :lib-metrics-set (into #{} (map #(lib-metrics this % opts)
+                                                  (:lib-metrics-uri-set r)))
+                  :tf-metrics-set (into #{} (map #(tf-metrics this % opts)
+                                                 (:tf-metrics-uri-set r)))
+                  :analysis-metrics-set (into #{} (map #(analysis-metrics this % opts)
+                                                       (:analysis-metrics-uri-set r)))
+                  :quality-metrics-set (into #{} (map #(quality-metrics this % opts)
+                                                      (:quality-metrics-uri-set r)))}
+                 ))))
 
   (plugin-result [this id-or-uri]
     (plugin-result this id-or-uri {}))
   (plugin-result [this id-or-uri opts]
     (let [json (get-json this (ensure-starts-with (str (:api-path this) "pluginresult/")
                                                   (str id-or-uri)))]
-      (plugin-result (assoc json :torrent-server this)))))
+      (plugin-result (assoc json :torrent-server this))))
+
+  (lib-metrics [this id-or-uri]
+    (lib-metrics this id-or-uri {}))
+  (lib-metrics [this id-or-uri opts]
+    (get-json this (ensure-starts-with (str (:api-path this) "libmetrics/")
+                                       (str id-or-uri))))
+  (tf-metrics [this id-or-uri]
+    (tf-metrics this id-or-uri {}))
+  (tf-metrics [this id-or-uri opts]
+    (get-json this (ensure-starts-with (str (:api-path this) "tfmetrics/")
+                                       (str id-or-uri))))
+  (analysis-metrics [this id-or-uri]
+    (analysis-metrics this id-or-uri {}))
+  (analysis-metrics [this id-or-uri opts]
+    (get-json this (ensure-starts-with (str (:api-path this) "analysismetrics/")
+                                       (str id-or-uri))))
+  (quality-metrics [this id-or-uri]
+    (quality-metrics this id-or-uri {}))
+  (quality-metrics [this id-or-uri opts]
+    (get-json this (ensure-starts-with (str (:api-path this) "qualitymetrics/")
+                                       (str id-or-uri)))))
 
 
 (defn torrent-server [server-url & {:keys [creds api-path] :or {api-path "/rundb/api/v1/"}}]
@@ -330,34 +402,6 @@ host should "
       (io/delete-file dest-file)
       (throw e))))
 
-(comment
-  (defn get-result-plugin-results
-    "All plugin-results for a result (completed), in most-recent-first order."
-    [creds host r]
-    (->> (r/result-plugin-results r)
-         (map #(get-plugin-result-uri creds host %))
-         sort-by-id-desc))
-
-  (defn- get-result-metrics
-    "Sorted list of metrics for a result."
-    [metric-name creds host res]
-    (sort-by-id-desc
-     (map #(get-json creds host %)
-          (get res metric-name))))
-
-  (def get-result-libmetrics
-    (partial get-result-metrics "libmetrics"))
-
-  (def get-result-qualitymetrics
-    (partial get-result-metrics "qualitymetrics"))
-
-  (def get-result-analysismetrics
-    (partial get-result-metrics "analysismetrics"))
-
-  (def get-result-tfmetrics
-    (partial get-result-metrics "tfmetrics")))
-
-
 ;;; general
 (def ^:const ^:private BUFFER-SIZE (* 16 1024))
 
@@ -370,36 +414,6 @@ host should "
   "File name without path."
     [f]
     (and f (.. (io/as-file f) getName)))
-
-;;;
-(comment
-
-  (defn newest-variant-caller-plugin-result
-    "Get the newest completed variantCaller if any from a collection of plugin-results."
-    [pr-coll]
-    (some pr/plugin-result-variant-caller? pr-coll))
-
-  (defn newest-coverage-plugin-result
-    "Get the newest completed variantCaller if any from a collection of plugin-results."
-    [pr-coll]
-    (some pr/plugin-result-coverage? pr-coll))
-
-  (defn get-experiment-results
-    "All results for an experiment (completed, not thumbnails), in most-recent-first order."
-    [creds host e]
-    (->> (e/experiment-result-uri e)
-         (map #(get-result-uri creds host %))
-         (remove r/result-metadata-thumb) ; HACK how to exclude thumbs in the query API?
-         sort-by-id-desc)))
-
-;;; ;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Query Torrent Server API
-
-;;; generic calls for resources and resource files
-
-(comment
-
-  )
 
 (comment
   (defn experiment-sample-names
