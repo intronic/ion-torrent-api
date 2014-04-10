@@ -361,6 +361,7 @@
         res (filter #(<= date (.getTime ^java.util.Date (:timestamp %)))
                     r-coll)]
     (assert (<= 0 (count res) 1) "0 or 1 latest results expected.")
+    (assert (not (:thumbnail? (first res))) "Latest result is thumbnail.")
     (first r-coll)))
 
 ;;;
