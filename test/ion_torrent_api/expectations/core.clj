@@ -222,7 +222,7 @@
                                         :body (slurp (uri-to-file uri :json))})}
               (result ts 77))))
 
-(expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :plugin-result-set :raw-map]
+(expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :plugin-result-set :lib-metrics-set :tf-metrics-set :analysis-metrics-set :quality-metrics-set :raw-map]
         (keys (with-fake-routes-in-isolation
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                          {:status 200 :headers {"Content-Type" "application/json"}
