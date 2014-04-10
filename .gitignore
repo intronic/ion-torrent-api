@@ -18,3 +18,4 @@ pom.xml.asc
 .\#*
 test/e2.edn
 test/e3.edn
+get-json.sh
