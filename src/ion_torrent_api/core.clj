@@ -86,8 +86,9 @@
                    plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
                    bam-link fastq-link report-link filesystem-path reference
                    lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
-                   timestamp thumbnail? plugin-result-set lib-metrics-set tf-metrics-set
-                   analysis-metrics-set quality-metrics-set raw-map]
+                   timestamp thumbnail? plugin-result-set
+                   lib-metrics-set tf-metrics-set analysis-metrics-set quality-metrics-set
+                   raw-map]
 
   Object
   (toString [this] (pr-str this))
@@ -221,7 +222,8 @@
       (apply ->Result (concat (map (partial get json-map) main-keys)
                               [(inst/read-instant-date (get json-map "timeStamp"))
                                (boolean (get-in json-map ["metaData" "thumb"]))
-                               nil nil nil nil nil
+                               nil
+                               nil nil nil nil
                                (apply dissoc json-map main-keys)]))))
 
   (plugin-result [json-map]
@@ -275,9 +277,8 @@
     (let [{:keys [recurse?]} opts
           json (get-json this (ensure-starts-with (str (:api-path this) "experiment/")
                                                   (str id-or-uri)))
-          e (experiment (assoc json :torrent-server this))
-          r (if recurse? (result e nil opts))]
-      (assoc e :latest-result r)))
+          e (experiment (assoc json :torrent-server this))]
+      (merge e (if recurse? {:latest-result (result e nil opts)}))))
 
   (result [this id-or-uri]
     (result this id-or-uri {}))
@@ -358,11 +359,11 @@
   "Get the newest completed result matching the experiment from a collection of results."
   [e r-coll]
   (let [date (.getTime ^java.util.Date (:latest-result-date e))
-        res (filter #(<= date (.getTime ^java.util.Date (:timestamp %)))
-                    r-coll)]
-    (assert (<= 0 (count res) 1) "0 or 1 latest results expected.")
-    (assert (not (:thumbnail? (first res))) "Latest result is thumbnail.")
-    (first r-coll)))
+        r-coll (filter #(>= (.getTime ^java.util.Date (:timestamp %)) date) r-coll)
+        res (first r-coll)]
+    (assert (<= 0 (count r-coll) 1) "0 or 1 latest results expected.")
+    (assert (not (:thumbnail? res)) "Latest result is thumbnail.")
+    res))
 
 ;;;
 
