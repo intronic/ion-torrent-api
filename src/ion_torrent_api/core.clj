@@ -196,8 +196,11 @@
     (experiment-name this name {}))
   (experiment-name [this name opts]
     ;; query by options returns map with "meta" and "objects" keys
+    ;; if name has any upper case char then do case-sensitive search
     (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (experiments this {"expName__contains" name "limit" 2})]
+          (experiments this {(str "expName__" (if (some #(Character/isUpperCase %) (seq name))
+                                                "contains"
+                                                "icontains")) name "limit" 2})]
       (assert (and meta total-count) "Invalid experiment name query response.")
       (assert (not (> total-count 1)) (str "More than one experiment matching name '" name "': "
                                            (pr-str (map #(get % "expName") objects))))
