@@ -243,7 +243,7 @@
                                      (apply dissoc json-map main-keys)])))))
 
 
-(defrecord TorrentServer [server-url api-path]
+(defrecord TorrentServer [server-url version api-path]
   Object
   (toString [this] (pr-str this))
 
@@ -328,9 +328,10 @@
                                        (str id-or-uri)))))
 
 
-(defn torrent-server [server-url & {:keys [creds api-path] :or {api-path "/rundb/api/v1/"}}]
+(defn torrent-server [server-url & {:keys [creds version api-path] :or {version :v1}}]
   ;; creds are attached to record as metadata
-  (TorrentServer. server-url api-path {:creds creds} nil))
+  (TorrentServer. server-url version (or api-path ({:v1 "/rundb/api/v1/"} version))
+                  {:creds creds} nil))
 
 
 (def data-readers
