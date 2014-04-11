@@ -180,69 +180,6 @@
 ;; API path:   "/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
 
 
-(extend-protocol TorrentServerAPI
-  ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
-  clojure.lang.IPersistentMap
-
-  (experiment [json-map]
-    (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
-                     "runtype" "chipType"
-                     "results" "expDir" "status" "ftpStatus"]
-          id (get json-map "id")
-          exp-name (get json-map "expName")
-          bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))
-          bc-samp-map (barcode-eas-map (first bc-samp))
-          samp-map (into {} (map (juxt #(get % "displayedName") identity) (get json-map "samples")))
-          date (get json-map "date")
-          result-date (get json-map "resultDate")]
-      (assert id "id required.")
-      (assert date "date required.")
-      (assert result-date "resultDate required.")
-      (assert (<= 0 (count bc-samp) 1)
-              (str "Zero or one distinct EAS set expected. Found " (count bc-samp)
-                   " in experiment: " exp-name " with results: " (pr-str (get json-map "results")) "."))
-      (assert (= (into #{} (keys samp-map)) (into #{} (vals bc-samp-map)))
-              (str "Samples dont match barcoded samples. Experiment: " exp-name
-                   ", Samples: " (pr-str (into #{} (keys samp-map))) ", Barcode samples: " (pr-str bc-samp-map) "."))
-      (apply ->Experiment (concat (map (partial get json-map) main-keys)
-                                  ;; for now, work with one label per barcode and one eas_set per experiment
-                                  [samp-map
-                                   bc-samp-map
-                                   (inst/read-instant-date date)
-                                   (inst/read-instant-date result-date)
-                                   nil
-                                   (apply dissoc json-map "log" main-keys)]))))
-
-  (result [json-map]
-    (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"
-                     "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
-                     "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
-                     "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
-      (assert (seq (get json-map "timeStamp")) "timeStamp required.")
-      (apply ->Result (concat (map (partial get json-map) main-keys)
-                              [(inst/read-instant-date (get json-map "timeStamp"))
-                               (boolean (get-in json-map ["metaData" "thumb"]))
-                               nil
-                               nil nil nil nil
-                               (apply dissoc json-map main-keys)]))))
-
-  (plugin-result [json-map]
-    (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
-                     "path" "reportLink"]]
-      (assert (seq (get json-map "starttime")) "starttime required.")
-      (assert (seq (get json-map "endtime")) "endtime required.")
-      (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
-                                    (map (partial get json-map) main-keys)
-                                    (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
-                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration" "barcodes"
-                                                                         "Target Regions" "targets_bed"
-                                                                         "Aligned Reads" "Trim Reads"])
-                                    [(.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
-                                     (inst/read-instant-date (get json-map "starttime"))
-                                     (inst/read-instant-date (get json-map "endtime"))
-                                     (apply dissoc json-map main-keys)])))))
-
-
 (defrecord TorrentServer [server-url version api-path]
   Object
   (toString [this] (pr-str this))
@@ -332,6 +269,69 @@
   ;; creds are attached to record as metadata
   (TorrentServer. server-url version (or api-path ({:v1 "/rundb/api/v1/"} version))
                   {:creds creds} nil))
+
+
+(extend-protocol TorrentServerAPI
+  ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
+  clojure.lang.IPersistentMap
+
+  (experiment [json-map]
+    (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
+                     "runtype" "chipType"
+                     "results" "expDir" "status" "ftpStatus"]
+          id (get json-map "id")
+          exp-name (get json-map "expName")
+          bc-samp (distinct (map #(get % "barcodedSamples") (get json-map "eas_set")))
+          bc-samp-map (barcode-eas-map (first bc-samp))
+          samp-map (into {} (map (juxt #(get % "displayedName") identity) (get json-map "samples")))
+          date (get json-map "date")
+          result-date (get json-map "resultDate")]
+      (assert id "id required.")
+      (assert date "date required.")
+      (assert result-date "resultDate required.")
+      (assert (<= 0 (count bc-samp) 1)
+              (str "Zero or one distinct EAS set expected. Found " (count bc-samp)
+                   " in experiment: " exp-name " with results: " (pr-str (get json-map "results")) "."))
+      (assert (= (into #{} (keys samp-map)) (into #{} (vals bc-samp-map)))
+              (str "Samples dont match barcoded samples. Experiment: " exp-name
+                   ", Samples: " (pr-str (into #{} (keys samp-map))) ", Barcode samples: " (pr-str bc-samp-map) "."))
+      (apply ->Experiment (concat (map (partial get json-map) main-keys)
+                                  ;; for now, work with one label per barcode and one eas_set per experiment
+                                  [samp-map
+                                   bc-samp-map
+                                   (inst/read-instant-date date)
+                                   (inst/read-instant-date result-date)
+                                   nil
+                                   (apply dissoc json-map "log" main-keys)]))))
+
+  (result [json-map]
+    (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"
+                     "pluginresults" "pluginState" "analysisVersion" "reportStatus" "pluginStore"
+                     "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
+                     "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
+      (assert (seq (get json-map "timeStamp")) "timeStamp required.")
+      (apply ->Result (concat (map (partial get json-map) main-keys)
+                              [(inst/read-instant-date (get json-map "timeStamp"))
+                               (boolean (get-in json-map ["metaData" "thumb"]))
+                               nil
+                               nil nil nil nil
+                               (apply dissoc json-map main-keys)]))))
+
+  (plugin-result [json-map]
+    (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
+                     "path" "reportLink"]]
+      (assert (seq (get json-map "starttime")) "starttime required.")
+      (assert (seq (get json-map "endtime")) "endtime required.")
+      (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
+                                    (map (partial get json-map) main-keys)
+                                    (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
+                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration" "barcodes"
+                                                                         "Target Regions" "targets_bed"
+                                                                         "Aligned Reads" "Trim Reads"])
+                                    [(.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
+                                     (inst/read-instant-date (get json-map "starttime"))
+                                     (inst/read-instant-date (get json-map "endtime"))
+                                     (apply dissoc json-map main-keys)])))))
 
 
 (def data-readers
