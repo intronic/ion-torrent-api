@@ -351,7 +351,7 @@
 (defn- plugin-result-api-path-prefix
   "Direct path to pluginresult files through API."
   [plugin-result]
-  (let [^String path (:filesystem-path plugin-result)
+  (let [^String path (:path plugin-result)
         ^String link (:report-link plugin-result)]
     (subs path (.indexOf path link))))
 

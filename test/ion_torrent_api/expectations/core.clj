@@ -1071,7 +1071,15 @@
           97 (:id x)
           ion_torrent_api.core.Result (:latest-result x)
           155 (:id (:latest-result x))
-          [251] (map :id (:plugin-result-set (:latest-result x))))
+          [251] (map :id (:plugin-result-set (:latest-result x)))
+          ion_torrent_api.core.PluginResult (type (first (:plugin-result-set (:latest-result x))))
+          "/results/analysis/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/plugin_out/FastqCreator_jb_out"
+          (:path (first (:plugin-result-set (:latest-result x))))
+          "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/"
+          (:report-link (first (:plugin-result-set (:latest-result x))))
+          "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/plugin_out/FastqCreator_jb_out"
+          (#'ion/plugin-result-api-path-prefix (first (:plugin-result-set (:latest-result x))))
+          )
  (with-fake-routes-in-isolation
    {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                             {:status 200 :headers {"Content-Type" "application/json"}
