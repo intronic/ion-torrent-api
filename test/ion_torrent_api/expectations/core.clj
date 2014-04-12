@@ -127,7 +127,7 @@
                       {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                {:status 200 :headers {"Content-Type" "application/json"}
                                                 :body (slurp (uri-to-file uri :json))})}
-                      (experiments ts 20 20))
+                      (experiments ts {} "namefilter"))
                     "objects")))
 
 ;;; experiment-name
