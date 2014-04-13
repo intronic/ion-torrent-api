@@ -165,6 +165,12 @@
   (complete? [_] (= "Completed" state))
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
+  (bam-uri [this bc]
+    (if (variant-caller? this)
+      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" (core/name bc) "_rawlib_PTRIM.bam")))
+  (bai-uri [this bc]
+    (if (variant-caller? this)
+      (str (bam-uri this bc) ".bai")))
   (tsvc-vcf-uri [this bc]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/TSVC_variants.vcf.gz")))

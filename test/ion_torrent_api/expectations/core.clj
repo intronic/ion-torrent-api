@@ -471,7 +471,11 @@
                  "IonXpressRNA_001_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50"
                  (get-in (:barcode-result-map x) [(name :IonXpressRNA_001) "Alignments"])
                  "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out/IonXpressRNA_001/IonXpressRNA_001_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50.amplicon.cov.xls"
-                 (coverage-ampl-uri x :IonXpressRNA_001))
+                 (coverage-ampl-uri x :IonXpressRNA_001)
+                 nil
+                 (bam-uri x :IonXpressRNA_001)
+                 nil
+                 (bai-uri x :IonXpressRNA_001))
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
@@ -1093,13 +1097,18 @@
                  (first (:plugin-result-set x))
                  ion_torrent_api.core.PluginResult
                  (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x)))
+
                  "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz"
                  (tsvc-vcf-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
                  "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz.tbi"
                  (tsvc-vcf-tbi-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
                  "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/4477685_Comprehensive_CCP_bedfile_20120517.bed"
                  (tsvc-target-bed-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))))
-                 )
+
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam"
+                 (bam-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam.bai"
+                 (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001))
         (:latest-result (with-fake-routes-in-isolation
                           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                    {:status 200 :headers {"Content-Type" "application/json"}
