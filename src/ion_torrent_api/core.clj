@@ -166,14 +166,18 @@
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
   (tsvc-vcf-uri [this bc]
-    (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/TSVC_variants.vcf.gz"))
+    (if (variant-caller? this)
+      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/TSVC_variants.vcf.gz")))
   (tsvc-vcf-tbi-uri [this bc]
-    (str (tsvc-vcf-uri this bc) ".tbi"))
+    (if (variant-caller? this)
+      (str (tsvc-vcf-uri this bc) ".tbi")))
   (tsvc-target-bed-uri [this]
-    target-bed)
+    (if (variant-caller? this)
+      (str (plugin-result-api-path-prefix this) "/" target-name ".bed")))
   (coverage-ampl-uri [this bc]
-    (if-let [prefix (get-in barcode-result-map [(core/name bc) "Alignments"])]
-      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" prefix ".amplicon.cov.xls"))))
+    (if (coverage? this)
+      (if-let [prefix (get-in barcode-result-map [(core/name bc) "Alignments"])]
+        (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" prefix ".amplicon.cov.xls")))))
 
 ;; path:       "/results/analysis/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
 ;; reportLink: "/output/Home/XXX-24-YYY/"

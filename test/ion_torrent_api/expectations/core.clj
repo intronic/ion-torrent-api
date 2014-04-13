@@ -460,6 +460,24 @@
           (get-json ts (#'ion/ensure-starts-with (str (:api-path ts) "pluginresult/")
                                                        (str 66)))))
 
+(expect (more-of x
+                 ion_torrent_api.core.PluginResult x
+                 66 (:id x)
+                 :coverage (:type x)
+                 "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out"
+                 (#'ion/plugin-result-api-path-prefix x)
+                 #{"IonXpressRNA_001" "IonXpressRNA_002" "IonXpressRNA_003" "IonXpressRNA_004" "IonXpressRNA_005"}
+                 (barcode-set x)
+                 "IonXpressRNA_001_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50"
+                 (get-in (:barcode-result-map x) [(name :IonXpressRNA_001) "Alignments"])
+                 "/output/Home/Auto_user_XXX-24-AmpliSeq_CCP_24_50_061/plugin_out/coverageAnalysis_out/IonXpressRNA_001/IonXpressRNA_001_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50.amplicon.cov.xls"
+                 (coverage-ampl-uri x :IonXpressRNA_001))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (plugin-result ts 66)))
+
 (expect '[:type :torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
         (keys (with-fake-routes-in-isolation
                 {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
@@ -1065,6 +1083,28 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (experiment ts 50 {:recurse? true})))
+
+(expect (more-of x
+                 ion_torrent_api.core.Result x
+                 77 (:id x)
+                 [[89 nil "IonReporterUploader"] [209 :tsvc "variantCaller"]]
+                 (map (juxt :id :type :name) (:plugin-result-set x))
+                 ion_torrent_api.core.PluginResult
+                 (first (:plugin-result-set x))
+                 ion_torrent_api.core.PluginResult
+                 (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x)))
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz"
+                 (tsvc-vcf-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz.tbi"
+                 (tsvc-vcf-tbi-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/4477685_Comprehensive_CCP_bedfile_20120517.bed"
+                 (tsvc-target-bed-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))))
+                 )
+        (:latest-result (with-fake-routes-in-isolation
+                          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                                    :body (slurp (uri-to-file uri :json))})}
+                          (experiment ts 50 {:recurse? true}))))
 
 (expect
  (more-of x
