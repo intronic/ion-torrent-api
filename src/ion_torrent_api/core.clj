@@ -3,7 +3,8 @@
             [clojure.core :as core]
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
-            [clojure.instant :as inst]))
+            [clojure.instant :as inst]
+            [slingshot.slingshot :refer (try+ throw+)]))
 
 (declare get-json ensure-starts-with filter-latest-result plugin-result-type-map
          barcode-eas-map plugin-result-api-path-prefix
@@ -147,7 +148,7 @@
     (str (bam-uri this bc) ".bai"))
   (bam-header-uri [this bc]
     (str (bam-uri this bc) ".header.sam"))
-  (complete? [_] (= "Completed" report-status))
+  (complete? [_] (= "Completed" status))
   (pdf-uri [_]
     (format "/report/latex/%d.pdf" id)))
 
@@ -372,13 +373,19 @@
                 m)))
 
 (defn filter-latest-result
-  "Get the newest completed result matching the experiment from a collection of results."
-  [e r-coll]
-  (let [date (.getTime ^java.util.Date (:latest-result-date e))
-        r-coll (filter #(>= (.getTime ^java.util.Date (:timestamp %)) date) r-coll)
+  "Get the newest, completed, non-thumbnail result matching the experiment from a collection of results."
+  [exp res-coll]
+  (let [date (.getTime ^java.util.Date (:latest-result-date exp))
+        r-coll (filter #(and (<= date (.getTime ^java.util.Date (:timestamp %)))
+                             (complete? %)
+                             (not (:thumbnail? %)))
+                       res-coll)
         res (first r-coll)]
-    (assert (<= 0 (count r-coll) 1) "0 or 1 latest results expected.")
-    (assert (not (:thumbnail? res)) "Latest result is thumbnail.")
+    (if-not (<= 0 (count r-coll) 1)
+      (throw+ {:data {:exp-id (:id exp) :exp-name (:name exp) :count (count r-coll) :res (mapv :id r-coll)}
+               :msg "0 or 1 latest results expected."}))
+    (if (:thumbnail? res)  (throw+ {:data {:res-id (:id res) :res-name (:name res) :exp-id (:id exp) :exp-name (:name exp)}
+                                    :msg "Latest result is thumbnail."}))
     res))
 
 ;;;

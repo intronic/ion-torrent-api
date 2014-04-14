@@ -122,7 +122,7 @@
                                                 :body (slurp (uri-to-file uri :json))})}
                       (experiments ts {"some" "opts"}))
                     "objects")))
-#_(expect 20
+(expect 20
         (count (get (with-fake-routes-in-isolation
                       {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                {:status 200 :headers {"Content-Type" "application/json"}
@@ -918,34 +918,69 @@
             (> (.getTime ^java.util.Date (:timestamp r155))
                (.getTime ^java.util.Date (:timestamp r156))))
 
-;;; borcode map is empty for plugin-result 251 which comes from result 155
-(expect nil
-        (with-fake-routes-in-isolation
-          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                   {:status 200 :headers {"Content-Type" "application/json"}
-                                    :body (slurp (uri-to-file uri :json))})}
-          (:barcode-map  (plugin-result ts 251))))
 ;;;
+
 (expect (more-of coll
                  ion_torrent_api.core.Experiment
-                 (first coll)
+                 (:e coll)
                  [ion_torrent_api.core.Result ion_torrent_api.core.Result]
-                 (map type (rest coll))
+                 (map type (:r coll))
                  #inst "2014-03-27T11:24:17.000-00:00"
-                 (:latest-result-date (first coll))
+                 (:latest-result-date (:e coll))
                  1395919457000
-                 (.getTime ^java.util.Date (:latest-result-date (first coll)))
+                 (.getTime ^java.util.Date (:latest-result-date (:e coll)))
                  [[1395919457000 155] [1395901265000 156]]
-                 (sort-by first > (map (juxt #(.getTime ^java.util.Date (:timestamp %)) :id) (rest coll)))
+                 (sort-by first > (map (juxt #(.getTime ^java.util.Date (:timestamp %)) :id) (:r coll)))
+                 ["Completed" "Completed"]
+                 (map :status (:r coll))
+                 [false true]
+                 (map :thumbnail? (:r coll))
+                 1395919457000
+                 (.getTime ^java.util.Date (:latest-result-date (:e coll)))
+                 [1395919457000 1395901265000]
+                 (map  #(.getTime ^java.util.Date (:timestamp %)) (:r coll))
+                 [true false]
+                 (map #(<= (.getTime ^java.util.Date (:latest-result-date (:e coll)))
+                           (.getTime ^java.util.Date (:timestamp %)))
+                      (:r coll))
                  155
-                 (:id (filter-latest-result (first coll) (rest coll))))
+                 (:id (filter-latest-result (:e coll) (:r coll))))
         (with-fake-routes-in-isolation
           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
-          [(experiment ts 97)
-           (result ts 155)
-           (result ts 156)]))
+          {:e (experiment ts 97) :r [(result ts 155) (result ts 156)]}))
+
+(expect (more-of coll
+                 ion_torrent_api.core.Experiment
+                 (:e coll)
+                 [ion_torrent_api.core.Result ion_torrent_api.core.Result]
+                 (map type (:r coll))
+                 #inst "2013-08-12T03:33:30.000-00:00"
+                 (:latest-result-date (:e coll))
+                 1376278410000
+                 (.getTime ^java.util.Date (:latest-result-date (:e coll)))
+                 [[1376310430000 80] [1376288311000 81]]
+                 (sort-by first > (map (juxt #(.getTime ^java.util.Date (:timestamp %)) :id) (:r coll)))
+                 ["Completed" "Completed"]
+                 (map :status (:r coll))
+                 [false true]
+                 (map :thumbnail? (:r coll))
+                 1376278410000
+                 (.getTime ^java.util.Date (:latest-result-date (:e coll)))
+                 [1376310430000 1376288311000]
+                 (map  #(.getTime ^java.util.Date (:timestamp %)) (:r coll))
+                 [true true]
+                 (map #(<= (.getTime ^java.util.Date (:latest-result-date (:e coll)))
+                           (.getTime ^java.util.Date (:timestamp %)))
+                      (:r coll))
+                 80
+                 (:id (filter-latest-result (:e coll) (:r coll))))
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          {:e (experiment ts 58) :r [(result ts 80) (result ts 81)]}))
 
 (expect (more-of x
                  (str "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/" "Bar-code-name" "_rawlib.bam")
@@ -970,7 +1005,8 @@
 
 (expect (more-of x
                  155 (:id x)
-                 false (complete? x)
+                 true (complete? x)
+                 false (:thumbnail? x)
                  "/report/latex/155.pdf" (pdf-uri x)
                  "/output/Home/Auto_user_XXX-65-RNASeq_1-73_97_155/IonXpressRNA_001_rawlib.bam"
                  (bam-uri x :IonXpressRNA_001)
