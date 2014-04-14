@@ -300,7 +300,7 @@
 
 (extend-protocol TorrentServerAPI
   ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
-  clojure.lang.IPersistentMap
+  clojure.lang.APersistentMap
 
   (experiment [json-map]
     (let [main-keys [:torrent-server "id" "expName" "pgmName" "displayName" "resource_uri"
@@ -358,7 +358,20 @@
                                     [(.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
                                      (inst/read-instant-date (get json-map "starttime"))
                                      (inst/read-instant-date (get json-map "endtime"))
-                                     (apply dissoc json-map main-keys)])))))
+                                     (apply dissoc json-map main-keys)]))))
+
+  (barcode-map [this bc-map]
+    (select-keys this bc-map))
+
+  (barcode-set [this] (into #{} (keys this)))
+
+  clojure.lang.APersistentSet
+
+  (barcode-set [this] this)
+
+  clojure.lang.ISeq
+
+  (barcode-set [this] (into #{} this)))
 
 
 (def data-readers
