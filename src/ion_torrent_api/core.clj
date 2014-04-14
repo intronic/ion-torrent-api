@@ -33,6 +33,8 @@
     "Get quality-metrics by id or uri (with options 'opts').")
   (barcode-set [this]
     "Set of barcodes.")
+  (barcode-map [this] [this exp]
+    "Map of experiment barcodes to values.")
   (complete? [this])
   (coverage? [this]
     "Coverage analysis plugin.")
@@ -72,6 +74,7 @@
 
   TorrentServerAPI
   (barcode-set [this] (into #{} (keys barcode-sample-map)))
+  (barcode-map [this] barcode-sample-map)
   (complete? [_] (= ["run" "Complete"] [status ftp-status]))
   (result [this]
     (result this nil {}))
@@ -165,6 +168,11 @@
 
   TorrentServerAPI
   (barcode-set [_] (into #{} (keys barcode-result-map)))
+  (barcode-map [this exp]
+    (select-keys (if (sample-id? this)
+                   (fmap #(get % "SampleID") barcode-result-map)
+                   barcode-result-map)
+                 (barcode-set exp)))
   (complete? [_] (= "Completed" state))
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
