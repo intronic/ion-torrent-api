@@ -38,6 +38,8 @@
     "Coverage analysis plugin.")
   (variant-caller? [this]
     "Variant caller plugin.")
+  (sample-id? [this]
+    "Sample ID plugin.")
   (bam-uri [this bc]
   "BAM uri for barcode.")
   (bai-uri [this bc]
@@ -166,6 +168,7 @@
   (complete? [_] (= "Completed" state))
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
+  (sample-id? [_] (= :sample-id type))
   (bam-uri [this bc]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" (core/name bc) "_rawlib_PTRIM.bam")))
@@ -357,7 +360,8 @@
    'ion_torrent_api.core.PluginResult ion-torrent-api.core/map->PluginResult})
 
 (def ^:private plugin-result-type-map {"variantCaller" :tsvc
-                                       "coverageAnalysis" :coverage})
+                                       "coverageAnalysis" :coverage
+                                       "sampleID" :sample-id})
 
 (defn- plugin-result-api-path-prefix
   "Direct path to pluginresult files through API."
