@@ -204,9 +204,9 @@
   (experiments [this opts]
     (get-json this "experiment/" (merge {"status__exact" "run" "ftpStatus__exact" "Complete"} opts)))
   (experiments [this opts name]
-    (experiments this (merge opts {(str "expName__" (if (some #(Character/isUpperCase %) (seq name))
-                                                      "contains"
-                                                      "icontains")) name})))
+    (experiments this (merge opts (if name {(str "expName__" (if (some #(Character/isUpperCase %) (seq name))
+                                                               "contains"
+                                                               "icontains")) name}))))
 
   (experiment-name [this name]
     (experiment-name this name {}))
