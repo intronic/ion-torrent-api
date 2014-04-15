@@ -160,8 +160,8 @@
 
 (defrecord PluginResult [type torrent-server id uri result-uri result-name state path report-link
                          name version versioned-name
-                         library-type config-desc barcode-result-map target-name target-bed experiment-name
-                         trimmed-reads? barcoded? start-time end-time raw-map]
+                         library-type config-desc target-name target-bed experiment-name
+                         trimmed-reads? barcode-result-map barcoded? start-time end-time raw-map]
 
   Object
   (toString [this] (pr-str this))
@@ -169,12 +169,8 @@
   TorrentServerAPI
   (barcode-set [_] (into #{} (keys barcode-result-map)))
   (barcode-set [_ exp] (barcode-set exp))
-  (barcode-map [this]
-    (if (sample-id? this)
-      (fmap #(get % "SampleID") barcode-result-map)
-      barcode-result-map))
-  (barcode-map [this exp]
-    (select-keys (barcode-map this) (barcode-set exp)))
+  (barcode-map [this] barcode-result-map)
+  (barcode-map [this exp] (select-keys (barcode-map this) (barcode-set exp)))
   (complete? [_] (= "Completed" state))
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
@@ -348,16 +344,20 @@
 
   (plugin-result [json-map]
     (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
-                     "path" "reportLink"]]
+                     "path" "reportLink"]
+          bc-map (get-in json-map ["store" "barcodes"])]
       (assert (seq (get json-map "starttime")) "starttime required.")
       (assert (seq (get json-map "endtime")) "endtime required.")
       (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
                                     (map (partial get json-map) main-keys)
                                     (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
-                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration" "barcodes"
+                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration"
                                                                          "Target Regions" "targets_bed"
                                                                          "Aligned Reads" "Trim Reads"])
-                                    [(.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
+                                    [(if (= "sampleID" (get-in json-map ["plugin" "name"]))
+                                       (fmap #(get % "SampleID") bc-map)
+                                       bc-map)
+                                     (.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
                                      (inst/read-instant-date (get json-map "starttime"))
                                      (inst/read-instant-date (get json-map "endtime"))
                                      (apply dissoc json-map main-keys)]))))
