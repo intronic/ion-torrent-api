@@ -42,12 +42,12 @@
     "Variant caller plugin.")
   (sample-id? [this]
     "Sample ID plugin.")
-  (bam-uri [this bc] [this bc trimmed?]
-  "BAM uri for barcode (uri for trimmed reads if if trimmed? true).")
-  (bai-uri [this bc] [this bc trimmed?]
-  "BAM BAI uri for barcode (uri for trimmed reads if if trimmed? true).")
-  (bam-header-uri [this bc] [this bc trimmed?]
-    "BAM header uri for barcode (uri for trimmed reads if if trimmed? true).")
+  (bam-uri [this bc]
+  "BAM uri for barcode.")
+  (bai-uri [this bc]
+  "BAM BAI uri for barcode.")
+  (bam-header-uri [this bc]
+    "BAM header uri for barcode. ")
   (pdf-uri [this]
     "PDF report uri.")
   (tsvc-vcf-uri [this bc]
@@ -172,15 +172,13 @@
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
   (sample-id? [_] (= :sample-id type))
-  (bam-uri [this bc] (bam-uri this bc nil))
-  (bam-uri [this bc trimmed?]
+  (bam-uri [this bc]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" (core/name bc)
-           "_rawlib" (if trimmed? "_PTRIM") ".bam")))
-  (bai-uri [this bc] (bai-uri this bc nil))
-  (bai-uri [this bc trimmed?]
+           "_rawlib" (if trimmed-reads? "_PTRIM") ".bam")))
+  (bai-uri [this bc]
     (if (variant-caller? this)
-      (str (bam-uri this bc trimmed?) ".bai")))
+      (str (bam-uri this bc) ".bai")))
   (tsvc-vcf-uri [this bc]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/TSVC_variants.vcf.gz")))

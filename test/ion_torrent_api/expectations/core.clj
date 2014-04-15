@@ -1216,43 +1216,49 @@
                                     :body (slurp (uri-to-file uri :json))})}
           (experiment ts 50 {:recurse? true})))
 
-(expect (more-of x
-                 ion_torrent_api.core.Result x
-                 77 (:id x)
-                 [[89 nil "IonReporterUploader"] [209 :tsvc "variantCaller"]]
-                 (map (juxt :id :type :name) (:plugin-result-set x))
-                 ion_torrent_api.core.PluginResult
-                 (first (:plugin-result-set x))
-                 ion_torrent_api.core.PluginResult
-                 (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x)))
+(expect
+ (more-of x
+          ion_torrent_api.core.Result x
+          77 (:id x)
+          [[89 nil "IonReporterUploader"] [209 :tsvc "variantCaller"]]
+          (map (juxt :id :type :name) (:plugin-result-set x))
+          ion_torrent_api.core.PluginResult
+          (first (:plugin-result-set x))
+          ion_torrent_api.core.PluginResult
+          (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x)))
 
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz"
-                 (tsvc-vcf-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz.tbi"
-                 (tsvc-vcf-tbi-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/4477685_Comprehensive_CCP_bedfile_20120517.bed"
-                 (tsvc-target-bed-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))))
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz"
+          (tsvc-vcf-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpress_001/TSVC_variants.vcf.gz.tbi"
+          (tsvc-vcf-tbi-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpress_001)
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/4477685_Comprehensive_CCP_bedfile_20120517.bed"
+          (tsvc-target-bed-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))))
 
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib.bam"
-                 (bam-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam"
-                 (bam-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001
-                          true)
+          true
+          (:trimmed-reads? (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
 
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib.bam.bai"
-                 (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam.bai"
-                 (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001
-                          true)
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam"
+          (bam-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
 
-                 "/output/Home/24_reanalyze_077/IonXpressRNA_001_rawlib.bam.header.sam"
-                 (bam-header-uri x :IonXpressRNA_001))
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib.bam"
+          (bam-uri (assoc (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x)))
+                     :trimmed-reads? false) :IonXpressRNA_001)
 
-        (:latest-result (with-fake-routes-in-isolation
-                          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
-                                                   {:status 200 :headers {"Content-Type" "application/json"}
-                                                    :body (slurp (uri-to-file uri :json))})}
-                          (experiment ts 50 {:recurse? true}))))
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam.bai"
+          (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
+
+          "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib.bam.bai"
+          (bai-uri (assoc (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x)))
+                     :trimmed-reads? false) :IonXpressRNA_001)
+
+          "/output/Home/24_reanalyze_077/IonXpressRNA_001_rawlib.bam.header.sam"
+          (bam-header-uri x :IonXpressRNA_001))
+
+ (:latest-result (with-fake-routes-in-isolation
+                   {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                            {:status 200 :headers {"Content-Type" "application/json"}
+                                             :body (slurp (uri-to-file uri :json))})}
+                   (experiment ts 50 {:recurse? true}))))
 
 (expect
  (more-of x
