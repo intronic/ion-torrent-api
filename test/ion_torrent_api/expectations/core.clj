@@ -625,32 +625,119 @@
 (expect #{:b :c} (barcode-set {:b 1 :c 2}))
 
 
-(def pr153 (with-fake-routes-in-isolation
+(def e71 (with-fake-routes-in-isolation
+           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                    {:status 200 :headers {"Content-Type" "application/json"}
+                                     :body (slurp (uri-to-file uri :json))})}
+           (experiment ts 71 {:recurse? true})))
+
+(def pr157 (with-fake-routes-in-isolation
              {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                       {:status 200 :headers {"Content-Type" "application/json"}
                                        :body (slurp (uri-to-file uri :json))})}
-             (plugin-result ts 153)))
+             (plugin-result ts 157)))
+
+(expect ion_torrent_api.core.Experiment e71)
 
 (expect [:type :torrent-server :id :uri :result-uri :result-name :state :path :report-link :name :version :versioned-name :library-type :config-desc :barcode-result-map :target-name :target-bed :experiment-name :trimmed-reads? :barcoded? :start-time :end-time :raw-map]
-        (keys pr153))
+        (keys pr157))
 
-(expect {"IonXpress_006" "?-T?G?GSAT", "IonXpress_005" "?-TKAYGSGW", }
-        (barcode-map pr153 #{"IonXpress_005" "IonXpress_006" }))
+(expect {"IonXpress_006" "F-TKG?GSAT", "IonXpress_005" "F-TKAYGSGW"}
+        (barcode-map pr157 #{"IonXpress_005" "IonXpress_006" }))
 
 (expect (more->
-         {"IonXpress_002" {"SampleID" "?-TKRY???T", "hotspot_coverage" {"Average base coverage depth" "17.5", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "25.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "8", "Male sample ID region reads" "0", "Number of mapped reads" "40278", "Number of reads in sample ID regions" "172", "Percent base reads in sample ID regions" "0.43%", "Percent reads in sample ID regions" "0.43%", "Total base reads in sample ID regions" "3812106"}, "target_coverage" {"Average base coverage depth" "15.2", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "30.8%", "Uniformity of coverage" "92.0%"}},
-          "IonXpress_004" {"SampleID" "N/A", "hotspot_coverage" {"Average base coverage depth" "11.2", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "12.5%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "7", "Male sample ID region reads" "0", "Number of mapped reads" "31496", "Number of reads in sample ID regions" "119", "Percent base reads in sample ID regions" "0.37%", "Percent reads in sample ID regions" "0.38%", "Total base reads in sample ID regions" "2936190"}, "target_coverage" {"Average base coverage depth" "10.1", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "4.7%", "Uniformity of coverage" "92.0%"}},
-          "IonXpress_005" {"SampleID" "?-TKAYGSGW", "hotspot_coverage" {"Average base coverage depth" "34.0", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "87.5%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "16", "Male sample ID region reads" "0", "Number of mapped reads" "74758", "Number of reads in sample ID regions" "340", "Percent base reads in sample ID regions" "0.46%", "Percent reads in sample ID regions" "0.45%", "Total base reads in sample ID regions" "6659878"}, "target_coverage" {"Average base coverage depth" "28.2", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "70.7%", "Uniformity of coverage" "92.0%"}},
-          "IonXpress_006" {"SampleID" "?-T?G?GSAT", "hotspot_coverage" {"Average base coverage depth" "22.0", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "62.5%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "12", "Male sample ID region reads" "0", "Number of mapped reads" "51279", "Number of reads in sample ID regions" "203", "Percent base reads in sample ID regions" "0.40%", "Percent reads in sample ID regions" "0.40%", "Total base reads in sample ID regions" "4650921"}, "target_coverage" {"Average base coverage depth" "17.2", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "41.2%", "Uniformity of coverage" "92.0%"}},
-          "IonXpress_014" {"SampleID" "N/A", "hotspot_coverage" {"Average base coverage depth" "15.6", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "25.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "6", "Male sample ID region reads" "0", "Number of mapped reads" "43394", "Number of reads in sample ID regions" "157", "Percent base reads in sample ID regions" "0.35%", "Percent reads in sample ID regions" "0.36%", "Total base reads in sample ID regions" "3920712"}, "target_coverage" {"Average base coverage depth" "12.7", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "15.5%", "Uniformity of coverage" "92.0%"}},
-          "IonXpress_015" {"SampleID" "N/A", "hotspot_coverage" {"Average base coverage depth" "13.9", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "25.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "16", "Male sample ID region reads" "0", "Number of mapped reads" "43734", "Number of reads in sample ID regions" "163", "Percent base reads in sample ID regions" "0.37%", "Percent reads in sample ID regions" "0.37%", "Total base reads in sample ID regions" "3957041"}, "target_coverage" {"Average base coverage depth" "13.5", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "18.8%", "Uniformity of coverage" "92.0%"}},
-          "IonXpress_018" {"SampleID" "?-?TAC??GT", "hotspot_coverage" {"Average base coverage depth" "19.0", "Bases in target regions" "8", "Coverage at 100x" "0.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "50.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "9", "Male sample ID region reads" "0", "Number of mapped reads" "52354", "Number of reads in sample ID regions" "191", "Percent base reads in sample ID regions" "0.35%", "Percent reads in sample ID regions" "0.36%", "Total base reads in sample ID regions" "4981945"}, "target_coverage" {"Average base coverage depth" "16.4", "Bases in target regions" "1074", "Coverage at 100x" "0.0%", "Coverage at 1x" "92.0%", "Coverage at 20x" "49.6%", "Uniformity of coverage" "90.7%"}}}
+         (:uri (:latest-result e71))
+         :result-uri
+         true
+         sample-id?
+         {"IonXpress_018" "F-YTAYGCGT", "IonXpress_006" "F-TKG?GSAT", "IonXpress_005" "F-TKAYGSGW",
+          "IonXpress_015" "F-TGGYGCAT", "IonXpress_004" "F-YGAYRSAA", "IonXpress_014" "F-TTGYRSRW",
+          "IonXpress_002" "F-TKRYRSRT"}
+         (barcode-map e71)
+         #{"IonXpress_002" "IonXpress_014" "IonXpress_004" "IonXpress_015" "IonXpress_005" "IonXpress_006" "IonXpress_018"}
+         (barcode-set e71)
+         #{"IonXpress_002" "IonXpress_004" "IonXpress_005" "IonXpress_006" "IonXpress_014" "IonXpress_015" "IonXpress_018"}
+         barcode-set
+         {"IonXpress_002" {"SampleID" "F-TKRYRSRT", "hotspot_coverage" {"Average base coverage depth" "2450.6", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "1946", "Male sample ID region reads" "0", "Number of mapped reads" "6748981", "Number of reads in sample ID regions" "24628", "Percent base reads in sample ID regions" "0.36%", "Percent reads in sample ID regions" "0.36%", "Total base reads in sample ID regions" "641008255"}, "target_coverage" {"Average base coverage depth" "2349.8", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}},
+          "IonXpress_004" {"SampleID" "F-YGAYRSAA", "hotspot_coverage" {"Average base coverage depth" "1762.8", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "1112", "Male sample ID region reads" "0", "Number of mapped reads" "5166623", "Number of reads in sample ID regions" "17951", "Percent base reads in sample ID regions" "0.34%", "Percent reads in sample ID regions" "0.35%", "Total base reads in sample ID regions" "485332704"}, "target_coverage" {"Average base coverage depth" "1687.3", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}},
+          "IonXpress_005" {"SampleID" "F-TKAYGSGW", "hotspot_coverage" {"Average base coverage depth" "5172.9", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "2686", "Male sample ID region reads" "0", "Number of mapped reads" "12498342", "Number of reads in sample ID regions" "52649", "Percent base reads in sample ID regions" "0.42%", "Percent reads in sample ID regions" "0.42%", "Total base reads in sample ID regions" "1118196811"}, "target_coverage" {"Average base coverage depth" "4781.7", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}},
+          "IonXpress_006" {"SampleID" "F-TKG?GSAT", "hotspot_coverage" {"Average base coverage depth" "3259.1", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "1512", "Male sample ID region reads" "0", "Number of mapped reads" "8488131", "Number of reads in sample ID regions" "32457", "Percent base reads in sample ID regions" "0.38%", "Percent reads in sample ID regions" "0.38%", "Total base reads in sample ID regions" "775619927"}, "target_coverage" {"Average base coverage depth" "2961.6", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}},
+          "IonXpress_014" {"SampleID" "F-TTGYRSRW", "hotspot_coverage" {"Average base coverage depth" "2576.1", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "1002", "Male sample ID region reads" "0", "Number of mapped reads" "7185798", "Number of reads in sample ID regions" "25805", "Percent base reads in sample ID regions" "0.35%", "Percent reads in sample ID regions" "0.36%", "Total base reads in sample ID regions" "654660133"}, "target_coverage" {"Average base coverage depth" "2338.3", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}},
+          "IonXpress_015" {"SampleID" "F-TGGYGCAT", "hotspot_coverage" {"Average base coverage depth" "2599.4", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "1593", "Male sample ID region reads" "0", "Number of mapped reads" "7308490", "Number of reads in sample ID regions" "26810", "Percent base reads in sample ID regions" "0.36%", "Percent reads in sample ID regions" "0.37%", "Total base reads in sample ID regions" "667495055"}, "target_coverage" {"Average base coverage depth" "2446.6", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}},
+          "IonXpress_018" {"SampleID" "F-YTAYGCGT", "hotspot_coverage" {"Average base coverage depth" "3248.2", "Bases in target regions" "8", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}, "mapped_reads" {"Female sample ID region reads" "2115", "Male sample ID region reads" "0", "Number of mapped reads" "8822299", "Number of reads in sample ID regions" "32819", "Percent base reads in sample ID regions" "0.36%", "Percent reads in sample ID regions" "0.37%", "Total base reads in sample ID regions" "841346599"}, "target_coverage" {"Average base coverage depth" "3067.5", "Bases in target regions" "988", "Coverage at 100x" "100.0%", "Coverage at 1x" "100.0%", "Coverage at 20x" "100.0%", "Uniformity of coverage" "100.0%"}}}
          :barcode-result-map
-         {"IonXpress_002" "?-TKRY???T",
-          "IonXpress_005" "?-TKAYGSGW",
-          "IonXpress_018" "?-?TAC??GT"}
+         {"IonXpress_018" "F-YTAYGCGT", "IonXpress_005" "F-TKAYGSGW", "IonXpress_002" "F-TKRYRSRT"}
          (barcode-map #{"IonXpress_002" "IonXpress_005" "IonXpress_018"}))
-        pr153)
+        pr157)
+
+
+;;; coverage plugin-result
+
+(def e58 (with-fake-routes-in-isolation
+             {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                      {:status 200 :headers {"Content-Type" "application/json"}
+                                       :body (slurp (uri-to-file uri :json))})}
+             (experiment ts 58 {:recurse? true})))
+
+(def pr94 (with-fake-routes-in-isolation
+             {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                      {:status 200 :headers {"Content-Type" "application/json"}
+                                       :body (slurp (uri-to-file uri :json))})}
+             (plugin-result ts 94)))
+
+(expect ion_torrent_api.core.Experiment e58)
+(expect ion_torrent_api.core.PluginResult pr94)
+
+(expect  (more-of x
+                  [["coverageAnalysis" :coverage] ["variantCaller" :tsvc] ["IonReporterUploader" nil]]
+                  (map (juxt :name :type) (:plugin-result-set (:latest-result x)))
+
+                  {"IonXpress_001" "07ME01 SEQ001-63", "IonXpress_002" "72TT01 SEQ001-63",
+                   "IonXpress_003" "74TT01 SEQ001-63", "IonXpress_004" "76ME01 SEQ001-63",
+                   "IonXpress_005" "86D SEQ001-63", "IonXpress_006" "88ME01 SEQ001-63",
+                   "IonXpress_007" "96ME01 SEQ001-63"}
+                  (:barcode-sample-map x)
+
+                  {"IonXpress_001" {"hotspots" {}, "variants" {"het_indels" 89, "het_snps" 860, "homo_indels" 27, "homo_snps" 251, "no_call" 0, "other" 0, "variants" 1227}},
+                   "IonXpress_012" {"hotspots" {}, "variants" {"het_indels" 0, "het_snps" 0, "homo_indels" 0, "homo_snps" 0, "no_call" 0, "other" 0, "variants" 0}},
+                   "IonXpress_034" {"hotspots" {}, "variants" {"het_indels" 0, "het_snps" 0, "homo_indels" 0, "homo_snps" 0, "no_call" 0, "other" 0, "variants" 0}},
+                   "IonXpress_002" {"hotspots" {}, "variants" {"het_indels" 87, "het_snps" 947, "homo_indels" 32, "homo_snps" 311, "no_call" 0, "other" 1, "variants" 1378}},
+                   "IonXpress_003" {"hotspots" {}, "variants" {"het_indels" 95, "het_snps" 1053, "homo_indels" 28, "homo_snps" 301, "no_call" 0, "other" 1, "variants" 1478}},
+                   "IonXpress_025" {"hotspots" {}, "variants" {"het_indels" 0, "het_snps" 0, "homo_indels" 0, "homo_snps" 0, "no_call" 0, "other" 0, "variants" 0}},
+                   "IonXpress_004" {"hotspots" {}, "variants" {"het_indels" 15, "het_snps" 117, "homo_indels" 5, "homo_snps" 47, "no_call" 0, "other" 0, "variants" 184}},
+                   "IonXpress_005" {"hotspots" {}, "variants" {"het_indels" 99, "het_snps" 792, "homo_indels" 35, "homo_snps" 293, "no_call" 0, "other" 0, "variants" 1219}},
+                   "IonXpress_006" {"hotspots" {}, "variants" {"het_indels" 90, "het_snps" 751, "homo_indels" 48, "homo_snps" 312, "no_call" 0, "other" 1, "variants" 1202}},
+                   "IonXpress_007" {"hotspots" {}, "variants" {"het_indels" 65, "het_snps" 833, "homo_indels" 11, "homo_snps" 168, "no_call" 0, "other" 0, "variants" 1077}},
+                   "IonXpress_008" {"hotspots" {}, "variants" {"het_indels" 0, "het_snps" 0, "homo_indels" 0, "homo_snps" 0, "no_call" 0, "other" 0, "variants" 0}}}
+                  (:barcode-result-map (first (filter variant-caller? (:plugin-result-set (:latest-result x)))))
+
+                  #{"IonXpress_001" "IonXpress_002" "IonXpress_003" "IonXpress_004" "IonXpress_005"
+                    "IonXpress_006" "IonXpress_007"}
+                  (barcode-set x)
+
+                  {"IonXpress_001" "07ME01 SEQ001-63", "IonXpress_002" "72TT01 SEQ001-63",
+                   "IonXpress_003" "74TT01 SEQ001-63", "IonXpress_004" "76ME01 SEQ001-63",
+                   "IonXpress_005" "86D SEQ001-63", "IonXpress_006" "88ME01 SEQ001-63",
+                   "IonXpress_007" "96ME01 SEQ001-63"}
+                  (barcode-map x)
+
+                  (:id pr94)
+                  (:id (first (filter variant-caller? (:plugin-result-set (:latest-result x))))))
+         e58)
+
+(expect (more-of x
+                 #{"IonXpress_001" "IonXpress_002" "IonXpress_003" "IonXpress_004" "IonXpress_005"
+                   "IonXpress_006" "IonXpress_007"
+                   "IonXpress_008" "IonXpress_012" "IonXpress_025" "IonXpress_034" }
+                 (barcode-set x)
+                 #{"IonXpress_001" "IonXpress_002" "IonXpress_003" "IonXpress_004" "IonXpress_005"
+                   "IonXpress_006" "IonXpress_007"}
+                 (barcode-set x e58)
+
+                 #{"IonXpress_001" "IonXpress_002" "IonXpress_003" "IonXpress_004" "IonXpress_005"
+                   "IonXpress_006" "IonXpress_007"}
+                 (into #{} (keys (barcode-map x e58))))
+        pr94)
 
 ;;; coverageAvnalysis plugin-result
 
@@ -664,6 +751,8 @@
         (keys pr66))
 
 (expect (more->
+         true
+         coverage?
          {"IonXpressRNA_001" {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.97%", "Target bases with no strand bias" "79.94%", "Number of mapped reads" "13541550", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "84.72%", "Target base coverage at 20x" "96.51%", "Total aligned base reads" "1185203398", "Average reads per amplicon" "794.0", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_001_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "96.94%", "Uniformity of base coverage" "83.69%", "Percent reads on target" "93.77%", "Total assigned amplicon reads" "12697352", "Percent assigned amplicon reads" "93.77%", "Amplicons with at least 100 reads" "90.96%", "Average base coverage depth" "671.9", "Target base coverage at 500x" "47.27%", "Amplicons with at least 500 reads" "53.41%", "Reference (File)" "hg19", "Percent base reads on target" "95.73%", "Total base reads on target" "1134571007", "Target base coverage at 1x" "99.34%", "Target base coverage at 100x" "88.24%", "Amplicons with at least 1 read" "99.51%", "Amplicons reading end-to-end" "8.67%"},
           "IonXpressRNA_002" {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.33%", "Target bases with no strand bias" "79.28%", "Number of mapped reads" "13579387", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "86.64%", "Target base coverage at 20x" "95.16%", "Total aligned base reads" "1228217548", "Average reads per amplicon" "815.0", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_002_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "95.56%", "Uniformity of base coverage" "85.89%", "Percent reads on target" "95.97%", "Total assigned amplicon reads" "13032709", "Percent assigned amplicon reads" "95.97%", "Amplicons with at least 100 reads" "90.11%", "Average base coverage depth" "707.7", "Target base coverage at 500x" "52.31%", "Amplicons with at least 500 reads" "59.97%", "Reference (File)" "hg19", "Percent base reads on target" "97.30%", "Total base reads on target" "1195050872", "Target base coverage at 1x" "99.00%", "Target base coverage at 100x" "89.04%", "Amplicons with at least 1 read" "99.19%", "Amplicons reading end-to-end" "8.34%"},
           "IonXpressRNA_003" {"Number of amplicons" "15992", "Amplicons with no strand bias" "92.60%", "Target bases with no strand bias" "80.47%", "Number of mapped reads" "12145531", "Using" "All Mapped Reads", "Uniformity of amplicon coverage" "88.99%", "Target base coverage at 20x" "95.99%", "Total aligned base reads" "1085455295", "Average reads per amplicon" "733.3", "Bases in target regions" "1688650", "Targeted Regions" "4477685_Comprehensive_CCP_bedfile_20120517", "Alignments" "IonXpressRNA_003_R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24_Auto_user_XXX-24-AmpliSeq_CCP_24_50", "Amplicons with at least 20 reads" "96.33%", "Uniformity of base coverage" "88.03%", "Percent reads on target" "96.56%", "Total assigned amplicon reads" "11727495", "Percent assigned amplicon reads" "96.56%", "Amplicons with at least 100 reads" "91.72%", "Average base coverage depth" "624.3", "Target base coverage at 500x" "47.29%", "Amplicons with at least 500 reads" "56.77%", "Reference (File)" "hg19", "Percent base reads on target" "97.12%", "Total base reads on target" "1054159542", "Target base coverage at 1x" "99.33%", "Target base coverage at 100x" "90.07%", "Amplicons with at least 1 read" "99.50%", "Amplicons reading end-to-end" "8.90%"},
