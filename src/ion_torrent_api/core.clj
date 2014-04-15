@@ -42,12 +42,12 @@
     "Variant caller plugin.")
   (sample-id? [this]
     "Sample ID plugin.")
-  (bam-uri [this bc]
-  "BAM uri for barcode.")
-  (bai-uri [this bc]
-  "BAM BAI uri for barcode.")
-  (bam-header-uri [this bc]
-    "BAM header uri for barcode.")
+  (bam-uri [this bc] [this bc trimmed?]
+  "BAM uri for barcode (uri for trimmed reads if if trimmed? true).")
+  (bai-uri [this bc] [this bc trimmed?]
+  "BAM BAI uri for barcode (uri for trimmed reads if if trimmed? true).")
+  (bam-header-uri [this bc] [this bc trimmed?]
+    "BAM header uri for barcode (uri for trimmed reads if if trimmed? true).")
   (pdf-uri [this]
     "PDF report uri.")
   (tsvc-vcf-uri [this bc]
@@ -147,12 +147,9 @@
     (if quality-metrics-set
       quality-metrics-set
       (into #{} (map #(quality-metrics torrent-server % opts) quality-metrics-uri-set))))
-  (bam-uri [_ bc]
-    (str report-link (core/name bc) "_rawlib.bam"))
-  (bai-uri [this bc]
-    (str (bam-uri this bc) ".bai"))
-  (bam-header-uri [this bc]
-    (str (bam-uri this bc) ".header.sam"))
+  (bam-uri [_ bc] (str report-link (core/name bc) "_rawlib.bam"))
+  (bai-uri [this bc] (str (bam-uri this bc) ".bai"))
+  (bam-header-uri [this bc] (str (bam-uri this bc) ".header.sam"))
   (complete? [_] (= "Completed" status))
   (pdf-uri [_]
     (format "/report/latex/%d.pdf" id)))
@@ -175,12 +172,15 @@
   (coverage? [_] (= :coverage type))
   (variant-caller? [_] (= :tsvc type))
   (sample-id? [_] (= :sample-id type))
-  (bam-uri [this bc]
+  (bam-uri [this bc] (bam-uri this bc nil))
+  (bam-uri [this bc trimmed?]
     (if (variant-caller? this)
-      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" (core/name bc) "_rawlib_PTRIM.bam")))
-  (bai-uri [this bc]
+      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" (core/name bc)
+           "_rawlib" (if trimmed? "_PTRIM") ".bam")))
+  (bai-uri [this bc] (bai-uri this bc nil))
+  (bai-uri [this bc trimmed?]
     (if (variant-caller? this)
-      (str (bam-uri this bc) ".bai")))
+      (str (bam-uri this bc trimmed?) ".bai")))
   (tsvc-vcf-uri [this bc]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/TSVC_variants.vcf.gz")))

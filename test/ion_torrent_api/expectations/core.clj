@@ -1233,10 +1233,21 @@
                  "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/4477685_Comprehensive_CCP_bedfile_20120517.bed"
                  (tsvc-target-bed-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))))
 
-                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam"
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib.bam"
                  (bam-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam"
+                 (bam-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001
+                          true)
+
+                 "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib.bam.bai"
+                 (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001)
                  "/output/Home/24_reanalyze_077/plugin_out/variantCaller_out/IonXpressRNA_001/IonXpressRNA_001_rawlib_PTRIM.bam.bai"
-                 (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001))
+                 (bai-uri (first (filter (comp (partial = :tsvc) :type) (:plugin-result-set x))) :IonXpressRNA_001
+                          true)
+
+                 "/output/Home/24_reanalyze_077/IonXpressRNA_001_rawlib.bam.header.sam"
+                 (bam-header-uri x :IonXpressRNA_001))
+
         (:latest-result (with-fake-routes-in-isolation
                           {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
                                                    {:status 200 :headers {"Content-Type" "application/json"}
