@@ -24,7 +24,8 @@
                  [clj-time "0.6.0"]
                  ;;[clj-http "0.9.0"]
                  [clj-http "0.7.9"]
-                 [clj-http-fake "0.7.8"]]
+                 [clj-http-fake "0.7.8"]
+                 [prismatic/schema "0.2.2"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
