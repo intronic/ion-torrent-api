@@ -4,7 +4,9 @@
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
-            [slingshot.slingshot :refer (try+ throw+)]))
+            [slingshot.slingshot :refer (try+ throw+)]
+            [ion-torrent-api.schema :as sc])
+  (:import [ion_torrent_api.schema Experiment Result PluginResult TorrentServer]))
 
 (declare get-json ensure-starts-with filter-latest-result plugin-result-type-map
          barcode-eas-map plugin-result-api-path-prefix
@@ -60,46 +62,23 @@
     "Amplicon Coverage analysis uri for barcode."))
 
 
-(defprotocol UniqueID
-    "Unique Identifier"
-    (unique-id [this]))
+(extend-protocol TorrentServerAPI
 
+  ion_torrent_api.schema.Experiment
+  (barcode-set [this] (into #{} (keys (-> this :barcode-sample-map))))
+  (barcode-map [this] (-> this :barcode-sample-map))
+  (complete? [this] (= ["run" "Complete"] (-> this ((juxt :status :ftp-status)))))
+  (result
+    ([this] (result this nil {}))
+    ([this _] (result this nil {}))
+    ([this _ opts]
+       (or (-> this :latest-result)
+           (->> this
+                :result-uri-set
+                (map #(result (:torrent-server this) % opts))
+                (filter-latest-result this)))))
 
-(defrecord Experiment [torrent-server id name pgm-name display-name uri run-type chip-type
-                       result-uri-set dir status ftp-status sample-map barcode-sample-map date
-                       latest-result-date latest-result raw-map]
-
-  Object
-  (toString [this] (pr-str this))
-
-  TorrentServerAPI
-  (barcode-set [this] (into #{} (keys barcode-sample-map)))
-  (barcode-map [this] barcode-sample-map)
-  (complete? [_] (= ["run" "Complete"] [status ftp-status]))
-  (result [this]
-    (result this nil {}))
-  (result [this _]
-    (result this nil {}))
-  (result [this _ opts]
-    (if latest-result
-      latest-result
-      (->> result-uri-set
-           (map #(result torrent-server % opts))
-           (filter-latest-result this)))))
-
-
-(defrecord Result [torrent-server id name uri experiment-uri status
-                   plugin-result-uri-set plugin-state-map analysis-version report-status plugin-store-map
-                   bam-link fastq-link report-link filesystem-path reference
-                   lib-metrics-uri-set tf-metrics-uri-set analysis-metrics-uri-set quality-metrics-uri-set
-                   timestamp thumbnail? plugin-result-set
-                   lib-metrics-set tf-metrics-set analysis-metrics-set quality-metrics-set
-                   raw-map]
-
-  Object
-  (toString [this] (pr-str this))
-
-  TorrentServerAPI
+  ion_torrent_api.schema.Result
 
   ;; HACK alternatively, more complicated but possibly less assumptions and safer?:-
   ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
@@ -107,75 +86,63 @@
   ;;     (str (io/file (.getParent bam) "download_links" (str (name barcode) "_" (.getName bam)))))
   ;; eg:
   ;; /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/IonXpress_009_rawlib.bam
-  (plugin-result [this]
-    (plugin-result this nil {}))
-  (plugin-result [this _]
-    (plugin-result this nil {}))
-  (plugin-result [this _ opts]
-    (if plugin-result-set
-      plugin-result-set
-      (into #{} (map #(plugin-result torrent-server % opts) plugin-result-uri-set))))
-  (lib-metrics [this]
-    (lib-metrics this nil {}))
-  (lib-metrics [this _]
-    (lib-metrics this nil {}))
-  (lib-metrics [this _ opts]
-    (if lib-metrics-set
-      lib-metrics-set
-      (into #{} (map #(lib-metrics torrent-server % opts) lib-metrics-uri-set))))
-  (tf-metrics [this]
-    (tf-metrics this nil {}))
-  (tf-metrics [this _]
-    (tf-metrics this nil {}))
-  (tf-metrics [this _ opts]
-    (if tf-metrics-set
-      tf-metrics-set
-      (into #{} (map #(tf-metrics torrent-server % opts) tf-metrics-uri-set))))
-  (analysis-metrics [this]
-    (analysis-metrics this nil {}))
-  (analysis-metrics [this _]
-    (analysis-metrics this nil {}))
-  (analysis-metrics [this _ opts]
-    (if analysis-metrics-set
-      analysis-metrics-set
-      (into #{} (map #(analysis-metrics torrent-server % opts) analysis-metrics-uri-set))))
-  (quality-metrics [this]
-    (quality-metrics this nil {}))
-  (quality-metrics [this _]
-    (quality-metrics this nil {}))
-  (quality-metrics [this _ opts]
-    (if quality-metrics-set
-      quality-metrics-set
-      (into #{} (map #(quality-metrics torrent-server % opts) quality-metrics-uri-set))))
-  (bam-uri [_ bc] (str report-link (core/name bc) "_rawlib.bam"))
+  (plugin-result
+    ([this] (plugin-result this nil {}))
+    ([this _] (plugin-result this nil {}))
+    ([this _ opts]
+       (or (-> this :plugin-result-set)
+           (into #{} (map #(plugin-result (-> this :torrent-server) % opts)
+                          (-> this :plugin-result-uri-set))))))
+  (lib-metrics
+    ([this] (lib-metrics this nil {}))
+    ([this _] (lib-metrics this nil {}))
+    ([this _ opts]
+       (or (-> this :lib-metrics-set)
+           (into #{} (map #(lib-metrics (-> this :torrent-server) % opts)
+                          (-> this :lib-metrics-uri-set))))))
+  (tf-metrics
+    ([this] (tf-metrics this nil {}))
+    ([this _] (tf-metrics this nil {}))
+    ([this _ opts]
+       (or (-> this :tf-metrics-set)
+           (into #{} (map #(tf-metrics (-> this :torrent-server) % opts)
+                          (-> this :tf-metrics-uri-set))))))
+  (analysis-metrics
+    ([this] (analysis-metrics this nil {}))
+    ([this _] (analysis-metrics this nil {}))
+    ([this _ opts]
+       (or (-> this :analysis-metrics-set)
+           (into #{} (map #(analysis-metrics (-> this :torrent-server) % opts)
+                          (-> this :analysis-metrics-uri-set))))))
+  (quality-metrics
+    ([this] (quality-metrics this nil {}))
+    ([this _] (quality-metrics this nil {}))
+    ([this _ opts]
+       (or (-> this :quality-metrics-set)
+           (into #{} (map #(quality-metrics (-> this :torrent-server) % opts)
+                          (-> this :quality-metrics-uri-set))))))
+  (bam-uri [this bc] (str (-> this :report-link) (core/name bc) "_rawlib.bam"))
   (bai-uri [this bc] (str (bam-uri this bc) ".bai"))
   (bam-header-uri [this bc] (str (bam-uri this bc) ".header.sam"))
-  (complete? [_] (= "Completed" status))
-  (pdf-uri [_]
-    (format "/report/latex/%d.pdf" id)))
+  (complete? [this] (= "Completed" (-> this :status)))
+  (pdf-uri [this] (format "/report/latex/%d.pdf" (-> this :id)))
 
+  ion_torrent_api.schema.PluginResult
 
-(defrecord PluginResult [type torrent-server id uri result-uri result-name state path report-link
-                         name version versioned-name
-                         library-type config-desc target-name target-bed experiment-name
-                         trimmed-reads? barcode-result-map barcoded? start-time end-time raw-map]
-
-  Object
-  (toString [this] (pr-str this))
-
-  TorrentServerAPI
-  (barcode-set [_] (into #{} (keys barcode-result-map)))
-  (barcode-set [_ exp] (barcode-set exp))
-  (barcode-map [this] barcode-result-map)
-  (barcode-map [this exp] (select-keys (barcode-map this) (barcode-set exp)))
-  (complete? [_] (= "Completed" state))
-  (coverage? [_] (= :coverage type))
-  (variant-caller? [_] (= :tsvc type))
-  (sample-id? [_] (= :sample-id type))
+  (barcode-set
+    ([this] (into #{} (keys (-> this :barcode-result-map))))
+    ([_ exp] (barcode-set exp)))
+  (barcode-map
+    ([this] (-> this :barcode-result-map))
+    ([this exp] (select-keys (barcode-map this) (barcode-set exp))))
+  (complete? [this] (= "Completed" (-> this :state)))
+  (coverage? [this] (= :coverage (-> this :type)))
+  (variant-caller? [this] (= :tsvc (-> this :type)))
+  (sample-id? [this] (= :sample-id (-> this :type)))
   (bam-uri [this bc]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" (core/name bc)
-           "_rawlib" (if trimmed-reads? "_PTRIM") ".bam")))
+           "_rawlib" (if (-> this :trimmed-reads?) "_PTRIM") ".bam")))
   (bai-uri [this bc]
     (if (variant-caller? this)
       (str (bam-uri this bc) ".bai")))
@@ -187,114 +154,103 @@
       (str (tsvc-vcf-uri this bc) ".tbi")))
   (tsvc-target-bed-uri [this]
     (if (variant-caller? this)
-      (str (plugin-result-api-path-prefix this) "/" target-name ".bed")))
+      (str (plugin-result-api-path-prefix this) "/" (-> this :target-name) ".bed")))
   (coverage-ampl-uri [this bc]
     (if (coverage? this)
-      (if-let [prefix (get-in barcode-result-map [(core/name bc) "Alignments"])]
-        (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" prefix ".amplicon.cov.xls")))))
+      (if-let [prefix (get-in (-> this :barcode-result-map) [(core/name bc) "Alignments"])]
+        (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/" prefix ".amplicon.cov.xls"))))
 
-;; path:       "/results/analysis/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
-;; reportLink: "/output/Home/XXX-24-YYY/"
-;; API path:   "/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
+  ;; path:       "/results/analysis/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
+  ;; reportLink: "/output/Home/XXX-24-YYY/"
+  ;; API path:   "/output/Home/XXX-24-YYY/plugin_out/coverageAnalysis_out"
 
+  ion_torrent_api.schema.TorrentServer
 
-(defrecord TorrentServer [server-url version api-path]
-  Object
-  (toString [this] (pr-str this))
+  (experiments
+    ([this] (experiments this {}))
+    ([this opts]
+       (get-json this "experiment/" (merge {"status__exact" "run" "ftpStatus__exact" "Complete"} opts)))
+    ([this opts name]
+       (experiments this (merge opts (if name {(str "expName__"
+                                                    (if (some #(Character/isUpperCase ^Character %) (seq name))
+                                                      "contains"
+                                                      "icontains")) name})))))
 
-  TorrentServerAPI
-  (experiments [this]
-    (experiments this {}))
-  (experiments [this opts]
-    (get-json this "experiment/" (merge {"status__exact" "run" "ftpStatus__exact" "Complete"} opts)))
-  (experiments [this opts name]
-    (experiments this (merge opts (if name {(str "expName__" (if (some #(Character/isUpperCase %) (seq name))
-                                                               "contains"
-                                                               "icontains")) name}))))
+  (experiment-name
+    ([this name] (experiment-name this name {}))
+    ([this name opts]
+       ;; query by options returns map with "meta" and "objects" keys
+       ;; if name has any upper case char then do case-sensitive search
+       (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
+             (experiments this {(str "expName__" (if (some #(Character/isUpperCase ^Character %) (seq name))
+                                                   "contains"
+                                                   "icontains")) name "limit" 2})]
+         (assert (and meta total-count) "Invalid experiment name query response.")
+         (assert (not (> total-count 1)) (str "More than one experiment matching name '" name "': "
+                                              (pr-str (map #(get % "expName") objects))))
+         (assert (not (zero? total-count)) (str "No experiments matching name '" name "'."))
+         (let [{:keys [recurse?]} opts]
+           (if-let [json (first objects)]
+             (let [e (experiment (assoc json :torrent-server this))
+                   r (if recurse? (result e nil opts))]
+               (assoc e :latest-result r)))))))
 
-  (experiment-name [this name]
-    (experiment-name this name {}))
-  (experiment-name [this name opts]
-    ;; query by options returns map with "meta" and "objects" keys
-    ;; if name has any upper case char then do case-sensitive search
-    (let [{objects "objects" {total-count "total_count" :as meta} "meta"}
-          (experiments this {(str "expName__" (if (some #(Character/isUpperCase %) (seq name))
-                                                "contains"
-                                                "icontains")) name "limit" 2})]
-      (assert (and meta total-count) "Invalid experiment name query response.")
-      (assert (not (> total-count 1)) (str "More than one experiment matching name '" name "': "
-                                           (pr-str (map #(get % "expName") objects))))
-      (assert (not (zero? total-count)) (str "No experiments matching name '" name "'."))
-      (let [{:keys [recurse?]} opts]
-        (if-let [json (first objects)]
-          (let [e (experiment (assoc json :torrent-server this))
-                r (if recurse? (result e nil opts))]
-            (assoc e :latest-result r))))))
+  (experiment
+    ([this id-or-uri] (experiment this id-or-uri {}))
+    ([this id-or-uri opts]
+       (let [{:keys [recurse?]} opts
+             json (get-json this (ensure-starts-with (str (:api-path this) "experiment/")
+                                                     (str id-or-uri)))]
+         (let [ e (experiment (assoc json :torrent-server this))]
+           (merge e (if recurse? {:latest-result (result e nil opts)}))))))
 
-  (experiment [this id-or-uri]
-    (experiment this id-or-uri {}))
-  (experiment [this id-or-uri opts]
-    (let [{:keys [recurse?]} opts
-          json (get-json this (ensure-starts-with (str (:api-path this) "experiment/")
-                                                  (str id-or-uri)))
-          e (experiment (assoc json :torrent-server this))]
-      (merge e (if recurse? {:latest-result (result e nil opts)}))))
+  (result
+    ([this id-or-uri] (result this id-or-uri {}))
+    ([this id-or-uri opts]
+       (let [{:keys [recurse?]} opts
+             json (get-json this (ensure-starts-with (str (:api-path this) "results/")
+                                                     (str id-or-uri)))
+             r (result (assoc json :torrent-server this))]
+         (merge r (when recurse?
+                    {:plugin-result-set (plugin-result r)
+                     :lib-metrics-set (into #{} (map #(lib-metrics this % opts)
+                                                     (:lib-metrics-uri-set r)))
+                     :tf-metrics-set (into #{} (map #(tf-metrics this % opts)
+                                                    (:tf-metrics-uri-set r)))
+                     :analysis-metrics-set (into #{} (map #(analysis-metrics this % opts)
+                                                          (:analysis-metrics-uri-set r)))
+                     :quality-metrics-set (into #{} (map #(quality-metrics this % opts)
+                                                         (:quality-metrics-uri-set r)))})))))
 
-  (result [this id-or-uri]
-    (result this id-or-uri {}))
-  (result [this id-or-uri opts]
-    (let [{:keys [recurse?]} opts
-          json (get-json this (ensure-starts-with (str (:api-path this) "results/")
-                                                  (str id-or-uri)))
-          r (result (assoc json :torrent-server this))]
-      (merge r (when recurse?
-                 {:plugin-result-set (plugin-result r)
-                  :lib-metrics-set (into #{} (map #(lib-metrics this % opts)
-                                                  (:lib-metrics-uri-set r)))
-                  :tf-metrics-set (into #{} (map #(tf-metrics this % opts)
-                                                 (:tf-metrics-uri-set r)))
-                  :analysis-metrics-set (into #{} (map #(analysis-metrics this % opts)
-                                                       (:analysis-metrics-uri-set r)))
-                  :quality-metrics-set (into #{} (map #(quality-metrics this % opts)
-                                                      (:quality-metrics-uri-set r)))}
-                 ))))
+  (plugin-result
+    ([this id-or-uri]
+       (plugin-result this id-or-uri {}))
+    ([this id-or-uri opts]
+       (let [json (get-json this (ensure-starts-with (str (:api-path this) "pluginresult/")
+                                                     (str id-or-uri)))]
+         (plugin-result (assoc json :torrent-server this)))))
 
-  (plugin-result [this id-or-uri]
-    (plugin-result this id-or-uri {}))
-  (plugin-result [this id-or-uri opts]
-    (let [json (get-json this (ensure-starts-with (str (:api-path this) "pluginresult/")
-                                                  (str id-or-uri)))]
-      (plugin-result (assoc json :torrent-server this))))
+  (lib-metrics
+    ([this id-or-uri] (lib-metrics this id-or-uri {}))
+    ([this id-or-uri opts]
+       (get-json this (ensure-starts-with (str (:api-path this) "libmetrics/")
+                                          (str id-or-uri)))))
+  (tf-metrics
+    ([this id-or-uri] (tf-metrics this id-or-uri {}))
+    ([this id-or-uri opts]
+       (get-json this (ensure-starts-with (str (:api-path this) "tfmetrics/")
+                                          (str id-or-uri)))))
+  (analysis-metrics
+    ([this id-or-uri] (analysis-metrics this id-or-uri {}))
+    ([this id-or-uri opts]
+       (get-json this (ensure-starts-with (str (:api-path this) "analysismetrics/")
+                                          (str id-or-uri)))))
+  (quality-metrics
+    ([this id-or-uri] (quality-metrics this id-or-uri {}))
+    ([this id-or-uri opts]
+       (get-json this (ensure-starts-with (str (:api-path this) "qualitymetrics/")
+                                          (str id-or-uri)))))
 
-  (lib-metrics [this id-or-uri]
-    (lib-metrics this id-or-uri {}))
-  (lib-metrics [this id-or-uri opts]
-    (get-json this (ensure-starts-with (str (:api-path this) "libmetrics/")
-                                       (str id-or-uri))))
-  (tf-metrics [this id-or-uri]
-    (tf-metrics this id-or-uri {}))
-  (tf-metrics [this id-or-uri opts]
-    (get-json this (ensure-starts-with (str (:api-path this) "tfmetrics/")
-                                       (str id-or-uri))))
-  (analysis-metrics [this id-or-uri]
-    (analysis-metrics this id-or-uri {}))
-  (analysis-metrics [this id-or-uri opts]
-    (get-json this (ensure-starts-with (str (:api-path this) "analysismetrics/")
-                                       (str id-or-uri))))
-  (quality-metrics [this id-or-uri]
-    (quality-metrics this id-or-uri {}))
-  (quality-metrics [this id-or-uri opts]
-    (get-json this (ensure-starts-with (str (:api-path this) "qualitymetrics/")
-                                       (str id-or-uri)))))
-
-
-(defn torrent-server [server-url & {:keys [creds version api-path] :or {version :v1}}]
-  ;; creds are attached to record as metadata
-  (TorrentServer. server-url version (or api-path ({:v1 "/rundb/api/v1/"} version))
-                  {:creds creds} nil))
-
-
-(extend-protocol TorrentServerAPI
   ;; base constructors for data from TorrentServer 'JSON String Keys' Maps
   clojure.lang.APersistentMap
 
@@ -318,14 +274,14 @@
       (assert (= (into #{} (keys samp-map)) (into #{} (vals bc-samp-map)))
               (str "Samples dont match barcoded samples. Experiment: " exp-name
                    ", Samples: " (pr-str (into #{} (keys samp-map))) ", Barcode samples: " (pr-str bc-samp-map) "."))
-      (apply ->Experiment (concat (map (partial get json-map) main-keys)
-                                  ;; for now, work with one label per barcode and one eas_set per experiment
-                                  [samp-map
-                                   bc-samp-map
-                                   (inst/read-instant-date date)
-                                   (inst/read-instant-date result-date)
-                                   nil
-                                   (apply dissoc json-map "log" main-keys)]))))
+      (apply sc/->Experiment (concat (map (partial get json-map) main-keys)
+                                     ;; for now, work with one label per barcode and one eas_set per experiment
+                                     [samp-map
+                                      bc-samp-map
+                                      (inst/read-instant-date date)
+                                      (inst/read-instant-date result-date)
+                                      nil
+                                      (apply dissoc json-map "log" main-keys)]))))
 
   (result [json-map]
     (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"
@@ -333,12 +289,12 @@
                      "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
                      "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
       (assert (seq (get json-map "timeStamp")) "timeStamp required.")
-      (apply ->Result (concat (map (partial get json-map) main-keys)
-                              [(inst/read-instant-date (get json-map "timeStamp"))
-                               (boolean (get-in json-map ["metaData" "thumb"]))
-                               nil
-                               nil nil nil nil
-                               (apply dissoc json-map main-keys)]))))
+      (apply sc/->Result (concat (map (partial get json-map) main-keys)
+                                 [(inst/read-instant-date (get json-map "timeStamp"))
+                                  (boolean (get-in json-map ["metaData" "thumb"]))
+                                  nil
+                                  nil nil nil nil
+                                  (apply dissoc json-map main-keys)]))))
 
   (plugin-result [json-map]
     (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
@@ -346,19 +302,19 @@
           bc-map (get-in json-map ["store" "barcodes"])]
       (assert (seq (get json-map "starttime")) "starttime required.")
       (assert (seq (get json-map "endtime")) "endtime required.")
-      (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
-                                    (map (partial get json-map) main-keys)
-                                    (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
-                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration"
-                                                                         "Target Regions" "targets_bed"
-                                                                         "Aligned Reads" "Trim Reads"])
-                                    [(if (= "sampleID" (get-in json-map ["plugin" "name"]))
-                                       (fmap #(get % "SampleID") bc-map)
-                                       bc-map)
-                                     (.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
-                                     (inst/read-instant-date (get json-map "starttime"))
-                                     (inst/read-instant-date (get json-map "endtime"))
-                                     (apply dissoc json-map main-keys)]))))
+      (apply sc/->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
+                                       (map (partial get json-map) main-keys)
+                                       (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
+                                       (map (partial get (get json-map "store")) ["Library Type" "Configuration"
+                                                                            "Target Regions" "targets_bed"
+                                                                            "Aligned Reads" "Trim Reads"])
+                                       [(if (= "sampleID" (get-in json-map ["plugin" "name"]))
+                                          (fmap #(get % "SampleID") bc-map)
+                                          bc-map)
+                                        (.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
+                                        (inst/read-instant-date (get json-map "starttime"))
+                                        (inst/read-instant-date (get json-map "endtime"))
+                                        (apply dissoc json-map main-keys)]))))
 
   (barcode-map [this bc-map]
     (select-keys this bc-map))
@@ -366,19 +322,11 @@
   (barcode-set [this] (into #{} (keys this)))
 
   clojure.lang.APersistentSet
-
   (barcode-set [this] this)
 
   clojure.lang.ISeq
-
   (barcode-set [this] (into #{} this)))
 
-
-(def data-readers
-  {'ion_torrent_api.core.TorrentServer ion-torrent-api.core/map->TorrentServer
-   'ion_torrent_api.core.Experiment ion-torrent-api.core/map->Experiment
-   'ion_torrent_api.core.Result ion-torrent-api.core/map->Result
-   'ion_torrent_api.core.PluginResult ion-torrent-api.core/map->PluginResult})
 
 (def ^:private plugin-result-type-map {"variantCaller" :tsvc
                                        "coverageAnalysis" :coverage
