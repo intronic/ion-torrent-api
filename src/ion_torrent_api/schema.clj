@@ -21,7 +21,7 @@
                   {:creds creds} nil))
 
 (sm/defrecord PluginResult
-    [type :- s/Keyword
+    [type :- (s/maybe s/Keyword)
      torrent-server :- TorrentServer
      id :- s/Int
      uri :- s/Str
@@ -33,13 +33,13 @@
      name :- s/Str
      version :- s/Str
      versioned-name :- s/Str
-     library-type :- s/Str
-     config-desc :- s/Str
-     target-name :- s/Str
-     target-bed :- s/Str
-     experiment-name :- s/Str
-     trimmed-reads? :- s/Bool
-     barcode-result-map :- {s/Str {s/Str s/Any}}
+     library-type :- (s/maybe s/Str)
+     config-desc :- (s/maybe s/Str)
+     target-name :- (s/maybe s/Str)
+     target-bed :- (s/maybe s/Str)
+     experiment-name :- (s/maybe s/Str)
+     trimmed-reads? :- (s/maybe s/Bool)
+     barcode-result-map :- (s/maybe {s/Str {s/Str s/Any}})
      barcoded? :- s/Bool
      start-time :- s/Inst
      end-time :- s/Inst
@@ -70,11 +70,11 @@
      quality-metrics-uri-set :- [s/Str]
      timestamp :- s/Inst
      thumbnail? :- s/Bool
-     plugin-result-set :- [s/Str]
-     lib-metrics-set :- [s/Str]
-     tf-metrics-set :- [s/Str]
-     analysis-metrics-set :- [s/Str]
-     quality-metrics-set :- [s/Str]
+     plugin-result-set :- (s/maybe #{PluginResult})
+     lib-metrics-set :- (s/maybe #{{s/Any s/Any}})
+     tf-metrics-set :- (s/maybe #{{s/Any s/Any}})
+     analysis-metrics-set :- (s/maybe #{{s/Any s/Any}})
+     quality-metrics-set :- (s/maybe #{{s/Any s/Any}})
      raw-map :- {s/Any s/Any}]
   Object
   (toString [this] (pr-str this)))
