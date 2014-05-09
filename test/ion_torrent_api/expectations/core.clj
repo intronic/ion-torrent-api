@@ -9,9 +9,39 @@
             [clojure [string :as str] [edn :as edn]])
   (:import [ion_torrent_api.schema Experiment Result PluginResult TorrentServer]))
 
-;; (def creds ["user" "pass"])
-;; (def host "http://my-intranet-torrent-server.com")
-;; (def ts (torrent-server host :creds creds))
+(def creds ["user" "pass"])
+(def host "http://my-intranet-torrent-server.com")
+(def ts (torrent-server host :creds creds))
+
+(expect #ion_torrent_api.schema.TorrentServer{:server-url "http://my-intranet-torrent-server.com"
+                                              :version :v1 :api-path "/rundb/api/v1/"}
+        ts)
+
+(expect #ion_torrent_api.schema.TorrentServer{:server-url "http://my-intranet-torrent-server.com"
+                                            :version :v1 :api-path "/rundb/api/v1/"}
+        (torrent-server host :version :v1))
+(expect #ion_torrent_api.schema.TorrentServer{:server-url "http://my-intranet-torrent-server.com"
+                                            :version :v1 :api-path "/some/other/path"}
+        (torrent-server host :version :v1 :api-path "/some/other/path"))
+(expect #ion_torrent_api.schema.TorrentServer{:server-url "http://my-intranet-torrent-server.com"
+                                            :version :v2 :api-path nil}
+        (torrent-server host :version :v2))
+(expect #ion_torrent_api.schema.TorrentServer{:server-url "http://my-intranet-torrent-server.com"
+                                            :version :v2 :api-path "/some/other/path"}
+        (torrent-server host :version :v2 :api-path "/some/other/path"))
+
+(expect creds (:creds (meta ts)))
+(expect "/rundb/api/v1/" (:api-path ts))
+(expect (torrent-server "h")
+        (torrent-server "h"))
+(expect (torrent-server "h")
+        (read-string (str (torrent-server "h"))))
+(expect-let [ts (torrent-server "h" :api-path "p")]
+            ts
+            (edn/read-string {:readers sc/data-readers} (str ts)))
+(expect-let [ts (torrent-server "h" :api-path "p")]
+            ts
+            (read-string (str ts)))
 
 ;;; utilities
 

@@ -62,6 +62,12 @@
     "Amplicon Coverage analysis uri for barcode."))
 
 
+(defn torrent-server
+  [server-url & {:keys [creds version api-path] :or {version :v1}}]
+  ;; creds are attached to record as metadata
+  (TorrentServer. server-url version (or api-path ({:v1 "/rundb/api/v1/"} version))
+                  {:creds creds} nil))
+
 (extend-protocol TorrentServerAPI
 
   ion_torrent_api.schema.Experiment
