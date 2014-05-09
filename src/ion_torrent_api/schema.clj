@@ -33,7 +33,7 @@
      target-bed :- (s/maybe s/Str)
      experiment-name :- (s/maybe s/Str)
      trimmed-reads? :- (s/maybe s/Bool)
-     barcode-result-map :- (s/maybe {s/Str {s/Str s/Any}})
+     barcode-result-map :- (s/maybe {s/Str s/Any})
      barcoded? :- s/Bool
      start-time :- s/Inst
      end-time :- s/Inst
