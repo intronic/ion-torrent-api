@@ -17,31 +17,31 @@ records and other resources.
 
 (def ts (ion/torrent-server "http://my-torent-server.com" ["user" "pass"]))
 ts
-; #ion_torrent_api.core.TorrentServer{:server-url "http://my-torent-server.com", :creds nil, :api-path "/rundb/api/v1/"}
+; #ion_torrent_api.schema.TorrentServer{:server-url "http://my-torent-server.com", :creds nil, :api-path "/rundb/api/v1/"}
 
 (def exp (ion/experiment ts 50))
 exp
-; #ion_torrent_api.core.Experiment{...}
+; #ion_torrent_api.schema.Experiment{...}
 
 (ion/experiment-name ts "R_2014_03_01_..._015")
-; #ion_torrent_api.core.Experiment{...}
+; #ion_torrent_api.schema.Experiment{...}
 
 (ion/barcode-set exp)
 ; #{"IonXpressRNA_001" "IonXpressRNA_002" "IonXpressRNA_003" "IonXpressRNA_004" "IonXpressRNA_005"}
 
 (def res (ion/result ts 109))
 res
-; #ion_torrent_api.core.Result{...}
+; #ion_torrent_api.schema.Result{...}
 
 (ion/result exp)
-; #ion_torrent_api.core.Result{...}
+; #ion_torrent_api.schema.Result{...}
 
 (def pr (ion/plugin-result ts 209))
 pr
-; #ion_torrent_api.core.PluginResult{...}
+; #ion_torrent_api.schema.PluginResult{...}
 
 (ion/plugin-result res)
-; [#ion_torrent_api.core.PluginResult{...}, ...]
+; [#ion_torrent_api.schema.PluginResult{...}, ...]
 
 (ion/barcode-set pr)
 ; #{"IonXpressRNA_001" "IonXpressRNA_002" "IonXpressRNA_003" "IonXpressRNA_004" "IonXpressRNA_005"}
