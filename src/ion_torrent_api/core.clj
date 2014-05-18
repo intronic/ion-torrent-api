@@ -1,6 +1,6 @@
 (ns ion-torrent-api.core
   (:require [clj-http.client :as client]
-            [clojure.core :as core]
+            [clojure [core :as core] [set :as set]]
             [clojure.java.io :as io]
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
@@ -34,9 +34,9 @@
   (quality-metrics [this] [this id-or-uri] [this id-or-uri opts]
     "Get quality-metrics by id or uri (with options 'opts').")
   (barcode-set [this] [this exp]
-    "Set of barcodes (using the subset in exp if supplied).")
+    "Set of barcodes.")
   (barcode-map [this] [this exp]
-    "Map of barcodes to values (using the subset in exp if supplied).")
+    "Map of barcodes to values.")
   (complete? [this])
   (coverage? [this]
     "Coverage analysis plugin.")
@@ -71,7 +71,7 @@
 (extend-protocol TorrentServerAPI
 
   ion_torrent_api.schema.Experiment
-  (barcode-set [this] (into #{} (keys (-> this :barcode-sample-map))))
+  (barcode-set [this] (into #{} (keys (barcode-map this))))
   (barcode-map [this] (-> this :barcode-sample-map))
   (complete? [this] (= ["run" "Complete"] (-> this ((juxt :status :ftp-status)))))
   (result
@@ -86,6 +86,11 @@
 
   ion_torrent_api.schema.Result
 
+  (barcode-set     ;    "Set of all barcodes found in any plugin or experiment."
+    ([this]
+       (->> this :plugin-result-set (map barcode-set) (reduce set/union)))
+    ([this exp]
+       (into (barcode-set exp) (barcode-set this))))
   ;; HACK alternatively, more complicated but possibly less assumptions and safer?:-
   ;; eg: /output/Home/Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7_011/download_links/IonXpress_009_R_2013_03_11_23_41_27_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_Auto_user_XXX-6-Ion_AmpliSeq_Comprehensive_Cancer_Panel_7.bam
   ;; (let [bam (io/as-file (result "bamLink"))]
@@ -136,11 +141,11 @@
   ion_torrent_api.schema.PluginResult
 
   (barcode-set
-    ([this] (into #{} (keys (-> this :barcode-result-map))))
-    ([_ exp] (barcode-set exp)))
+    ([this] (into #{} (keys (barcode-map this))))
+    ([this exp] (into #{} (keys (barcode-map this exp)))))
   (barcode-map
     ([this] (-> this :barcode-result-map))
-    ([this exp] (select-keys (barcode-map this) (barcode-set exp))))
+    ([this exp] (select-keys (barcode-map this) (if (set? exp) exp (barcode-set exp)))))
   (complete? [this] (= "Completed" (-> this :state)))
   (coverage? [this] (= :coverage (-> this :type)))
   (variant-caller? [this] (= :tsvc (-> this :type)))

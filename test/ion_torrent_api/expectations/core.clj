@@ -1686,3 +1686,15 @@
                                    {:status 200 :headers {"Content-Type" "application/json"}
                                     :body (slurp (uri-to-file uri :json))})}
           (experiment ts 95 {:recurse? true})))
+
+;; no barcodes assigned but there are results for barcodes
+(expect (more-of x
+                 "R_2014_04_30_02_26_25_user_XXX-70"
+                 (:name x)
+                 #{}
+                 (barcode-set x)
+                 #{"IonXpress_001" "IonXpress_004" "IonXpress_006" "IonXpress_007" "IonXpress_008"
+                   "IonXpress_010" "IonXpress_012" "IonXpress_013" "IonXpress_014" "IonXpress_016"
+                   "IonXpress_025" "IonXpress_034" "IonXpress_061" "IonXpress_095" "IonXpress_096"}
+                 (barcode-set (:latest-result x)))
+        (read-string (slurp "test/data/e70-no-bc.edn")))
