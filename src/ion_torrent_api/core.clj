@@ -56,6 +56,10 @@
     "TorrentSuite VCF uri for barcode.")
   (tsvc-vcf-tbi-uri [this bc]
     "TorrentSuite VCF TBI uri for barcode.")
+  (tsvc-variants-xls-uri [this bc]
+    "TorrentSuite variants XLS uri for barcode.")
+  (tsvc-alleles-xls-uri [this bc]
+    "TorrentSuite alleles XLS uri for barcode.")
   (tsvc-target-bed-uri [this]
     "TorrentSuite target bed uri.")
   (coverage-ampl-uri [this bc]
@@ -163,6 +167,12 @@
   (tsvc-vcf-tbi-uri [this bc]
     (if (variant-caller? this)
       (str (tsvc-vcf-uri this bc) ".tbi")))
+  (tsvc-variants-xls-uri [this bc]
+    (if (variant-caller? this)
+      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/variants.xls")))
+  (tsvc-alleles-xls-uri [this bc]
+    (if (variant-caller? this)
+      (str (plugin-result-api-path-prefix this) "/" (core/name bc) "/alleles.xls")))
   (tsvc-target-bed-uri [this]
     (if (variant-caller? this)
       (str (plugin-result-api-path-prefix this) "/" (-> this :target-name) ".bed")))

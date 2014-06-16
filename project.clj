@@ -10,7 +10,7 @@
 ;; You must not remove this notice, or any other, from this software.
 
 
-(defproject intronic/ion-torrent-api "0.3.2-SNAPSHOT"
+(defproject intronic/ion-torrent-api "0.3.3-SNAPSHOT"
   :description "Ion Torrent Server API: Convenience functions for accessing data."
   :url "https://github.com/intronic/ion-torrent-api"
   :autodoc {:name "ion-torrent-api", :page-title "Ion Torrent Server API Convenience Functions Documentation."
