@@ -40,9 +40,15 @@
   (complete? [this])
   (coverage? [this]
     "Coverage analysis plugin.")
+  (coverage [this]
+    "Coverage analysis plugin.")
   (variant-caller? [this]
     "Variant caller plugin.")
+  (variant-caller [this]
+    "Variant caller plugin.")
   (sample-id? [this]
+    "Sample ID plugin.")
+  (sample-id [this]
     "Sample ID plugin.")
   (bam-uri [this bc]
   "BAM uri for barcode.")
@@ -87,6 +93,12 @@
                 :result-uri-set
                 (map #(result (:torrent-server this) % opts))
                 (filter-latest-result this)))))
+  (variant-caller [this]
+    (->> this :latest-result :plugin-result-set (filter variant-caller?)))
+  (coverage [this]
+    (->> this :latest-result :plugin-result-set (filter coverage?)))
+  (sample-id [this]
+    (->> this :latest-result :plugin-result-set (filter sample-id?)))
 
   ion_torrent_api.schema.Result
 

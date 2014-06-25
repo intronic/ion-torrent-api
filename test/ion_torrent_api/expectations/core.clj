@@ -1297,6 +1297,36 @@
                                              :body (slurp (uri-to-file uri :json))})}
                    (experiment ts 50 {:recurse? true}))))
 
+(expect (more-of exp
+                 50(:id exp)
+                 2 (count (-> exp :latest-result :plugin-result-set))
+                 [:tsvc nil]
+                 (map :type (-> exp :latest-result :plugin-result-set))
+                 1 (count (variant-caller exp))
+                 0 (count (sample-id exp))
+                 0 (count (coverage exp))
+                 )
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (experiment ts 50 {:recurse? true})))
+
+(expect (more-of exp
+                 71 (:id exp)
+                 3 (count (-> exp :latest-result :plugin-result-set))
+                 [:coverage :sample-id :tsvc]
+                 (map :type (-> exp :latest-result :plugin-result-set))
+                 1 (count (variant-caller exp))
+                 1 (count (sample-id exp))
+                 1 (count (coverage exp))
+                 )
+        (with-fake-routes-in-isolation
+          {#".*/rundb/api/v1/.*" (fn [{uri :uri :as req}]
+                                   {:status 200 :headers {"Content-Type" "application/json"}
+                                    :body (slurp (uri-to-file uri :json))})}
+          (experiment ts 71 {:recurse? true})))
+
 (expect
  (more-of x
           97 (:id x)
