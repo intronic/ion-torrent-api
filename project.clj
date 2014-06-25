@@ -21,18 +21,18 @@
 
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/algo.generic "0.1.2"]
-                 [clj-time "0.6.0"]
+                 [clj-time "0.7.0"]
                  ;;[clj-http "0.9.0"]
-                 [clj-http "0.7.9"]
+                 [clj-http "0.9.2"]
                  [clj-http-fake "0.7.8"]
-                 [prismatic/schema "0.2.2"]]
+                 [prismatic/schema "0.2.4"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
 
   :repositories {"snapshots" ~(str "file://" (System/getProperty "user.home") "/clj-repo/snapshots")}
 
-  :profiles {:dev {:dependencies [[expectations "2.0.6"]]}}
+  :profiles {:dev {:dependencies [[expectations "2.0.7"]]}}
 
   :lein-release {:deploy-via :clojars
                  :scm :git}
