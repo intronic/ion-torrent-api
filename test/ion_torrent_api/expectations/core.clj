@@ -1,6 +1,6 @@
 (ns ion-torrent-api.expectations.core
   (:require [expectations :refer :all]
-            [ion-torrent-api.schema :as sc]
+            [ion-torrent-api.schema :refer :all]
             [ion-torrent-api.core :refer :all :as ion]
             [ion-torrent-api.expectations.util :refer :all]
             [ion-torrent-api.expectations.schema :refer :all]
@@ -38,7 +38,7 @@
         (read-string (str (torrent-server "h"))))
 (expect-let [ts (torrent-server "h" :api-path "p")]
             ts
-            (edn/read-string {:readers sc/data-readers} (str ts)))
+            (edn/read-string {:readers data-readers} (str ts)))
 (expect-let [ts (torrent-server "h" :api-path "p")]
             ts
             (read-string (str ts)))
@@ -196,7 +196,7 @@
               (experiment ts "/rundb/api/v1/experiment/50/" {}))))
 
 (expect-let [x e50]
-            x (edn/read-string {:readers sc/data-readers} (str x)))
+            x (edn/read-string {:readers data-readers} (str x)))
 
 (expect-let [x e50]
             x (read-string (str x)))
@@ -222,7 +222,7 @@
                                                :date #inst "2013-06-03T13:31:54.000-00:00",
                                                :latest-result-date #inst "2013-07-23T00:32:14.000-00:00",
                                                :raw-map {"sequencekitname" "", "notes" "", "pinnedRepResult" false, "storageHost" "localhost", "flowsInOrder" "TACGTACGTCTGAGCATCGATCGATGTACAGC", "diskusage" 224837, "flows" 400, "baselineRun" false, "samples" [{"externalId" "", "name" "inq-037-me", "displayedName" "inq-037-me", "date" "2013-06-01T06:30:44.000910+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 76, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/76/", "description" nil} {"externalId" "", "name" "inq-052-tt", "displayedName" "inq-052-tt", "date" "2013-06-01T06:30:44.000906+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 75, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/75/", "description" nil} {"externalId" "", "name" "inq-024-me", "displayedName" "inq-024-me", "date" "2013-06-03T04:51:46.000218+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/49/"], "id" 83, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/83/", "description" nil} {"externalId" "", "name" "inq-022-me", "displayedName" "inq-022-me", "date" "2013-06-03T04:51:46.000222+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/49/"], "id" 84, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/84/", "description" nil} {"externalId" "", "name" "inq-025-tt", "displayedName" "inq-025-tt", "date" "2013-06-01T06:30:44.000903+00:00", "status" "run", "experiments" ["/rundb/api/v1/experiment/50/" "/rundb/api/v1/experiment/47/" "/rundb/api/v1/experiment/49/"], "id" 74, "sampleSets" [], "resource_uri" "/rundb/api/v1/sample/74/", "description" nil}], "seqKitBarcode" "", "plan" "/rundb/api/v1/plannedexperiment/53/", "sample" "inq-037-me", "resultDate" "2013-07-23T00:32:14.000226+00:00", "sequencekitbarcode" "", "cycles" 12, "runMode" "single", "reagentBarcode" "", "date" "2013-06-03T13:31:54+00:00", "metaData" {}, "reverse_primer" "Ion Kit", "unique" "/rawdata/XXXNPROTON/R_2013_06_03_23_30_18_user_XXX-24-AmpliSeq_CCP_24", "star" false, "isReverseRun" false, "chipBarcode" "", "user_ack" "U", "storage_options" "A", "expCompInfo" "", "eas_set" [{"alignmentargs" "", "barcodeKitName" "IonXpressRNA", "prethumbnailbasecallerargs" "", "libraryKey" "TCAG", "thumbnailbasecallerargs" "", "selectedPlugins" {"Alignment" {"features" [], "id" "27", "name" "Alignment", "userInput" "", "version" "3.6.56201"}}, "thumbnailanalysisargs" "", "barcodedSamples" {"inq-022-me" {"barcodes" ["IonXpressRNA_003"]}, "inq-024-me" {"barcodes" ["IonXpressRNA_004"]}, "inq-025-tt" {"barcodes" ["IonXpressRNA_005"]}, "inq-037-me" {"barcodes" ["IonXpressRNA_002"]}, "inq-052-tt" {"barcodes" ["IonXpressRNA_001"]}}, "libraryKitBarcode" "", "libraryKitName" "", "thumbnailbeadfindargs" "", "reference" "hg19", "threePrimeAdapter" "ATCACCGACTGCCCATAGAGAGGCTGAGAC", "isEditable" false, "date" "2013-06-04T03:26:53.000155+00:00", "status" "run", "thumbnailalignmentargs" "", "isOneTimeOverride" false, "results" ["/rundb/api/v1/results/77/" "/rundb/api/v1/results/61/" "/rundb/api/v1/results/62/"], "targetRegionBedFile" "/results/uploads/BED/1/hg19/unmerged/detail/4477685_Comprehensive_CCP_bedfile_20120517.bed", "basecallerargs" "", "analysisargs" "", "hotSpotRegionBedFile" "", "id" 47, "resource_uri" "/rundb/api/v1/experimentanalysissettings/47/", "prebasecallerargs" "", "isDuplicateReads" false, "beadfindargs" "", "experiment" "/rundb/api/v1/experiment/50/"}], "usePreBeadfind" false, "autoAnalyze" true, "rawdatastyle" "tiled"}}
-            (edn/read-string {:readers sc/data-readers} (str e)))
+            (edn/read-string {:readers data-readers} (str e)))
 
 ;;; result
 
@@ -293,7 +293,7 @@
 (expect [:torrent-server :id :name :uri :experiment-uri :status :plugin-result-uri-set :plugin-state-map :analysis-version :report-status :plugin-store-map :bam-link :fastq-link :report-link :filesystem-path :reference :lib-metrics-uri-set :tf-metrics-uri-set :analysis-metrics-uri-set :quality-metrics-uri-set :timestamp :thumbnail? :plugin-result-set :lib-metrics-set :tf-metrics-set :analysis-metrics-set :quality-metrics-set :raw-map]
         (keys r77))
 
-(expect r77 (edn/read-string {:readers sc/data-readers} (pr-str r77)))
+(expect r77 (edn/read-string {:readers data-readers} (pr-str r77)))
 
 (expect r77
         (with-fake-routes-in-isolation
@@ -371,7 +371,7 @@
 
 (expect pr209 (read-string (pr-str pr209)))
 
-(expect pr209 (edn/read-string {:readers sc/data-readers} (pr-str pr209)))
+(expect pr209 (edn/read-string {:readers data-readers} (pr-str pr209)))
 
 (expect (more->
          :tsvc :type

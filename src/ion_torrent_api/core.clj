@@ -5,72 +5,12 @@
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
             [slingshot.slingshot :refer (try+ throw+)]
-            [ion-torrent-api.schema :as sc])
+            [ion-torrent-api.schema :refer :all])
   (:import [ion_torrent_api.schema Experiment Result PluginResult TorrentServer]))
 
 (declare get-json ensure-starts-with filter-latest-result plugin-result-type-map
          barcode-eas-map plugin-result-api-path-prefix
          file-name BUFFER-SIZE)
-
-
-(defprotocol TorrentServerAPI
-  "Torrent Server API calls."
-  (experiments [this] [this opts] [this limit offset]
-    "Get experiments (with options 'opts' or by limit and offset).")
-  (experiment-name [this name] [this name opts]
-    "Get experiment by name (with options 'opts').")
-  (experiment [this] [this id-or-uri] [this id-or-uri opts]
-    "Get experiment by id or uri (with options 'opts').")
-  (result [this] [this id-or-uri] [this id-or-uri opts]
-    "Get result by id or uri (with options 'opts').")
-  (plugin-result [this] [this id-or-uri] [this id-or-uri opts]
-    "Get plugin-result by id or uri (with options 'opts').")
-  (lib-metrics [this] [this id-or-uri] [this id-or-uri opts]
-    "Get lib-metrics by id or uri (with options 'opts').")
-  (tf-metrics [this] [this id-or-uri] [this id-or-uri opts]
-    "Get tf-metrics by id or uri (with options 'opts').")
-  (analysis-metrics [this] [this id-or-uri] [this id-or-uri opts]
-    "Get analysis-metrics by id or uri (with options 'opts').")
-  (quality-metrics [this] [this id-or-uri] [this id-or-uri opts]
-    "Get quality-metrics by id or uri (with options 'opts').")
-  (barcode-set [this] [this exp]
-    "Set of barcodes.")
-  (barcode-map [this] [this exp]
-    "Map of barcodes to values.")
-  (complete? [this])
-  (coverage? [this]
-    "Coverage analysis plugin.")
-  (coverage [this]
-    "Coverage analysis plugin.")
-  (variant-caller? [this]
-    "Variant caller plugin.")
-  (variant-caller [this]
-    "Variant caller plugin.")
-  (sample-id? [this]
-    "Sample ID plugin.")
-  (sample-id [this]
-    "Sample ID plugin.")
-  (bam-uri [this bc]
-  "BAM uri for barcode.")
-  (bai-uri [this bc]
-  "BAM BAI uri for barcode.")
-  (bam-header-uri [this bc]
-    "BAM header uri for barcode. ")
-  (pdf-uri [this]
-    "PDF report uri.")
-  (tsvc-vcf-uri [this bc]
-    "TorrentSuite VCF uri for barcode.")
-  (tsvc-vcf-tbi-uri [this bc]
-    "TorrentSuite VCF TBI uri for barcode.")
-  (tsvc-variants-xls-uri [this bc]
-    "TorrentSuite variants XLS uri for barcode.")
-  (tsvc-alleles-xls-uri [this bc]
-    "TorrentSuite alleles XLS uri for barcode.")
-  (tsvc-target-bed-uri [this]
-    "TorrentSuite target bed uri.")
-  (coverage-ampl-uri [this bc]
-    "Amplicon Coverage analysis uri for barcode."))
-
 
 (defn torrent-server
   [server-url & {:keys [creds version api-path] :or {version :v1}}]
@@ -307,7 +247,7 @@
       (assert (= (into #{} (keys samp-map)) (into #{} (vals bc-samp-map)))
               (str "Samples dont match barcoded samples. Experiment: " exp-name
                    ", Samples: " (pr-str (into #{} (keys samp-map))) ", Barcode samples: " (pr-str bc-samp-map) "."))
-      (apply sc/->Experiment (concat (map (partial get json-map) main-keys)
+      (apply ->Experiment (concat (map (partial get json-map) main-keys)
                                      ;; for now, work with one label per barcode and one eas_set per experiment
                                      [samp-map
                                       bc-samp-map
@@ -322,7 +262,7 @@
                      "bamLink" "fastqLink" "reportLink" "filesystempath" "reference"
                      "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
       (assert (seq (get json-map "timeStamp")) "timeStamp required.")
-      (apply sc/->Result (concat (map (partial get json-map) main-keys)
+      (apply ->Result (concat (map (partial get json-map) main-keys)
                                  [(inst/read-instant-date (get json-map "timeStamp"))
                                   (boolean (get-in json-map ["metaData" "thumb"]))
                                   nil
@@ -335,7 +275,7 @@
           bc-map (get-in json-map ["store" "barcodes"])]
       (assert (seq (get json-map "starttime")) "starttime required.")
       (assert (seq (get json-map "endtime")) "endtime required.")
-      (apply sc/->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
+      (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
                                        (map (partial get json-map) main-keys)
                                        (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
                                        (map (partial get (get json-map "store")) ["Library Type" "Configuration"

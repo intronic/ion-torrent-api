@@ -7,6 +7,64 @@
             [schema.macros :as sm]
             [slingshot.slingshot :refer (try+ throw+)]))
 
+(defprotocol TorrentServerAPI
+  "Torrent Server API calls."
+  (experiments [this] [this opts] [this limit offset]
+    "Get experiments (with options 'opts' or by limit and offset).")
+  (experiment-name [this name] [this name opts]
+    "Get experiment by name (with options 'opts').")
+  (experiment [this] [this id-or-uri] [this id-or-uri opts]
+    "Get experiment by id or uri (with options 'opts').")
+  (result [this] [this id-or-uri] [this id-or-uri opts]
+    "Get result by id or uri (with options 'opts').")
+  (plugin-result [this] [this id-or-uri] [this id-or-uri opts]
+    "Get plugin-result by id or uri (with options 'opts').")
+  (lib-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get lib-metrics by id or uri (with options 'opts').")
+  (tf-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get tf-metrics by id or uri (with options 'opts').")
+  (analysis-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get analysis-metrics by id or uri (with options 'opts').")
+  (quality-metrics [this] [this id-or-uri] [this id-or-uri opts]
+    "Get quality-metrics by id or uri (with options 'opts').")
+  (barcode-set [this] [this exp]
+    "Set of barcodes.")
+  (barcode-map [this] [this exp]
+    "Map of barcodes to values.")
+  (complete? [this])
+  (coverage? [this]
+    "Coverage analysis plugin.")
+  (coverage [this]
+    "Coverage analysis plugin.")
+  (variant-caller? [this]
+    "Variant caller plugin.")
+  (variant-caller [this]
+    "Variant caller plugin.")
+  (sample-id? [this]
+    "Sample ID plugin.")
+  (sample-id [this]
+    "Sample ID plugin.")
+  (bam-uri [this bc]
+  "BAM uri for barcode.")
+  (bai-uri [this bc]
+  "BAM BAI uri for barcode.")
+  (bam-header-uri [this bc]
+    "BAM header uri for barcode. ")
+  (pdf-uri [this]
+    "PDF report uri.")
+  (tsvc-vcf-uri [this bc]
+    "TorrentSuite VCF uri for barcode.")
+  (tsvc-vcf-tbi-uri [this bc]
+    "TorrentSuite VCF TBI uri for barcode.")
+  (tsvc-variants-xls-uri [this bc]
+    "TorrentSuite variants XLS uri for barcode.")
+  (tsvc-alleles-xls-uri [this bc]
+    "TorrentSuite alleles XLS uri for barcode.")
+  (tsvc-target-bed-uri [this]
+    "TorrentSuite target bed uri.")
+  (coverage-ampl-uri [this bc]
+    "Amplicon Coverage analysis uri for barcode."))
+
 (sm/defrecord TorrentServer
     [server-url :- s/Str
      version :- s/Keyword
