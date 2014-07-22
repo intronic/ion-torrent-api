@@ -428,22 +428,30 @@
   (plugin-result [json-map]
     (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
                      "path" "reportLink"]
-          bc-map (get-in json-map ["store" "barcodes"])]
+          bc-map (get-in json-map ["store" "barcodes"])
+          ;; api changed between v3 and v4
+          name (or (get-in json-map ["plugin" "name"])
+                   (get json-map "pluginName"))
+          version  (or (get-in json-map ["plugin" "version"])
+                       (get json-map "pluginVersion"))
+          versioned-name (or (get-in json-map ["plugin" "versionedName"])
+                             (str name "--v" version))
+          type (plugin-result-type-map name)]
       (assert (seq (get json-map "starttime")) "starttime required.")
       (assert (seq (get json-map "endtime")) "endtime required.")
-      (apply ->PluginResult (concat [(plugin-result-type-map (get-in json-map ["plugin" "name"]))]
-                                       (map (partial get json-map) main-keys)
-                                       (map (partial get (get json-map "plugin")) ["name" "version" "versionedName"])
-                                       (map (partial get (get json-map "store")) ["Library Type" "Configuration"
-                                                                            "Target Regions" "targets_bed"
-                                                                            "Aligned Reads" "Trim Reads"])
-                                       [(if (= "sampleID" (get-in json-map ["plugin" "name"]))
-                                          (fmap #(get % "SampleID") bc-map)
-                                          bc-map)
-                                        (.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
-                                        (inst/read-instant-date (get json-map "starttime"))
-                                        (inst/read-instant-date (get json-map "endtime"))
-                                        (apply dissoc json-map main-keys)]))))
+      (apply ->PluginResult (concat [type]
+                                    (map (partial get json-map) main-keys)
+                                    [name version versioned-name]
+                                    (map (partial get (get json-map "store")) ["Library Type" "Configuration"
+                                                                               "Target Regions" "targets_bed"
+                                                                               "Aligned Reads" "Trim Reads"])
+                                    [(if (= "sampleID" name)
+                                       (fmap #(get % "SampleID") bc-map)
+                                       bc-map)
+                                     (.equalsIgnoreCase "true" (get-in json-map ["store" "barcoded"])) ; string -> boolean
+                                     (inst/read-instant-date (get json-map "starttime"))
+                                     (inst/read-instant-date (get json-map "endtime"))
+                                     (apply dissoc json-map main-keys)]))))
 
   (barcode-map [this bc-map]
     (select-keys this bc-map))
