@@ -198,7 +198,7 @@
 
   ion_torrent_api.core.Result
 
-  (barcode-set     ;    "Set of all barcodes found in any plugin or experiment."
+  (barcode-set ;    "Set of all barcodes found in any plugin or experiment."
     ([this]
        (->> this :plugin-result-set (map barcode-set) (reduce set/union)))
     ([this exp]
@@ -404,13 +404,13 @@
               (str "Samples dont match barcoded samples. Experiment: " exp-name
                    ", Samples: " (pr-str (into #{} (keys samp-map))) ", Barcode samples: " (pr-str bc-samp-map) "."))
       (apply ->Experiment (concat (map (partial get json-map) main-keys)
-                                     ;; for now, work with one label per barcode and one eas_set per experiment
-                                     [samp-map
-                                      bc-samp-map
-                                      (inst/read-instant-date date)
-                                      (inst/read-instant-date result-date)
-                                      nil
-                                      (apply dissoc json-map "log" main-keys)]))))
+                                  ;; for now, work with one label per barcode and one eas_set per experiment
+                                  [samp-map
+                                   bc-samp-map
+                                   (inst/read-instant-date date)
+                                   (inst/read-instant-date result-date)
+                                   nil
+                                   (apply dissoc json-map "log" main-keys)]))))
 
   (result [json-map]
     (let [main-keys [:torrent-server "id" "resultsName" "resource_uri" "experiment" "status"
@@ -419,11 +419,11 @@
                      "libmetrics" "tfmetrics" "analysismetrics" "qualitymetrics"]]
       (assert (seq (get json-map "timeStamp")) "timeStamp required.")
       (apply ->Result (concat (map (partial get json-map) main-keys)
-                                 [(inst/read-instant-date (get json-map "timeStamp"))
-                                  (boolean (get-in json-map ["metaData" "thumb"]))
-                                  nil
-                                  nil nil nil nil
-                                  (apply dissoc json-map main-keys)]))))
+                              [(inst/read-instant-date (get json-map "timeStamp"))
+                               (boolean (get-in json-map ["metaData" "thumb"]))
+                               nil
+                               nil nil nil nil
+                               (apply dissoc json-map main-keys)]))))
 
   (plugin-result [json-map]
     (let [main-keys [:torrent-server "id" "resource_uri" "result" "resultName" "state"
