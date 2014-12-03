@@ -483,19 +483,18 @@
                 m)))
 
 (defn filter-latest-result
-  "Get the newest, completed, non-thumbnail result matching the experiment from a collection of results."
+  "Get the newest, non-thumbnail result matching the experiment from a collection of results.
+  Include ones that are not 'completed' status as the API can error and leave this flag as
+  not completed even though a result and its pluginresults really is complete."
   [exp res-coll]
   (let [date (.getTime ^java.util.Date (:latest-result-date exp))
-        r-coll (filter #(and (<= date (.getTime ^java.util.Date (:timestamp %)))
-                             (complete? %)
-                             (not (:thumbnail? %)))
+        r-coll (filter #(and (not (:thumbnail? %))
+                             (<= date (.getTime ^java.util.Date (:timestamp %))))
                        res-coll)
         res (first r-coll)]
     (if-not (<= 0 (count r-coll) 1)
       (throw+ {:data {:exp-id (:id exp) :exp-name (:name exp) :count (count r-coll) :res (mapv :id r-coll)}
                :msg "0 or 1 latest results expected."}))
-    (if (:thumbnail? res)  (throw+ {:data {:res-id (:id res) :res-name (:name res) :exp-id (:id exp) :exp-name (:name exp)}
-                                    :msg "Latest result is thumbnail."}))
     res))
 
 ;;;
