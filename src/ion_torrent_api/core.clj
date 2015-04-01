@@ -5,8 +5,7 @@
             [clojure.algo.generic.functor :refer (fmap)]
             [clojure.instant :as inst]
             [slingshot.slingshot :refer (try+ throw+)]
-            [schema.core :as s]
-            [schema.macros :as sm]))
+            [schema.core :as s]))
 
 (declare get-json ensure-starts-with filter-latest-result plugin-result-type-map
          barcode-eas-map plugin-result-api-path-prefix
@@ -70,14 +69,14 @@
   (coverage-ampl-uri [this bc]
     "Amplicon Coverage analysis uri for barcode."))
 
-(sm/defrecord TorrentServer
+(s/defrecord TorrentServer
     [server-url :- s/Str
      version :- s/Keyword
      api-path :- s/Str]
   Object
   (toString [this] (pr-str this)))
 
-(sm/defrecord PluginResult
+(s/defrecord PluginResult
     [type :- (s/maybe s/Keyword)
      torrent-server :- TorrentServer
      id :- s/Int
@@ -104,7 +103,7 @@
   Object
   (toString [this] (pr-str this)))
 
-(sm/defrecord Result
+(s/defrecord Result
     [torrent-server :- TorrentServer
      id :- s/Int
      name :- s/Str
@@ -136,7 +135,7 @@
   Object
   (toString [this] (pr-str this)))
 
-(sm/defrecord Experiment
+(s/defrecord Experiment
     [torrent-server :- TorrentServer
      id :- s/Int
      name :- s/Str
